@@ -13,8 +13,9 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
@@ -24,34 +25,42 @@ public class AuthenticationService {
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
 
-
-
     public AuthenticationResponse register(RegisterRequest request) {
+        log.info("Tentative d'inscription avec rôle: {}", request.getRole());
+        // Validation basique du rôle
+        if(request.getRole() == null) {
+            throw new IllegalArgumentException("Le rôle est obligatoire");
+        }
+
+        // Création de l'utilisateur
         Utilisateur user = Utilisateur.builder()
             .firstname(request.getFirstname())
             .lastname(request.getLastname())
             .email(request.getEmail())
             .password(passwordEncoder.encode(request.getPassword()))
-            .statutEmploi(true) // Mets true ou false selon ton besoin
+            .statutEmploi(true)
             .tel(request.getTel())
-            .role(RoleEnum.administrateur) // Enum en majuscules
+            .role(request.getRole())
             .build();
-    
+
         repository.save(user);
-    
+        log.debug("Utilisateur créé avec succès - ID: {}, Rôle: {}", user.getId(), user.getRole());
+
         String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder().token(jwtToken).build();
     }
-    
 
-    // Méthode pour authentifier un utilisateur
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
+        log.info("Tentative d'authentification pour: {}", request.getEmail());
+
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
         
         Utilisateur user = repository.findByEmail(request.getEmail())
             .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+            log.info("Authentification réussie - Utilisateur: {}, Rôle: {}", user.getEmail(), user.getRole().name());
+
 
         String jwtToken = jwtService.generateToken(user);
         return AuthenticationResponse.builder().token(jwtToken).build();
