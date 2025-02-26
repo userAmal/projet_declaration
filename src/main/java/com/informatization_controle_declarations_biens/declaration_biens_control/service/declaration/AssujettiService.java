@@ -23,25 +23,25 @@ public class AssujettiService implements IAssujettiService {
     @Autowired
     private IAssujettiData assujettiData;
     @Autowired
-private IUtilisateurService utilisateurService;
-public Assujetti save(Assujetti assujetti) {
-    String username = SecurityContextHolder.getContext().getAuthentication().getName();
-    Utilisateur admin = utilisateurService.findByEmail(username)
-        .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-    assujetti.setAdministrateur(admin);
-    assujetti.setDatePriseDeService(new Date());
-    return assujettiData.save(assujetti);
-}
+    private IUtilisateurService utilisateurService;
 
-
-    @Override
-    public Optional<Assujetti> findById(Long id) {
-        return assujettiData.findById(id);
+    public Assujetti save(Assujetti assujetti) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        Utilisateur admin = utilisateurService.findByEmail(username)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        assujetti.setAdministrateur(admin);
+        assujetti.setDatePriseDeService(new Date());
+        return assujettiData.save(assujetti);
     }
 
     @Override
     public List<Assujetti> findAll() {
         return assujettiData.findAll();
+    }
+
+    @Override
+    public Optional<Assujetti> findById(Long id) {
+        return assujettiData.findById(id);
     }
 
     @Override
@@ -51,11 +51,8 @@ public Assujetti save(Assujetti assujetti) {
 
     @Override
     public List<Assujetti> findByCode(String code) {
-        
         return assujettiData.findByCode(code);
     }
-    
-
 
     @Override
     public List<Assujetti> findByNom(String nom) {
@@ -63,7 +60,28 @@ public Assujetti save(Assujetti assujetti) {
     }
 
     @Override
+    public List<Assujetti> findByEmail(String email) {
+        return assujettiData.findByEmail(email);
+    }
+
+/*     @Override
+    public List<Assujetti> findByFonction(String fonctionLibelle) {
+        return assujettiData.findByFonction(fonctionLibelle);
+    }
+    
+    @Override
+    public List<Assujetti> findByInstitution(String institutionLibelle) {
+        return assujettiData.findByInstitution(institutionLibelle);
+    } */
+    
+
+    @Override
     public List<AssujettiProjection> getAssujettiDetails(Long id) {
-        return assujettiData.getAssujettiDetails(id); 
+        return assujettiData.getAssujettiDetails(id);
+    }
+
+    @Override
+    public List<Assujetti> findByDatePriseDeServiceBetween(java.sql.Date startDate, java.sql.Date endDate) {
+        return assujettiData.findByDatePriseDeServiceBetween(startDate, endDate);
     }
 }

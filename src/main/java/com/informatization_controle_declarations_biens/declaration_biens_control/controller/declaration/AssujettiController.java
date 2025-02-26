@@ -41,7 +41,6 @@ public class AssujettiController {
         Optional<Assujetti> existingAssujettiOpt = assujettiService.findById(id);
         if (existingAssujettiOpt.isPresent()) {
             Assujetti existingAssujetti = existingAssujettiOpt.get();
-            // Copier les champs sauf administrateur
             existingAssujetti.setCivilite(assujetti.getCivilite());
             existingAssujetti.setNom(assujetti.getNom());
             existingAssujetti.setPrenom(assujetti.getPrenom());
@@ -55,6 +54,8 @@ public class AssujettiController {
             existingAssujetti.setFonction(assujetti.getFonction());
             existingAssujetti.setMatricule(assujetti.getMatricule());
             existingAssujetti.setDatePriseDeService(assujetti.getDatePriseDeService());
+            existingAssujetti.setDateCessationFonction(assujetti.getDateCessationFonction());
+            
             return ResponseEntity.ok(assujettiService.save(existingAssujetti));
         } else {
             return ResponseEntity.notFound().build();
@@ -85,5 +86,23 @@ public class AssujettiController {
     public List<Assujetti> getAssujettiByNom(@PathVariable String nom) {
         return assujettiService.findByNom(nom);
     }
+    
+    // New endpoints for additional search options
+    @GetMapping("/email/{email}")
+    public List<Assujetti> getAssujettiByEmail(@PathVariable String email) {
+        return assujettiService.findByEmail(email);
+    }
+    
+    // @GetMapping("/fonction/{fonctionLibelle}")
+    // public List<Assujetti> getAssujettiByFonction(@PathVariable String fonctionLibelle) {
+    //     return assujettiService.findByFonction(fonctionLibelle);
+    // }
+    
+    // @GetMapping("/institution/{institutionLibelle}")
+    // public List<Assujetti> getAssujettiByInstitution(@PathVariable String institutionLibelle) {
+    //     return assujettiService.findByInstitution(institutionLibelle);
+    // }
+    
 }
+
 

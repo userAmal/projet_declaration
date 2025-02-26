@@ -30,6 +30,7 @@ public class AssujettiDto {
         this.matricule = assujettiProjection.getMatricule();
         this.etat = assujettiProjection.getEtat();
         this.datePriseDeService = assujettiProjection.getDatePriseDeService();
+        this.dateCessationFonction = assujettiProjection.getDateCessationFonction();
         this.administrateur=assujettiProjection.getAdministrateur();
     }
     private Long id;
@@ -46,6 +47,7 @@ public class AssujettiDto {
     private Vocabulaire fonction;
     private String matricule;
     private Date datePriseDeService;
+    private Date dateCessationFonction;
     private Utilisateur administrateur;
 
 }

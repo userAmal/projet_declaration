@@ -21,7 +21,7 @@ public class Assujetti {
 
     public Assujetti( Vocabulaire civilite, String nom, String prenom, String contacttel, String email, 
                      Vocabulaire institutions, Vocabulaire administration, Vocabulaire entite, String code,
-                     Vocabulaire fonction, String matricule, Date datePriseDeService,EtatAssujettiEnum etat,Utilisateur administrateur) {
+                     Vocabulaire fonction, String matricule, Date datePriseDeService,EtatAssujettiEnum etat,Utilisateur administrateur,Date dateCessationFonction) {
       
         this.civilite = civilite;
         this.nom = nom;
@@ -37,6 +37,7 @@ public class Assujetti {
         this.etat=etat;
         this.datePriseDeService = datePriseDeService;
         this.administrateur = administrateur;
+        this.dateCessationFonction=dateCessationFonction;
     }
 
     @Id
@@ -90,7 +91,12 @@ private Vocabulaire civilite;
     @Temporal(TemporalType.DATE)
     private Date datePriseDeService;
 
+    @Column(nullable = true)
+    @Temporal(TemporalType.DATE)
+    private Date dateCessationFonction;
+
+
     @ManyToOne
     @JoinColumn(nullable = false)
-    private Utilisateur administrateur; // Ajout de l'administrat
+    private Utilisateur administrateur;
 }

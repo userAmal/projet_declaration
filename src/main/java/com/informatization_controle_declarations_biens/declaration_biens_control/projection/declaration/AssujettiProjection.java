@@ -36,6 +36,9 @@ public interface AssujettiProjection {
     String getMatricule();
 
     Date getDatePriseDeService();
+
+    Date getDateCessationFonction();
+
     Utilisateur getAdministrateur();
 
 }
