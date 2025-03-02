@@ -25,30 +25,30 @@ public class AuthenticationService {
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    public AuthenticationResponse register(RegisterRequest request) {
-        log.info("Tentative d'inscription avec rôle: {}", request.getRole());
-        // Validation basique du rôle
-        if(request.getRole() == null) {
-            throw new IllegalArgumentException("Le rôle est obligatoire");
-        }
+    // public AuthenticationResponse register(RegisterRequest request) {
+    //     log.info("Tentative d'inscription avec rôle: {}", request.getRole());
+    //     // Validation basique du rôle
+    //     if(request.getRole() == null) {
+    //         throw new IllegalArgumentException("Le rôle est obligatoire");
+    //     }
 
-        // Création de l'utilisateur
-        Utilisateur user = Utilisateur.builder()
-            .firstname(request.getFirstname())
-            .lastname(request.getLastname())
-            .email(request.getEmail())
-            .password(passwordEncoder.encode(request.getPassword()))
-            .statutEmploi(true)
-            .tel(request.getTel())
-            .role(request.getRole())
-            .build();
+    //     // Création de l'utilisateur
+    //     Utilisateur user = Utilisateur.builder()
+    //         .firstname(request.getFirstname())
+    //         .lastname(request.getLastname())
+    //         .email(request.getEmail())
+    //         .password(passwordEncoder.encode(request.getPassword()))
+    //         .statutEmploi(true)
+    //         .tel(request.getTel())
+    //         .role(request.getRole())
+    //         .build();
 
-        repository.save(user);
-        log.debug("Utilisateur créé avec succès - ID: {}, Rôle: {}", user.getId(), user.getRole());
+    //     repository.save(user);
+    //     log.debug("Utilisateur créé avec succès - ID: {}, Rôle: {}", user.getId(), user.getRole());
 
-        String jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
-    }
+    //     String jwtToken = jwtService.generateToken(user);
+    //     return AuthenticationResponse.builder().token(jwtToken).build();
+    // }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         log.info("Tentative d'authentification pour: {}", request.getEmail());

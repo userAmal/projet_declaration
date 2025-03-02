@@ -20,7 +20,7 @@ public class Utilisateur implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(length = 200, nullable = false)
     private String email;
@@ -44,7 +44,19 @@ public class Utilisateur implements UserDetails {
     @Column(length = 50, nullable = false)
     private boolean statutEmploi;
 
+    @Column(name = "first_login")
+    @Builder.Default
+    private boolean firstLogin = true; 
+    
 
+    public Boolean getFirstLogin() {
+        return firstLogin;
+    }
+    
+    public void setFirstLogin(Boolean firstLogin) {
+        this.firstLogin = firstLogin;
+    }
+    
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

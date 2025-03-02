@@ -41,6 +41,7 @@ public class ApplicationConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        // Use custom password encoder that handles both BCrypt and plain text
+        return new CustomPasswordEncoder();
     }
 }

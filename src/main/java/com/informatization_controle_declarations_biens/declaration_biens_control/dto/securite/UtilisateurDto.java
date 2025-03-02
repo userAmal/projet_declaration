@@ -44,6 +44,8 @@ public class UtilisateurDto {
         this.lastname = utilisateurProjection.getLastname();
         this.role = utilisateurProjection.getRole(); 
         this.statutEmploi = utilisateurProjection.getStatutEmploi();
+        this.firstLogin = utilisateurProjection.getFirstLogin();
+
         this.token = token;
     }
 
@@ -56,6 +58,8 @@ public class UtilisateurDto {
         this.tel = utilisateur.getTel();
         this.role = utilisateur.getRole(); 
         this.statutEmploi = utilisateur.isStatutEmploi();
+        this.firstLogin = utilisateur.getFirstLogin();
+
         this.token = token;
     }
 
@@ -69,4 +73,7 @@ public class UtilisateurDto {
     private RoleEnum role; 
     private String token;
     private Boolean statutEmploi;
+    private Boolean firstLogin;
+
+
 }

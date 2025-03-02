@@ -12,5 +12,7 @@ public interface UtilisateurProjection {
     String getTel(); 
     RoleEnum getRole(); 
     Boolean getStatutEmploi(); 
+    Boolean getFirstLogin(); 
+
 }
 
