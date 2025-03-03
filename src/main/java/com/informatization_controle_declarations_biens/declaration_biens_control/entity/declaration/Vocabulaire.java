@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -44,9 +45,9 @@ public class Vocabulaire {
     @Column(length = 100, nullable = false)
     private String intitule;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private TypeVocabulaire typevocabulaire;
+@ManyToOne(fetch = FetchType.EAGER)
+@JoinColumn(nullable = false)
+private TypeVocabulaire typevocabulaire;
 
     @ManyToOne
     private Vocabulaire vocabulaireParent;

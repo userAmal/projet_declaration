@@ -15,9 +15,9 @@ public class TypeVocabulaireDto {
 
     public TypeVocabulaireDto(TypeVocabulaireProjection typeVocabulaireProjection) {
         this.id = typeVocabulaireProjection.getId();
-        this.nom = typeVocabulaireProjection.getIntitule();
+        this.intitule = typeVocabulaireProjection.getIntitule();
     }
     private Long id;
-    private String nom;
+    private String intitule;
 }
 

@@ -42,7 +42,8 @@ public class Utilisateur implements UserDetails {
     private RoleEnum role;
 
     @Column(length = 50, nullable = false)
-    private boolean statutEmploi;
+    @Builder.Default
+    private boolean statutEmploi=true;
 
     @Column(name = "first_login")
     @Builder.Default

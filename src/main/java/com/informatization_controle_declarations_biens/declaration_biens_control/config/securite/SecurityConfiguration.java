@@ -13,6 +13,8 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.config.JWTAuthenticationFilter;
+
 import lombok.RequiredArgsConstructor;
 
 @Configuration
@@ -42,6 +44,7 @@ public class SecurityConfiguration {
 // SecurityConfiguration.java
 
 .requestMatchers("/api/assujetti/**").hasAuthority("administrateur")
+.requestMatchers("/api/vocabulaire/**").hasAuthority("administrateur")
 .requestMatchers("/api/utilisateurs**").hasAuthority("administrateur")
                 .anyRequest().authenticated()
                 

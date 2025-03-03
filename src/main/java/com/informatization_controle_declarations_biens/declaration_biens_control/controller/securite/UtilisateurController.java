@@ -69,7 +69,19 @@ public class UtilisateurController {
             return ResponseEntity.status(500).body(null);
         }
     }
-
+    @GetMapping("/roles")
+    public ResponseEntity<List<String>> getAllRoles() {
+        try {
+            List<String> roles = Arrays.stream(RoleEnum.values())
+                                       .map(Enum::name)
+                                       .toList();
+            return ResponseEntity.ok(roles);
+        } catch (Exception e) {
+            logger.error("Erreur lors de la récupération des rôles", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    
     @GetMapping
     public ResponseEntity<List<Utilisateur>> getAllUsers() {
         try {
