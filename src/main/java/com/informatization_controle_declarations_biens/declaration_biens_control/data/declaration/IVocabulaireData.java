@@ -14,7 +14,9 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 
 @Repository
 public interface IVocabulaireData extends JpaRepository<Vocabulaire, Long> {
-    
+    @Query("SELECT v FROM Vocabulaire v WHERE v.isActive = true")
+List<Vocabulaire> findAllActive();
+
     Optional<Vocabulaire> findByIntitule(String intitule);
 
     @Query("SELECT v FROM Vocabulaire v WHERE v.typevocabulaire.id = :typeId")

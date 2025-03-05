@@ -71,11 +71,18 @@ public class VocabulaireController {
     public ResponseEntity<List<VocabulaireProjection>> getVocabulaireDetails(@PathVariable Long id) {
         return ResponseEntity.ok(vocabulaireService.getVocabulaireDetails(id));
     }
-    @GetMapping("/by-type/{typeId}")
-    public ResponseEntity<List<Vocabulaire>> getVocabulaireByTypeId(@PathVariable Long typeId) {
-        List<Vocabulaire> vocabulaireList = vocabulaireService.findByTypeVocabulaireId(typeId);
-        return ResponseEntity.ok(vocabulaireList);
+
+    @PutMapping("/{id}/disable")
+    public ResponseEntity<Void> disableVocabulaire(@PathVariable Long id) {
+        Optional<Vocabulaire> vocabulaire = vocabulaireService.findById(id);
+        if (vocabulaire.isPresent()) {
+            Vocabulaire v = vocabulaire.get();
+            v.setActive(false);
+            vocabulaireService.save(v);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
-  
+    
 
 }

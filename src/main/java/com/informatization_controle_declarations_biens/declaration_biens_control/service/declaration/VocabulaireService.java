@@ -21,8 +21,9 @@ public class VocabulaireService implements IVocabulaireService {
 
     @Override
     public List<Vocabulaire> findAll() {
-        return vocabulaireData.findAll();
+        return vocabulaireData.findAllActive();  
     }
+    
 
     @Override
     public Optional<Vocabulaire> findById(Long id) {
@@ -64,4 +65,5 @@ public class VocabulaireService implements IVocabulaireService {
         return vocabulaireData.findByTypevocabulaireId(typeId);
     }
 
+    
 }

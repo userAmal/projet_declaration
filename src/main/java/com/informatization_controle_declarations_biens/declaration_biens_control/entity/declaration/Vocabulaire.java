@@ -14,41 +14,21 @@ import lombok.Data;
 @Entity
 public class Vocabulaire {
 
-    public Vocabulaire() {
-    }
-
-    public Vocabulaire(Long id) {
-        this.id = id;
-    }
-
-    public Vocabulaire(String intitule) {
-        this.intitule = intitule;
-    }
-
-    public Vocabulaire(Long id, String intitule, TypeVocabulaire typevocabulaire) {
-        this.id = id;
-        this.intitule = intitule;
-        this.typevocabulaire = typevocabulaire;
-    }
-
-    public Vocabulaire( String intitule, TypeVocabulaire typevocabulaire) {
-        this.intitule = intitule;
-        this.typevocabulaire = typevocabulaire;
-    }
-
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @Column(length = 100, nullable = false)
     private String intitule;
 
-@ManyToOne(fetch = FetchType.EAGER)
-@JoinColumn(nullable = false)
-private TypeVocabulaire typevocabulaire;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(nullable = false)
+    private TypeVocabulaire typevocabulaire;
 
     @ManyToOne
     private Vocabulaire vocabulaireParent;
+
+    @Column(nullable = false)
+    private boolean isActive = true; 
+
 }
