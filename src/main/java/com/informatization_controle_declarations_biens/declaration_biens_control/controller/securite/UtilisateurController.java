@@ -19,6 +19,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
+
+import jakarta.validation.Valid;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 @RestController
@@ -45,9 +48,12 @@ public class UtilisateurController {
             Utilisateur updatedUser = utilisateurService.modifierUtilisateur(id, utilisateur);
             return ResponseEntity.ok(updatedUser);
         } catch (Exception e) {
-            return ResponseEntity.status(500).body(null); 
+            logger.error("Erreur lors de la modification de l'utilisateur", e);
+            return ResponseEntity.status(500).body(null);  
         }
     }
+    
+    
 
     @PutMapping("/{id}/archiver")
     public ResponseEntity<Void> archiverUtilisateur(@PathVariable Long id) {

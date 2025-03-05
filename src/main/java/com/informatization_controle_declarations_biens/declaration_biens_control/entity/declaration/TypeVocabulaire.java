@@ -20,10 +20,11 @@ public class TypeVocabulaire {
 
     public TypeVocabulaire(Long id, String intitule) {
         this.id = id;
-
         this.intitule = intitule;
     }
-
+    public TypeVocabulaire(String intitule) { 
+        this.intitule = intitule;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

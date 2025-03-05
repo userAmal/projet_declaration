@@ -36,7 +36,7 @@ public class VocabulaireService implements IVocabulaireService {
 
     @Override
     public void deleteById(Long id) {
-        vocabulaireData.deleteById(id);
+        //vocabulaireData.deleteById(id);
     }
 
     @Override
@@ -58,4 +58,10 @@ public class VocabulaireService implements IVocabulaireService {
     public List<VocabulaireProjection> getVocabulaireDetails(Long id) {
         return vocabulaireData.getVocabulaireDetails(id);
     }
+
+    @Override
+    public List<Vocabulaire> findByTypeVocabulaireId(Long typeId) {
+        return vocabulaireData.findByTypevocabulaireId(typeId);
+    }
+
 }

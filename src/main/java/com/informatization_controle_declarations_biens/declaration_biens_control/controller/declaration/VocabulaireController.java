@@ -71,4 +71,11 @@ public class VocabulaireController {
     public ResponseEntity<List<VocabulaireProjection>> getVocabulaireDetails(@PathVariable Long id) {
         return ResponseEntity.ok(vocabulaireService.getVocabulaireDetails(id));
     }
+    @GetMapping("/by-type/{typeId}")
+    public ResponseEntity<List<Vocabulaire>> getVocabulaireByTypeId(@PathVariable Long typeId) {
+        List<Vocabulaire> vocabulaireList = vocabulaireService.findByTypeVocabulaireId(typeId);
+        return ResponseEntity.ok(vocabulaireList);
+    }
+  
+
 }

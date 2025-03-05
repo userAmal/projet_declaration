@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -89,30 +90,41 @@ public class UtilisateurServiceImpl implements IUtilisateurService {
         
         return sb.toString();
     }
-
-   
-    
-
-   
-    
-    
     @Override
-    public Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateurDetails) {
-        return utilisateurData.findById(id).map(utilisateur -> {
-            utilisateur.setFirstname(utilisateurDetails.getFirstname());
-            utilisateur.setLastname(utilisateurDetails.getLastname());
-            utilisateur.setEmail(utilisateurDetails.getEmail());
-            utilisateur.setTel(utilisateurDetails.getTel());
-            utilisateur.setRole(utilisateurDetails.getRole());
+public Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateurDetails) {
+    Optional<Utilisateur> existingUtilisateurOpt = utilisateurData.findById(id);
     
-            if (utilisateurDetails.getPassword() != null && !utilisateurDetails.getPassword().isEmpty()) {
-                String encodedPassword = passwordEncoder.encode(utilisateurDetails.getPassword());
-                utilisateur.setPassword(encodedPassword);
-            }
-    
-            return utilisateurData.save(utilisateur);
-        }).orElseThrow(() -> new RuntimeException("Utilisateur non trouvé !"));
+    if (existingUtilisateurOpt.isPresent()) {
+        Utilisateur existingUtilisateur = existingUtilisateurOpt.get();
+        
+        if (utilisateurDetails.getFirstname() != null) {
+            existingUtilisateur.setFirstname(utilisateurDetails.getFirstname());
+        }
+        if (utilisateurDetails.getLastname() != null) {
+            existingUtilisateur.setLastname(utilisateurDetails.getLastname());
+        }
+        if (utilisateurDetails.getEmail() != null) {
+            existingUtilisateur.setEmail(utilisateurDetails.getEmail());
+        }
+        if (utilisateurDetails.getTel() != null) {
+            existingUtilisateur.setTel(utilisateurDetails.getTel());
+        }
+        if (utilisateurDetails.getRole() != null) {
+            existingUtilisateur.setRole(utilisateurDetails.getRole());
+        }
+        
+        if (utilisateurDetails.getPassword() != null && !utilisateurDetails.getPassword().isEmpty()) {
+            String encodedPassword = passwordEncoder.encode(utilisateurDetails.getPassword());
+            existingUtilisateur.setPassword(encodedPassword);
+        }
+        
+        return utilisateurData.save(existingUtilisateur); 
+    } else {
+        throw new RuntimeException("Utilisateur non trouvé");
     }
+}
+
+    
     
     
 

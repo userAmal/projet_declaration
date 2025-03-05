@@ -15,4 +15,7 @@ public interface IVocabulaireService extends IGenericService<Vocabulaire, Long> 
     List<Vocabulaire> findByVocabulaireParent(Long vocabulaireParentId);
     
     List<VocabulaireProjection> getVocabulaireDetails(Long id);
+
+    List<Vocabulaire> findByTypeVocabulaireId(Long typeId);
+
 }

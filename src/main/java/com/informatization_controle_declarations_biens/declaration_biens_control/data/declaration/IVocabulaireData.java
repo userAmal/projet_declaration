@@ -36,4 +36,6 @@ List<Vocabulaire> findRootsByType(@Param("typeId") Long typeId);
        "LEFT JOIN v.vocabulaireParent p " +
        "WHERE v.id = :id")
 List<VocabulaireProjection> getVocabulaireDetails(@Param("id") Long id);
+
+
 }
