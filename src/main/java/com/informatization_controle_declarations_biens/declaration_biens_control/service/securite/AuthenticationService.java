@@ -2,13 +2,11 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.AuthenticationRequest;
 import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.AuthenticationResponse;
-import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.RegisterRequest;
-import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
+
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
 
@@ -21,7 +19,6 @@ import lombok.extern.slf4j.Slf4j;
 public class AuthenticationService {
 
     private final IUtilisateurService repository;
-    private final PasswordEncoder passwordEncoder;
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
 
@@ -52,17 +49,22 @@ public class AuthenticationService {
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         log.info("Tentative d'authentification pour: {}", request.getEmail());
-
+    
         authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
         
         Utilisateur user = repository.findByEmail(request.getEmail())
             .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-            log.info("Authentification réussie - Utilisateur: {}, Rôle: {}", user.getEmail(), user.getRole().name());
-
-
+        
+        log.info("Authentification réussie - Utilisateur: {}, Rôle: {}", user.getEmail(), user.getRole().name());
+    
         String jwtToken = jwtService.generateToken(user);
-        return AuthenticationResponse.builder().token(jwtToken).build();
+    
+        return AuthenticationResponse.builder()
+            .token(jwtToken)
+            .id(user.getId())  
+            .build();
     }
+    
 }

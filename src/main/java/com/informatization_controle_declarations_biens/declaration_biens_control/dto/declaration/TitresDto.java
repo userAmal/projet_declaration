@@ -6,6 +6,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.TitresProjection;
 import lombok.Data;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Titres;
 
 @Data
 public class TitresDto {
@@ -29,5 +30,15 @@ public class TitresDto {
         this.dateCreation = titresProjection.getDateCreation();
         this.isSynthese = titresProjection.isSynthese();
         this.idDeclaration = titresProjection.getIdDeclaration();
+    }
+    public TitresDto(Titres titres) {
+        this.id = titres.getId();
+        this.designationNatureActions = titres.getDesignationNatureActions();
+        this.valeurEmplacement = titres.getValeurEmplacement();
+        this.emplacement = titres.getEmplacement();
+        this.autrePrecisions = titres.getAutrePrecisions();
+        this.dateCreation = titres.getDateCreation();
+        this.isSynthese = titres.isSynthese();
+        this.idDeclaration = titres.getIdDeclaration();
     }
 }

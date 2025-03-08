@@ -3,6 +3,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.time.LocalDate;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Animaux;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AnimauxProjection;
 
@@ -13,6 +14,18 @@ public class AnimauxDto {
 
     public AnimauxDto() {
     }
+public AnimauxDto(Animaux animaux) {
+    this.id = animaux.getId();
+    this.especes = animaux.getEspeces();
+    this.nombreTetes = animaux.getNombreTetes();
+    this.modeAcquisition = animaux.getModeAcquisition();
+    this.anneeAcquisition = animaux.getAnneeAcquisition();
+    this.valeurAcquisition = animaux.getValeurAcquisition();
+    this.localite = animaux.getLocalite();
+    this.dateCreation = animaux.getDateCreation();
+    this.isSynthese = animaux.isSynthese();
+    this.idDeclaration = animaux.getIdDeclaration();
+}
 
     public AnimauxDto(AnimauxProjection projection) {
         this.id = projection.getId();

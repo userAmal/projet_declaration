@@ -1,0 +1,10 @@
+package com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration;
+
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.AppareilsElectroMenagers;
+import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IGenericService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AppareilsElectroMenagersProjection;
+import java.util.List;
+
+public interface IAppareilsElectroMenagersService extends IGenericService<AppareilsElectroMenagers, Long> {
+    List<AppareilsElectroMenagersProjection> getByDeclaration(Long declarationId);
+}

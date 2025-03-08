@@ -42,4 +42,8 @@ public class AutresBiensDeValeur {
 
     @Column(nullable = false)
     private boolean isSynthese;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Declaration idDeclaration;
 }

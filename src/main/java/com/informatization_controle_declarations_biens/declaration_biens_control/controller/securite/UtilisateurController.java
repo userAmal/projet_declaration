@@ -20,7 +20,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
 
-import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -129,14 +128,15 @@ public class UtilisateurController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié");
             }
     
-            // Supprimer la sauvegarde manuelle
-            utilisateurService.changePassword(utilisateur.getEmail(), request.getNewPassword());
-            
-            return ResponseEntity.ok("Mot de passe changé avec succès.");
+            // Appel du service et récupération de la réponse avec le token
+            AuthenticationResponse response = utilisateurService.changePassword(utilisateur.getEmail(), request.getNewPassword());
+    
+            return ResponseEntity.ok(response); // Renvoie directement l'objet contenant le token
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur serveur");
         }
     }
+    
 
     @GetMapping("/search")
     public ResponseEntity<List<Utilisateur>> searchUsers(@RequestParam String keyword) {

@@ -3,6 +3,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.time.LocalDate;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.AppareilsElectroMenagers;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AppareilsElectroMenagersProjection;
 
@@ -24,6 +25,16 @@ public class AppareilsElectroMenagersDto {
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
     }
+public AppareilsElectroMenagersDto(AppareilsElectroMenagers entity) {
+    this.id = entity.getId();
+    this.designation = entity.getDesignation();
+    this.anneeAcquisition = entity.getAnneeAcquisition();
+    this.valeurAcquisition = entity.getValeurAcquisition();
+    this.etatGeneral = entity.getEtatGeneral();
+    this.dateCreation = entity.getDateCreation();
+    this.isSynthese = entity.isSynthese();
+    this.idDeclaration = entity.getIdDeclaration();
+}
 
     private Long id;
     private Vocabulaire designation;

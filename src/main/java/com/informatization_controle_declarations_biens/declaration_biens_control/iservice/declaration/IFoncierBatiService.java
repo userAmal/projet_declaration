@@ -1,0 +1,11 @@
+package com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration;
+
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.FoncierBati;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.FoncierBatiProjection;
+import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IGenericService;
+
+import java.util.List;
+
+public interface IFoncierBatiService extends IGenericService<FoncierBati, Long> {
+    List<FoncierBatiProjection> getByDeclaration(Long declarationId);
+}

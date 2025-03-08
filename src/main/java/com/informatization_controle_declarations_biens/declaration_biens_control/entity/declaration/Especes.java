@@ -38,4 +38,8 @@ public class Especes {
 
     @Column(nullable = false)
     private boolean isSynthese;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Declaration idDeclaration;
 }

@@ -2,33 +2,32 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import java.security.SecureRandom;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.AuthenticationResponse;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.securite.IUtilisateurData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
 
 import jakarta.transaction.Transactional;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 @Service
 @Transactional
 public class UtilisateurServiceImpl implements IUtilisateurService {
-    private static final Logger logger = LoggerFactory.getLogger(UtilisateurServiceImpl.class); // Déclaration statique du Logger
 
     private final IUtilisateurData utilisateurData;
     private final PasswordEncoder passwordEncoder;
 
-
     @Autowired
+    private JWTService jwtService;
+
+
+    
     public UtilisateurServiceImpl(
         IUtilisateurData utilisateurData,
         @Lazy PasswordEncoder passwordEncoder
@@ -69,15 +68,23 @@ public class UtilisateurServiceImpl implements IUtilisateurService {
     
     
     
-    public void changePassword(String email, String newPassword) {
+    public AuthenticationResponse changePassword(String email, String newPassword) {
         Utilisateur utilisateur = utilisateurData.findByEmail(email)
             .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
     
-        utilisateur.setPassword(passwordEncoder.encode(newPassword)); // Hachage du mot de passe
+        utilisateur.setPassword(passwordEncoder.encode(newPassword)); 
         utilisateur.setFirstLogin(false);
         utilisateurData.save(utilisateur);
         utilisateurData.flush();
+    
+        String newJwtToken = jwtService.generateToken(utilisateur);
+    
+        return AuthenticationResponse.builder()
+            .token(newJwtToken)
+            .id(utilisateur.getId())
+            .build();
     }
+    
     
     private String generateSecurePassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

@@ -1,6 +1,8 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration;
 
 import java.time.LocalDate;
+
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
 
 public interface RevenusProjection {
@@ -8,4 +10,6 @@ public interface RevenusProjection {
     float getSalaireMensuelNet();
     Vocabulaire getAutresRevenus();
     LocalDate getDateCreation();
+        Declaration getIdDeclaration();
+
 }

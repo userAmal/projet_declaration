@@ -3,6 +3,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.time.LocalDate;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AutresDettesProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.AutresDettes;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import lombok.Data;
 
@@ -22,7 +23,16 @@ public class AutresDettesDto {
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
     }
-
+    public AutresDettesDto(AutresDettes autresDettes) {
+        this.id = autresDettes.getId();
+        this.creanciers = autresDettes.getCreanciers();
+        this.montant = autresDettes.getMontant();
+        this.justificatifs = autresDettes.getJustificatifs();
+        this.autresPrecisions = autresDettes.getAutresPrecisions();
+        this.dateCreation = autresDettes.getDateCreation();
+        this.isSynthese = autresDettes.isSynthese();
+        this.idDeclaration = autresDettes.getIdDeclaration();
+    }
     private Long id;
     private Vocabulaire creanciers;
     private float montant;

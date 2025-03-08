@@ -4,6 +4,7 @@ import java.time.LocalDate;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.FoncierBati;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.FoncierBatiProjection;
 
 import lombok.Data;
@@ -28,6 +29,21 @@ public class FoncierBatiDto {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+    }
+    public FoncierBatiDto(FoncierBati foncierBati) {
+        this.id = foncierBati.getId();
+        this.nature = foncierBati.getNature();
+        this.anneeConstruction = foncierBati.getAnneeConstruction();
+        this.modeAcquisition = foncierBati.getModeAcquisition();
+        this.referencesCadastrales = foncierBati.getReferencesCadastrales();
+        this.superficie = foncierBati.getSuperficie();
+        this.localis = foncierBati.getLocalis();
+        this.typeUsage = foncierBati.getTypeUsage();
+        this.coutAcquisitionFCFA = foncierBati.getCoutAcquisitionFCFA();
+        this.coutInvestissements = foncierBati.getCoutInvestissements();
+        this.dateCreation = foncierBati.getDateCreation();
+        this.isSynthese = foncierBati.isSynthese();
+        this.idDeclaration = foncierBati.getIdDeclaration();
     }
 
     private Long id;

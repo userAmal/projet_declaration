@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.VehiculeProjection;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vehicule;
 
 import lombok.Data;
 
@@ -24,6 +25,18 @@ public class VehiculeDto {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+    }
+    public VehiculeDto(Vehicule vehicule) {
+        this.id = vehicule.getId();
+        this.designation = vehicule.getDesignation();
+        this.marque = vehicule.getMarque();
+        this.immatriculation = vehicule.getImmatriculation();
+        this.anneeAcquisition = vehicule.getAnneeAcquisition();
+        this.valeurAcquisition = vehicule.getValeurAcquisition();
+        this.etatGeneral = vehicule.getEtatGeneral();
+        this.dateCreation = vehicule.getDateCreation();
+        this.isSynthese = vehicule.isSynthese();
+        this.idDeclaration = vehicule.getIdDeclaration();
     }
 
     private Long id;

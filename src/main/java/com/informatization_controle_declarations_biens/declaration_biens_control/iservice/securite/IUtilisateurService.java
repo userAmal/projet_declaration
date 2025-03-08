@@ -5,6 +5,7 @@ import java.util.Optional;
 
 import org.springframework.data.repository.query.Param;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.AuthenticationResponse;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 
@@ -15,7 +16,7 @@ public interface IUtilisateurService {
     Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateur);
 
     void archiverUtilisateur(Long id);
-   void changePassword(String email, String newPassword);
+AuthenticationResponse changePassword(String email, String newPassword);
 
     Optional<Utilisateur> findById(Long id);
     

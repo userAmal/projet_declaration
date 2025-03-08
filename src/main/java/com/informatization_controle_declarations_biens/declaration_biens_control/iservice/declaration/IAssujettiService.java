@@ -5,7 +5,6 @@ import java.sql.Date;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.web.bind.annotation.PathVariable;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IGenericService;

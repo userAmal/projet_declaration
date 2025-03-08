@@ -42,5 +42,5 @@ public class DisponibilitesEnBanque {
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    private Declaration DeclarationId;
+    private Declaration idDeclaration;
 }

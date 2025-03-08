@@ -24,4 +24,8 @@ public class Revenus {
     @Column(nullable = false)
     @Temporal(TemporalType.DATE)
     private LocalDate dateCreation;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Declaration idDeclaration;
 }

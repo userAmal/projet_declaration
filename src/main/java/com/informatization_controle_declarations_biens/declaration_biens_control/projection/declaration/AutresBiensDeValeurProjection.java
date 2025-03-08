@@ -1,6 +1,8 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration;
 
 import java.time.LocalDate;
+
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
 
 public interface AutresBiensDeValeurProjection {
@@ -13,4 +15,6 @@ public interface AutresBiensDeValeurProjection {
     Vocabulaire getType();
     LocalDate getDateCreation();
     boolean isSynthese();
+    Declaration getIdDeclaration();
+
 }

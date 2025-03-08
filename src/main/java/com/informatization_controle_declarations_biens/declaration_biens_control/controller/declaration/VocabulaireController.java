@@ -83,6 +83,16 @@ public class VocabulaireController {
         }
         return ResponseEntity.notFound().build();
     }
-    
+    @PutMapping("/{id}/enable")
+    public ResponseEntity<Void> enableVocabulaire(@PathVariable Long id) {
+        Optional<Vocabulaire> vocabulaire = vocabulaireService.findById(id);
+        if (vocabulaire.isPresent()) {
+            Vocabulaire v = vocabulaire.get();
+            v.setActive(true); 
+            vocabulaireService.save(v);
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
+    }
 
 }
