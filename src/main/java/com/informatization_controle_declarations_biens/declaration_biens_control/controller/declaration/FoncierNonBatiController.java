@@ -3,6 +3,8 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.FoncierNonBatiDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.FoncierNonBati;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IFoncierNonBatiService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.FoncierNonBatiProjection;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,15 @@ public class FoncierNonBatiController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
-
+    @GetMapping("/by-declaration/{declarationId}")
+    public ResponseEntity<List<FoncierNonBatiDto>> getByDeclaration(@PathVariable Long declarationId) {
+        List<FoncierNonBatiProjection> projections = foncierNonBatiService.getByDeclaration(declarationId);
+        List<FoncierNonBatiDto> dtos = projections.stream()
+                .map(FoncierNonBatiDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity<FoncierNonBatiDto> getFoncierNonBatiById(@PathVariable Long id) {
         return foncierNonBatiService.findById(id)
@@ -66,8 +76,21 @@ public class FoncierNonBatiController {
     private FoncierNonBati convertToEntity(FoncierNonBatiDto dto) {
         FoncierNonBati entity = new FoncierNonBati();
         entity.setId(dto.getId());
-        entity.setNature(dto.getNature()); // Remplace type par nature
+        entity.setNature(dto.getNature()); 
+        entity.setModeAcquisition(dto.getModeAcquisition()); 
+        entity.setIlot(dto.getIlot());
+        entity.setLotissement(dto.getLotissement());
         entity.setSuperficie(dto.getSuperficie());
+        entity.setLocalite(dto.getLocalite());
+        entity.setTitrePropriete(dto.getTitrePropriete());
+        entity.setDateAcquis(dto.getDateAcquis());
+        entity.setValeurAcquisFCFA(dto.getValeurAcquisFCFA());
+        entity.setCoutInvestissements(dto.getCoutInvestissements());
+        entity.setDateCreation(dto.getDateCreation());
+        entity.setSynthese(dto.isSynthese()); 
+        entity.setIdDeclaration(dto.getIdDeclaration()); 
+    
         return entity;
     }
+    
 }

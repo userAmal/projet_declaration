@@ -3,6 +3,8 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.MeublesMeublantsDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.MeublesMeublants;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IMeublesMeublantsService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.MeublesMeublantsProjection;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -62,7 +64,15 @@ public class MeublesMeublantsController {
         service.deleteById(id);
         return ResponseEntity.noContent().build();
     }
-
+    @GetMapping("/by-declaration/{declarationId}")
+    public ResponseEntity<List<MeublesMeublantsDto>> getByDeclaration(@PathVariable Long declarationId) {
+        List<MeublesMeublantsProjection> projections = service.getByDeclaration(declarationId);
+        List<MeublesMeublantsDto> dtos = projections.stream()
+                .map(MeublesMeublantsDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+    
     private MeublesMeublants convertToEntity(MeublesMeublantsDto dto) {
         MeublesMeublants entity = new MeublesMeublants();
         entity.setId(dto.getId());

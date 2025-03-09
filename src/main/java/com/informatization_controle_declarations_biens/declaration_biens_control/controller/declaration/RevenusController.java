@@ -3,6 +3,8 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.RevenusDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Revenus;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IRevenusService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.RevenusProjection;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,7 +30,14 @@ public class RevenusController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
-
+    @GetMapping("/by-declaration/{declarationId}")
+    public ResponseEntity<List<RevenusDto>> getByDeclaration(@PathVariable Long declarationId) {
+        List<RevenusProjection> projections = revenusService.getByDeclaration(declarationId);
+        List<RevenusDto> dtos = projections.stream()
+                .map(RevenusDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
     @GetMapping("/{id}")
     public ResponseEntity<RevenusDto> getRevenusById(@PathVariable Long id) {
         return revenusService.findById(id)

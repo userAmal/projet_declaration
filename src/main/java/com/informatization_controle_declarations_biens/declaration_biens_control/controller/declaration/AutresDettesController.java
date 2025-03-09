@@ -30,7 +30,7 @@ public class AutresDettesController {
         return entity.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/declaration/{declarationId}")
+    @GetMapping("/by-declaration/{declarationId}")
     public List<AutresDettesProjection> getByDeclaration(@PathVariable Long declarationId) {
         return service.getByDeclaration(declarationId);
     }

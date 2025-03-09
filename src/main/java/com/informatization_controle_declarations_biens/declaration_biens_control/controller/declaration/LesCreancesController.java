@@ -3,6 +3,8 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.LesCreancesDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.LesCreances;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.ILesCreancesService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.LesCreancesProjection;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -27,7 +29,15 @@ public class LesCreancesController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
-
+    @GetMapping("/by-declaration/{declarationId}")
+    public ResponseEntity<List<LesCreancesDto>> getByDeclaration(@PathVariable Long declarationId) {
+        List<LesCreancesProjection> projections = service.getByDeclaration(declarationId);
+        List<LesCreancesDto> dtos = projections.stream()
+                .map(LesCreancesDto::new)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
+    }
+    
     @GetMapping("/{id}")
     public ResponseEntity<LesCreancesDto> getById(@PathVariable Long id) {
         return service.findById(id)
@@ -67,7 +77,11 @@ public class LesCreancesController {
         LesCreances entity = new LesCreances();
         entity.setId(dto.getId());
         entity.setMontant(dto.getMontant());
+        entity.setAutresPrecisions(dto.getAutresPrecisions());
+        entity.setDebiteurs(dto.getDebiteurs());
         entity.setDateCreation(dto.getDateCreation());
+        entity.setIdDeclaration(dto.getIdDeclaration());
+
         return entity;
     }
 }

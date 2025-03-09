@@ -30,7 +30,7 @@ public class EmpruntsController {
         return entity.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/declaration/{declarationId}")
+    @GetMapping("/by-declaration/{declarationId}")
     public List<EmpruntsProjection> getByDeclaration(@PathVariable Long declarationId) {
         return service.getByDeclaration(declarationId);
     }
