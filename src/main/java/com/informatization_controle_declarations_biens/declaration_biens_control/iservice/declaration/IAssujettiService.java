@@ -10,6 +10,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IGenericService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
 
+
 public interface IAssujettiService extends IGenericService<Assujetti, Long> {
     List<Assujetti> findAll();
     Optional<Assujetti> findById(Long id);
@@ -22,6 +23,7 @@ public interface IAssujettiService extends IGenericService<Assujetti, Long> {
 //  List<Assujetti> findByInstitution(String institutionLibelle);
     List<Assujetti> findByDatePriseDeServiceBetween(Date startDate, Date endDate);
     List<AssujettiProjection> getAssujettiDetails(Long id);
+
     
 }
 

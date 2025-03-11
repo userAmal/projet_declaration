@@ -6,7 +6,6 @@ import lombok.*;
 
 import java.time.LocalDate;
 
-import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 
 @Entity
 @Getter
@@ -23,12 +22,16 @@ public class Declaration {
     @Temporal(TemporalType.DATE)
     private LocalDate dateDeclaration;
 
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private Vocabulaire typeDeclaration;
+
 
     @ManyToOne
     @JoinColumn(nullable = false)
-    private Utilisateur utilisateurId;
+    private Assujetti assujetti;
+    
+    @Column(nullable = false)
+    private TypeDeclarationEnum typeDeclaration;
+
+    @Column(nullable = false)
+    private EtatDeclarationEnum etatDeclaration;
 }
 

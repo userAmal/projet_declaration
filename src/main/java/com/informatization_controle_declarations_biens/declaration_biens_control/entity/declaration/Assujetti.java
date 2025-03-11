@@ -97,6 +97,6 @@ private Vocabulaire civilite;
 
 
     @ManyToOne
-    @JoinColumn(nullable = false)
+   @JoinColumn(nullable = false)
     private Utilisateur administrateur;
 }
