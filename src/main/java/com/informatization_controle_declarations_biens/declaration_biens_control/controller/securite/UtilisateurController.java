@@ -128,10 +128,9 @@ public class UtilisateurController {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Utilisateur non authentifié");
             }
     
-            // Appel du service et récupération de la réponse avec le token
             AuthenticationResponse response = utilisateurService.changePassword(utilisateur.getEmail(), request.getNewPassword());
     
-            return ResponseEntity.ok(response); // Renvoie directement l'objet contenant le token
+            return ResponseEntity.ok(response); 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Erreur serveur");
         }

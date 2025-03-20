@@ -1,11 +1,13 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.controller.declaration;
 
-
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
-import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAssujettiService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,6 +18,8 @@ import java.util.Optional;
 @RequestMapping("/api/assujetti")
 public class AssujettiController {
 
+    private static final Logger logger = LoggerFactory.getLogger(AssujettiController.class);
+
     @Autowired
     private IAssujettiService assujettiService;
 
@@ -23,6 +27,20 @@ public class AssujettiController {
     public List<Assujetti> getAllAssujetti() {
         return assujettiService.findAll();
     }
+    @GetMapping("/declaration/access")
+    public ResponseEntity<Long> getDeclarationIdFromToken(@RequestParam String token) {
+        // Utilisation du logger pour afficher le token
+        logger.info("Token reçu: " + token);
+        Long declarationId = assujettiService.verifyToken(token);
+        if (declarationId != null) {
+            return ResponseEntity.ok(declarationId);
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
+    
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Assujetti> getAssujettiById(@PathVariable Long id) {
@@ -72,11 +90,6 @@ public class AssujettiController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/code/{code}")
-    public List<Assujetti> getAssujettiByCode(@PathVariable String code) {
-        return assujettiService.findByCode(code);
-    }
-
     @GetMapping("/details/{id}")
     public List<AssujettiProjection> getAssujettiDetails(@PathVariable Long id) {
         return assujettiService.getAssujettiDetails(id);
@@ -87,22 +100,8 @@ public class AssujettiController {
         return assujettiService.findByNom(nom);
     }
     
-    // New endpoints for additional search options
     @GetMapping("/email/{email}")
     public List<Assujetti> getAssujettiByEmail(@PathVariable String email) {
         return assujettiService.findByEmail(email);
     }
-    
-    // @GetMapping("/fonction/{fonctionLibelle}")
-    // public List<Assujetti> getAssujettiByFonction(@PathVariable String fonctionLibelle) {
-    //     return assujettiService.findByFonction(fonctionLibelle);
-    // }
-    
-    // @GetMapping("/institution/{institutionLibelle}")
-    // public List<Assujetti> getAssujettiByInstitution(@PathVariable String institutionLibelle) {
-    //     return assujettiService.findByInstitution(institutionLibelle);
-    // }
-    
 }
-
-

@@ -68,9 +68,7 @@ public class AutresBiensDeValeurController {
         entity.setType(dto.getType());
         entity.setDateCreation(dto.getDateCreation());
         entity.setSynthese(dto.isSynthese());
-    
-        // Vérifiez ici que idDeclaration est non null avant de l'affecter
-        if (dto.getIdDeclaration() != null) {
+            if (dto.getIdDeclaration() != null) {
             entity.setIdDeclaration(dto.getIdDeclaration());
         } else {
             throw new IllegalArgumentException("La déclaration est obligatoire");

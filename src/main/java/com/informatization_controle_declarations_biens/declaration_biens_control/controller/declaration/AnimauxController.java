@@ -29,7 +29,6 @@ public class AnimauxController {
         return ResponseEntity.ok(dtos);
     }
 
-    // CRUD Endpoints
     @GetMapping
     public ResponseEntity<List<AnimauxDto>> getAllAnimaux() {
         List<Animaux> animauxList = animauxService.findAll();

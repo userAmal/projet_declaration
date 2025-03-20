@@ -41,8 +41,7 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/auth/**").permitAll()
                 // Restrict access to admin-only routes
 // SecurityConfiguration.java
-.requestMatchers("/api/declaration/access").permitAll()
-
+.requestMatchers("/api/assujetti/declaration/access").permitAll()
 .requestMatchers("/api/assujetti/**").hasAuthority("administrateur")
 .requestMatchers("/api/vocabulaire/**").hasAuthority("administrateur")
 .requestMatchers("/api/utilisateurs**").hasAuthority("administrateur")

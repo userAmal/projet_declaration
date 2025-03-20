@@ -66,13 +66,11 @@ public class DeclarationService implements IDeclarationService {
     public DeclarationDto getFullDeclarationDetails(Long declarationId) {
         DeclarationDto dto = new DeclarationDto();
         
-        // Récupérer la déclaration principale
         Declaration declaration = declarationData.findById(declarationId).orElse(null);
         if (declaration == null) return null;
         
         dto = new DeclarationDto(declaration);
         
-        // Récupérer toutes les entités associées et les ajouter au DTO
         dto.setAnimaux(animauxService.getAnimauxByDeclaration(declarationId));
         System.out.println(dto.getAnimaux());
 
