@@ -45,7 +45,7 @@ public class SecurityConfiguration {
 .requestMatchers("/api/assujetti/**").hasAuthority("administrateur")
 .requestMatchers("/api/vocabulaire/**").hasAuthority("administrateur")
 .requestMatchers("/api/utilisateurs**").hasAuthority("administrateur")
-
+.requestMatchers("/api/parametrages**").hasAuthority("administrateur")
 .anyRequest().authenticated()
                 
             )

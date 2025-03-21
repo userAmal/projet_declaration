@@ -32,7 +32,7 @@ public class PdfReportController {
         try {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String fileName = "declarations_" + timestamp + ".pdf";
-            String filePath = "E:\\pfe_projet\\declaration\\rapport\\" + fileName;
+            String filePath = "C:\\Users\\DELL\\Desktop\\isetn\\pfe\\PdfRapport-File" + fileName;
             
             // Génère le rapport contenant toutes les déclarations
             pdfFileService.pdfCreation();
@@ -59,7 +59,7 @@ public class PdfReportController {
         try {
             String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
             String fileName = "declaration_" + id + "_" + timestamp + ".pdf";
-            String filePath = "E:\\pfe_projet\\declaration\\rapport\\" + fileName;
+            String filePath = "C:\\Users\\DELL\\Desktop\\isetn\\pfe\\PdfRapport-File" + fileName;
             
             // Génère le rapport pour une déclaration spécifique
             pdfFileService.generateDeclarationPdf(id, filePath);
