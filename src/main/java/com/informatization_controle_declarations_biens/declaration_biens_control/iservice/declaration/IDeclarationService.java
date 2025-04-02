@@ -9,4 +9,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 
 public interface IDeclarationService extends IGenericService<Declaration, Long> {
  DeclarationDto getFullDeclarationDetails(Long declarationId);
+ Declaration validateDeclaration(Long id);
+ Declaration refuseDeclaration(Long id);
 }

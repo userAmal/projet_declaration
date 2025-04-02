@@ -3,7 +3,6 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.parametrage.IParametrageData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.parametrage.Parametrage;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.parametrage.IParametrageService;
-import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IGenericService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.parametrage.ParametrageProjection;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +54,12 @@ public class ParametrageService implements IParametrageService {
             return parametrageData.save(parametrage);
         }
         return null;  // Retourne null si l'entité n'est pas trouvée
+    }
+
+    @Override
+    public Parametrage getByCode(String code) {
+        Optional<Parametrage> parametrageOpt = parametrageData.findByCode(code);
+        return parametrageOpt.orElse(null);
     }
 
     

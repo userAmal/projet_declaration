@@ -37,13 +37,13 @@ public class SecurityConfiguration {
             }))
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Permet l'accès public à l'authentification
                 .requestMatchers("/api/auth/**").permitAll()
-                // Restrict access to admin-only routes
-// SecurityConfiguration.java
+.requestMatchers("/api/declarations/**").permitAll()
+.requestMatchers("/api/foncier-bati/**").permitAll()
+.requestMatchers("/api/type-vocabulaire/**").permitAll()
+.requestMatchers("/api/vocabulaire/**").permitAll()
 .requestMatchers("/api/assujetti/declaration/access").permitAll()
 .requestMatchers("/api/assujetti/**").hasAuthority("administrateur")
-.requestMatchers("/api/vocabulaire/**").hasAuthority("administrateur")
 .requestMatchers("/api/utilisateurs**").hasAuthority("administrateur")
 .requestMatchers("/api/parametrages**").hasAuthority("administrateur")
 .anyRequest().authenticated()

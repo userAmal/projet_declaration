@@ -7,6 +7,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IDeclarationService;
 
+import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.stereotype.Service;
 
@@ -111,4 +112,21 @@ public class DeclarationService implements IDeclarationService {
     public void deleteById(Long id) {
         declarationData.deleteById(id);
     }
+    @Override
+public Declaration validateDeclaration(Long id) {
+    Declaration declaration = declarationData.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
+
+    
+    return declarationData.save(declaration);
+}
+
+@Override
+public Declaration refuseDeclaration(Long id) {
+    Declaration declaration = declarationData.findById(id)
+        .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
+    
+    
+    return declarationData.save(declaration);
+}
 }

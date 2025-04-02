@@ -11,5 +11,7 @@ public interface IParametrageService extends IGenericService<Parametrage, Long> 
     List<Parametrage> findAll();
     Optional<ParametrageProjection> findProjectedById(Long id);
     Parametrage updateValeur(Long id, String valeur);
+    Parametrage getByCode(String code);
+
 
 }

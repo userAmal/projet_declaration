@@ -1,7 +1,9 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Arrays;
+import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -146,4 +148,19 @@ public class UtilisateurController {
             return ResponseEntity.status(500).build();
         }
     }
+    @GetMapping("/{id}/role")
+public ResponseEntity<Map<String, String>> getUserRole(@PathVariable Long id) {
+    try {
+        return utilisateurService.findById(id)
+                .map(user -> {
+                    Map<String, String> response = new HashMap<>();
+                    response.put("role", user.getRole().name());
+                    return ResponseEntity.ok(response);
+                })
+                .orElse(ResponseEntity.notFound().build());
+    } catch (Exception e) {
+        logger.error("Erreur lors de la récupération du rôle pour l'utilisateur ID: {}", id, e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+}
 }
