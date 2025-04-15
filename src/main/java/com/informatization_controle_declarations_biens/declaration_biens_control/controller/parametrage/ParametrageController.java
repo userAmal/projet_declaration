@@ -42,6 +42,19 @@ public class ParametrageController {
             return ResponseEntity.notFound().build(); 
         }
         
+        @GetMapping("/search")
+        public ResponseEntity<ParametrageDto> getParametrageByCode(@RequestParam String code) {
+            Parametrage parametrage = parametrageService.getByCode(code);
+            if (parametrage != null) {
+                return ResponseEntity.ok(new ParametrageDto(parametrage));
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        }
+
+        
+
+        
 
         
 

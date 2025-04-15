@@ -38,14 +38,16 @@ public class SecurityConfiguration {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
-.requestMatchers("/api/declarations/**").permitAll()
+.requestMatchers("/api/declarations/**").authenticated()
 .requestMatchers("/api/foncier-bati/**").permitAll()
 .requestMatchers("/api/type-vocabulaire/**").permitAll()
 .requestMatchers("/api/vocabulaire/**").permitAll()
 .requestMatchers("/api/assujetti/declaration/access").permitAll()
 .requestMatchers("/api/assujetti/**").hasAuthority("administrateur")
-.requestMatchers("/api/utilisateurs**").hasAuthority("administrateur")
+.requestMatchers("/api/utilisateurs/**").permitAll()
 .requestMatchers("/api/parametrages**").hasAuthority("administrateur")
+//.requestMatchers("/api/declarations/mes-declarations").authenticated()
+
 .anyRequest().authenticated()
                 
             )

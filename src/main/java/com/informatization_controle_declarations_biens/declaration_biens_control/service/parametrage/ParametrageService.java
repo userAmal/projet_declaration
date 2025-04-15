@@ -21,7 +21,7 @@ public class ParametrageService implements IParametrageService {
 
     @Override
     public List<Parametrage> findAll() {
-        return parametrageData.findAll();  // Si tu as un repository Spring Data
+        return parametrageData.findAll();
     }
 
     @Override
@@ -50,17 +50,18 @@ public class ParametrageService implements IParametrageService {
         Optional<Parametrage> parametrageOpt = parametrageData.findById(id);
         if (parametrageOpt.isPresent()) {
             Parametrage parametrage = parametrageOpt.get();
-            parametrage.setValeur(valeur);  // Met à jour la valeur telle qu'elle est
+            parametrage.setValeur(valeur);
             return parametrageData.save(parametrage);
         }
-        return null;  // Retourne null si l'entité n'est pas trouvée
+        return null;
     }
 
     @Override
     public Parametrage getByCode(String code) {
-        Optional<Parametrage> parametrageOpt = parametrageData.findByCode(code);
-        return parametrageOpt.orElse(null);
+        List<Parametrage> result = parametrageData.searchByCodeOrDescription(code);
+        return result.isEmpty() ? null : result.get(0);
     }
+
 
     
     

@@ -24,6 +24,7 @@ public interface IAssujettiService extends IGenericService<Assujetti, Long> {
     List<Assujetti> findByDatePriseDeServiceBetween(Date startDate, Date endDate);
     List<AssujettiProjection> getAssujettiDetails(Long id);
     Long verifyToken(String token);
+    void archiverAssujetti(Long id);
 
 
     

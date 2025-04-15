@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatAssujettiEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
 
 public interface IAssujettiData extends JpaRepository<Assujetti, Long> {
@@ -25,6 +26,10 @@ public interface IAssujettiData extends JpaRepository<Assujetti, Long> {
     
     // @Query(value = "from Assujetti a where a.institutions.libelle = :institutionLibelle")
     // List<Assujetti> findByInstitution(@Param("institutionLibelle") String institutionLibelle);
+    
+    @Query("SELECT a FROM Assujetti a WHERE a.etat != :etat")
+    List<Assujetti> findAssujettisExcludingEtat(@Param("etat") EtatAssujettiEnum etat);
+
     
     
     @Query(value = "from Assujetti a where a.datePriseDeService BETWEEN :startDate AND :endDate")

@@ -29,4 +29,5 @@ List<Utilisateur> findByRole(@Param("role") RoleEnum role);
     List<Utilisateur> searchByFirstnameOrLastname(String keyword);
     
     void deleteById(Long id);
+    
 }

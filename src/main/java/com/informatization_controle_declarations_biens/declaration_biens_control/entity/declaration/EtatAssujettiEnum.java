@@ -3,6 +3,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 public enum EtatAssujettiEnum {
         NOUVEAU,
         AFFECTER,
+        STOP,
         VALIDER,
         NON_VALIDER
 }

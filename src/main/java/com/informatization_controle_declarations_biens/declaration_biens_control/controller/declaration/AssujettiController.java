@@ -104,4 +104,15 @@ public class AssujettiController {
     public List<Assujetti> getAssujettiByEmail(@PathVariable String email) {
         return assujettiService.findByEmail(email);
     }
+
+    @PutMapping("/{id}/archiver")
+    public ResponseEntity<Void> archiverAssujetti(@PathVariable Long id) {
+        try {
+            assujettiService.archiverAssujetti(id);
+            return ResponseEntity.noContent().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 }

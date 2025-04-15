@@ -5,16 +5,20 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.DeclarationDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IDeclarationService;
-
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+
 @Service
 public class DeclarationService implements IDeclarationService {
+
+    private final UtilisateurServiceImpl utilisateurServiceImpl;
     
     private final IDeclarationData declarationData;
     private final AnimauxService animauxService;
@@ -31,6 +35,7 @@ public class DeclarationService implements IDeclarationService {
     private final RevenusService revenusService;
     private final TitresService titresService;
     private final VehiculeService vehiculeService;
+
     
     public DeclarationService(IDeclarationData declarationData,
                              AnimauxService animauxService,
@@ -46,7 +51,7 @@ public class DeclarationService implements IDeclarationService {
                              MeublesMeublantsService meublesMeublantsService,
                              RevenusService revenusService,
                              TitresService titresService,
-                             VehiculeService vehiculeService) {
+                             VehiculeService vehiculeService, UtilisateurServiceImpl utilisateurServiceImpl) {
         this.declarationData = declarationData;
         this.animauxService = animauxService;
         this.appareilElectroMenagerService = appareilElectroMenagerService;
@@ -62,6 +67,7 @@ public class DeclarationService implements IDeclarationService {
         this.revenusService = revenusService;
         this.titresService = titresService;
         this.vehiculeService = vehiculeService;
+        this.utilisateurServiceImpl = utilisateurServiceImpl;
     }
         
     public DeclarationDto getFullDeclarationDetails(Long declarationId) {
@@ -129,4 +135,41 @@ public Declaration refuseDeclaration(Long id) {
     
     return declarationData.save(declaration);
 }
+
+public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurId) {
+    // Récupérer la déclaration
+    Declaration declaration = declarationData.findById(declarationId)
+        .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
+    
+    // Récupérer l'utilisateur (assure-toi que utilisateurService existe)
+    Utilisateur utilisateur = utilisateurServiceImpl.findById(utilisateurId)
+        .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
+
+    // Affecter l'utilisateur à la déclaration
+    declaration.setUtilisateur(utilisateur);
+
+    // Sauvegarder la déclaration mise à jour
+    return declarationData.save(declaration);
+}
+
+@Override
+public List<Declaration> searchByNomOrPrenomAssujetti(String keyword) {
+    return declarationData.searchByNomOrPrenomAssujetti(keyword);
+}
+
+@Override
+public List<Declaration> findByUtilisateur(Utilisateur utilisateur) {
+    return declarationData.findByUtilisateur(utilisateur);
+}
+
+public List<Declaration> findByUtilisateurId(Long utilisateurId) {
+    return declarationData.findByUtilisateurId(utilisateurId);
+}
+
+public List<Declaration> getDeclarationsByUtilisateurId(Long utilisateurId) {
+    return declarationData.findByUtilisateurId(utilisateurId);
+}
+
+
+
 }

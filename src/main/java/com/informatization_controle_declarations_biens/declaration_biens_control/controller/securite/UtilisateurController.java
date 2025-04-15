@@ -97,6 +97,7 @@ public class UtilisateurController {
             return ResponseEntity.status(500).build(); 
         }
     }
+    
     @GetMapping("/role/{role}")
     public ResponseEntity<List<Utilisateur>> getUsersByRole(@PathVariable String role) {
         try {
@@ -149,17 +150,34 @@ public class UtilisateurController {
         }
     }
     @GetMapping("/{id}/role")
-public ResponseEntity<Map<String, String>> getUserRole(@PathVariable Long id) {
+    public ResponseEntity<Map<String, String>> getUserRole(@PathVariable Long id) {
+        try {
+            return utilisateurService.findById(id)
+                    .map(user -> {
+                        Map<String, String> response = new HashMap<>();
+                        response.put("role", user.getRole().name());
+                        return ResponseEntity.ok(response);
+                    })
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            logger.error("Erreur lors de la récupération du rôle pour l'utilisateur ID: {}", id, e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+    @GetMapping("/current")
+public ResponseEntity<Map<String, Object>> getCurrentUser(@AuthenticationPrincipal Utilisateur utilisateur) {
     try {
-        return utilisateurService.findById(id)
-                .map(user -> {
-                    Map<String, String> response = new HashMap<>();
-                    response.put("role", user.getRole().name());
-                    return ResponseEntity.ok(response);
-                })
-                .orElse(ResponseEntity.notFound().build());
+        if (utilisateur == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("id", utilisateur.getId());
+        response.put("email", utilisateur.getEmail());
+        
+        return ResponseEntity.ok(response);
     } catch (Exception e) {
-        logger.error("Erreur lors de la récupération du rôle pour l'utilisateur ID: {}", id, e);
+        logger.error("Erreur lors de la récupération de l'utilisateur courant", e);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
 }

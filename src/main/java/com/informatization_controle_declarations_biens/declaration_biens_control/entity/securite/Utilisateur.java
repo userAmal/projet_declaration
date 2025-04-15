@@ -75,21 +75,21 @@ public Collection<? extends GrantedAuthority> getAuthorities() {
 
     @Override
     public boolean isAccountNonExpired() {
-        return true; // À modifier si tu veux gérer l'expiration des comptes
+        return true; 
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return true; // À modifier si tu veux gérer le verrouillage des comptes
+        return true; 
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return true; // À modifier si tu veux gérer l'expiration des mots de passe
+        return true; 
     }
 
     @Override
     public boolean isEnabled() {
-        return true; // Peut être remplacé par un champ `boolean actif`
+        return true; 
     }
 }

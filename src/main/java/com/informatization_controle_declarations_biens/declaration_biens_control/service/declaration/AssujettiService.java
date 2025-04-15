@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IAssujettiData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatAssujettiEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAssujettiService;
@@ -131,15 +132,27 @@ public class AssujettiService implements IAssujettiService {
         }
     }
 
+
     @Override
     public List<Assujetti> findAll() {
-        return assujettiData.findAll();
+        return assujettiData.findAssujettisExcludingEtat(EtatAssujettiEnum.STOP);
     }
+
+    @Override
+    public void archiverAssujetti(Long id) {
+        assujettiData.findById(id).ifPresent(assujetti -> {
+            assujetti.setEtat(EtatAssujettiEnum.STOP);
+            assujettiData.save(assujetti);
+        });
+    }
+
     
     @Override
     public Optional<Assujetti> findById(Long id) {
         return assujettiData.findById(id);
     }
+
+    
     
     @Override
     public void deleteById(Long id) {

@@ -167,4 +167,8 @@ public class UtilisateurServiceImpl implements IUtilisateurService {
         return utilisateurData.findByRole(role);
     }
 
+    
+
+    
+
 }
