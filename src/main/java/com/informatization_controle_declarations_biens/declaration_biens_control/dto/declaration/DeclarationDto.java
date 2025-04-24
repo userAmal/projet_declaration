@@ -68,4 +68,5 @@ private Assujetti assujetti;
     private List<RevenusProjection> revenus;
     private List<TitresProjection> titres;
     private List<AutresDettesProjection> autresDettes;
+
 }

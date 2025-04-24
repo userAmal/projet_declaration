@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Déclaration de Biens</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            color: #333;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+        .header p {
+            margin: 5px 0;
+        }
+        .section {
+            margin-bottom: 20px;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+            font-size: 12px;
+        }
+        th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .page-break {
+            page-break-before: always;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+<img src="logoniger.jpg" alt="Logo" style="height: 80px; margin-bottom: 10px;"/>    <div class="header">
+        <h1>Déclaration de Biens</h1>
+        <p th:text="'Date de Déclaration: ' + ${dateDeclaration}">Date de Déclaration: </p>
+        <p th:text="'Type de Déclaration: ' + ${typeDeclaration}">Type de Déclaration: </p>
+    </div>
+
+    <div class="section" id="section-assujetti">
+        <div class="section-title">1. Informations Personnelles</div>
+        <table>
+            <tr>
+                <th>Champ</th>
+                <th>Valeur</th>
+            </tr>
+            <tr><td>Nom</td><td th:text="${nom}">-</td></tr>
+            <tr><td>Prénom</td><td th:text="${prenom}">-</td></tr>
+            <tr><td>Civilité</td><td th:text="${civilite}">-</td></tr>
+            <tr><td>Téléphone</td><td th:text="${contacttel}">-</td></tr>
+            <tr><td>Email</td><td th:text="${email}">-</td></tr>
+            <tr><td>Code</td><td th:text="${code}">-</td></tr>
+            <tr><td>État</td><td th:text="${etat}">-</td></tr>
+            <tr><td>Institution</td><td th:text="${institution}">-</td></tr>
+            <tr><td>Administration</td><td th:text="${administration}">-</td></tr>
+            <tr><td>Entité</td><td th:text="${entite}">-</td></tr>
+            <tr><td>Fonction</td><td th:text="${fonction}">-</td></tr>
+            <tr><td>Matricule</td><td th:text="${matricule}">-</td></tr>
+            <tr><td>Date prise de service</td><td th:text="${datePriseDeService}">-</td></tr>
+        </table>
+    </div>
+
+    <div class="section" id="section-vehicules" th:if="${vehicules != null and !vehicules.empty}">
+        <div class="section-title">2. Véhicules</div>
+        <table>
+            <tr>
+                <th>Désignation</th>
+                <th>Marque</th>
+                <th>Immatriculation</th>
+                <th>Année</th>
+                <th>Valeur (FCFA)</th>
+            </tr>
+            <tr th:each="vehicule : ${vehicules}">
+                <td th:text="${vehicule.designation != null ? vehicule.designation.intitule : 'N/A'}">-</td>
+                <td th:text="${vehicule.marque != null ? vehicule.marque.intitule : 'N/A'}">-</td>
+                <td th:text="${vehicule.immatriculation}">-</td>
+                <td th:text="${vehicule.anneeAcquisition}">-</td>
+                <td th:text="${#numbers.formatDecimal(vehicule.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section" id="section-revenus" th:if="${revenus != null and !revenus.empty}">
+        <div class="section-title">3. Revenus</div>
+        <table>
+            <tr>
+                <th>Salaire Mensuel Net</th>
+                <th>Autres Revenus</th>
+                <th>Date</th>
+            </tr>
+            <tr th:each="revenu : ${revenus}">
+                <td th:text="${#numbers.formatDecimal(revenu.salaireMensuelNet, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${revenu.autresRevenus != null ? revenu.autresRevenus.intitule : 'N/A'}">-</td>
+                <td th:text="${revenu.dateCreation}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section" id="section-foncier-bati" th:if="${fonciersBatis != null and !fonciersBatis.empty}">
+        <div class="section-title">4. Biens Fonciers Bâtis</div>
+        <table>
+            <tr>
+                <th>Nature</th>
+                <th>Année Construction</th>
+                <th>Mode Acquisition</th>
+                <th>Références Cadastrales</th>
+                <th>Superficie</th>
+                <th>Localisation</th>
+                <th>Usage</th>
+                <th>Coût Acquisition (FCFA)</th>
+                <th>Investissements (FCFA)</th>
+            </tr>
+            <tr th:each="foncier : ${fonciersBatis}">
+                <td th:text="${foncier.nature != null ? foncier.nature.intitule : 'N/A'}">-</td>
+                <td th:text="${foncier.anneeConstruction}">-</td>
+                <td th:text="${foncier.modeAcquisition != null ? foncier.modeAcquisition.intitule : 'N/A'}">-</td>
+                <td th:text="${foncier.referencesCadastrales}">-</td>
+                <td th:text="${foncier.superficie}">-</td>
+                <td th:text="${foncier.localis != null ? foncier.localis.intitule : 'N/A'}">-</td>
+                <td th:text="${foncier.typeUsage != null ? foncier.typeUsage.intitule : 'N/A'}">-</td>
+                <td th:text="${#numbers.formatDecimal(foncier.coutAcquisitionFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${#numbers.formatDecimal(foncier.coutInvestissements, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section" id="section-foncier-non-bati" th:if="${fonciersNonBatis != null and !fonciersNonBatis.empty}">
+        <div class="section-title">5. Biens Fonciers Non Bâtis</div>
+        <table>
+            <tr>
+                <th>Nature</th>
+                <th>Mode Acquisition</th>
+                <th>Ilot</th>
+                <th>Lotissement</th>
+                <th>Superficie</th>
+                <th>Localité</th>
+                <th>Titre Propriété</th>
+                <th>Année Acquisition</th>
+                <th>Valeur (FCFA)</th>
+                <th>Investissements (FCFA)</th>
+            </tr>
+            <tr th:each="foncier : ${fonciersNonBatis}">
+                <td th:text="${foncier.nature != null ? foncier.nature.intitule : 'N/A'}">-</td>
+                <td th:text="${foncier.modeAcquisition != null ? foncier.modeAcquisition.intitule : 'N/A'}">-</td>
+                <td th:text="${foncier.ilot}">-</td>
+                <td th:text="${foncier.lotissement}">-</td>
+                <td th:text="${foncier.superficie}">-</td>
+                <td th:text="${foncier.localite}">-</td>
+                <td th:text="${foncier.titrePropriete}">-</td>
+                <td th:text="${foncier.dateAcquis}">-</td>
+                <td th:text="${#numbers.formatDecimal(foncier.valeurAcquisFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${#numbers.formatDecimal(foncier.coutInvestissements, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+            </tr>
+        </table>
+    </div>
+    
+    <div class="page-break"></div>
+    
+    <div class="section" id="section-emprunts" th:if="${emprunts != null and !emprunts.empty}">
+        <div class="section-title">6. Emprunts</div>
+        <table>
+            <tr>
+                <th>Institution</th>
+                <th>Numéro Compte</th>
+                <th>Type</th>
+                <th>Montant (FCFA)</th>
+            </tr>
+            <tr th:each="emprunt : ${emprunts}">
+                <td th:text="${emprunt.institutionsFinancieres != null ? emprunt.institutionsFinancieres.intitule : 'N/A'}">-</td>
+                <td th:text="${emprunt.numeroCompte}">-</td>
+                <td th:text="${emprunt.typeEmprunt != null ? emprunt.typeEmprunt.intitule : 'N/A'}">-</td>
+                <td th:text="${#numbers.formatDecimal(emprunt.montantEmprunt, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section" id="section-disponibilites-banque" th:if="${disponibilitesBanque != null and !disponibilitesBanque.empty}">
+        <div class="section-title">7. Disponibilités Bancaires</div>
+        <table>
+            <tr>
+                <th>Banque</th>
+                <th>Numéro Compte</th>
+                <th>Type Compte</th>
+                <th>Solde (FCFA)</th>
+                <th>Date Solde</th>
+            </tr>
+            <tr th:each="disponibilite : ${disponibilitesBanque}">
+                <td th:text="${disponibilite.banque != null ? disponibilite.banque.intitule : 'N/A'}">-</td>
+                <td th:text="${disponibilite.numeroCompte}">-</td>
+                <td th:text="${disponibilite.typeCompte != null ? disponibilite.typeCompte.intitule : 'N/A'}">-</td>
+                <td th:text="${#numbers.formatDecimal(disponibilite.soldeFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${disponibilite.dateSolde}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section" id="section-especes" th:if="${especes != null and !especes.empty}">
+        <div class="section-title">8. Espèces</div>
+        <table>
+            <tr>
+                <th>Monnaie</th>
+                <th>Devise</th>
+                <th>Taux Change</th>
+                <th>Montant FCFA</th>
+                <th>Total FCFA</th>
+                <th>Date</th>
+            </tr>
+            <tr th:each="espece : ${especes}">
+                <td th:text="${#numbers.formatDecimal(espece.monnaie, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${#numbers.formatDecimal(espece.devise, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${espece.tauxChange}">-</td>
+                <td th:text="${#numbers.formatDecimal(espece.montantFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${#numbers.formatDecimal(espece.montantTotalFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${espece.dateEspece}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Page break pour améliorer la lisibilité -->
+    <div class="page-break"></div>
+
+    <!-- Section 9: Animaux -->
+    <div class="section" id="section-animaux" th:if="${animaux != null and !animaux.empty}">
+        <div class="section-title">9. Animaux</div>
+        <table>
+            <tr>
+                <th>Espèce</th>
+                <th>Nombre Têtes</th>
+                <th>Mode Acquisition</th>
+                <th>Année</th>
+                <th>Valeur (FCFA)</th>
+                <th>Localité</th>
+            </tr>
+            <tr th:each="animal : ${animaux}">
+                <td th:text="${animal.especes}">-</td>
+                <td th:text="${animal.nombreTetes}">-</td>
+                <td th:text="${animal.modeAcquisition != null ? animal.modeAcquisition.intitule : 'N/A'}">-</td>
+                <td th:text="${animal.anneeAcquisition}">-</td>
+                <td th:text="${#numbers.formatDecimal(animal.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${animal.localite != null ? animal.localite.intitule : 'N/A'}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Section 10: Meubles Meublants -->
+    <div class="section" id="section-meubles" th:if="${meublesMeublants != null and !meublesMeublants.empty}">
+        <div class="section-title">10. Meubles Meublants</div>
+        <table>
+            <tr>
+                <th>Désignation</th>
+                <th>Année</th>
+                <th>Valeur (FCFA)</th>
+                <th>État</th>
+            </tr>
+            <tr th:each="meuble : ${meublesMeublants}">
+                <td th:text="${meuble.designation != null ? meuble.designation.intitule : 'N/A'}">-</td>
+                <td th:text="${meuble.anneeAcquisition}">-</td>
+                <td th:text="${#numbers.formatDecimal(meuble.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${meuble.etatGeneral != null ? meuble.etatGeneral.intitule : 'N/A'}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Section 11: Titres -->
+    <div class="section" id="section-titres" th:if="${titres != null and !titres.empty}">
+        <div class="section-title">11. Titres</div>
+        <table>
+            <tr>
+                <th>Nature/Actions</th>
+                <th>Valeur (FCFA)</th>
+                <th>Emplacement</th>
+                <th>Précisions</th>
+            </tr>
+            <tr th:each="titre : ${titres}">
+                <td th:text="${titre.designationNatureActions != null ? titre.designationNatureActions.intitule : 'N/A'}">-</td>
+                <td th:text="${#numbers.formatDecimal(titre.valeurEmplacement, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${titre.emplacement != null ? titre.emplacement.intitule : 'N/A'}">-</td>
+                <td th:text="${titre.autrePrecisions != null ? titre.autrePrecisions.intitule : 'N/A'}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Section 12: Créances -->
+    <div class="section" id="section-creances" th:if="${creances != null and !creances.empty}">
+        <div class="section-title">12. Créances</div>
+        <table>
+            <tr>
+                <th>Débiteur</th>
+                <th>Montant (FCFA)</th>
+                <th>Précisions</th>
+            </tr>
+            <tr th:each="creance : ${creances}">
+                <td th:text="${creance.debiteurs != null ? creance.debiteurs.intitule : 'N/A'}">-</td>
+                <td th:text="${#numbers.formatDecimal(creance.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${creance.autresPrecisions != null ? creance.autresPrecisions.intitule : 'N/A'}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Page break pour améliorer la lisibilité -->
+    <div class="page-break"></div>
+
+    <!-- Section 13: Autres Dettes -->
+    <div class="section" id="section-autres-dettes" th:if="${autresDettes != null and !autresDettes.empty}">
+        <div class="section-title">13. Autres Dettes</div>
+        <table>
+            <tr>
+                <th>Créancier</th>
+                <th>Montant (FCFA)</th>
+                <th>Justificatifs</th>
+                <th>Précisions</th>
+            </tr>
+            <tr th:each="dette : ${autresDettes}">
+                <td th:text="${dette.creanciers != null ? dette.creanciers.intitule : 'N/A'}">-</td>
+                <td th:text="${#numbers.formatDecimal(dette.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${dette.justificatifs != null ? dette.justificatifs.intitule : 'N/A'}">-</td>
+                <td th:text="${dette.autresPrecisions != null ? dette.autresPrecisions.intitule : 'N/A'}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Section 14: Autres Biens de Valeur -->
+    <div class="section" id="section-autres-biens" th:if="${autresBiensDeValeur != null and !autresBiensDeValeur.empty}">
+        <div class="section-title">14. Autres Biens de Valeur</div>
+        <table>
+            <tr>
+                <th>Désignation</th>
+                <th>Localité</th>
+                <th>Année</th>
+                <th>Valeur (FCFA)</th>
+                <th>Précisions</th>
+                <th>Type</th>
+            </tr>
+            <tr th:each="bien : ${autresBiensDeValeur}">
+                <td th:text="${bien.designation != null ? bien.designation.intitule : 'N/A'}">-</td>
+                <td th:text="${bien.localite != null ? bien.localite.intitule : 'N/A'}">-</td>
+                <td th:text="${bien.anneeAcquis}">-</td>
+                <td th:text="${#numbers.formatDecimal(bien.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${bien.autrePrecisions != null ? bien.autrePrecisions.intitule : 'N/A'}">-</td>
+                <td th:text="${bien.type != null ? bien.type.intitule : 'N/A'}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Section 15: Appareils Électroménagers -->
+    <div class="section" id="section-appareils-electro" th:if="${appareilsElectromenagers != null and !appareilsElectromenagers.empty}">
+        <div class="section-title">15. Appareils Électroménagers</div>
+        <table>
+            <tr>
+                <th>Désignation</th>
+                <th>Année</th>
+                <th>Valeur (FCFA)</th>
+                <th>État</th>
+            </tr>
+            <tr th:each="appareil : ${appareilsElectromenagers}">
+                <td th:text="${appareil.designation != null ? appareil.designation.intitule : 'N/A'}">-</td>
+                <td th:text="${appareil.anneeAcquisition}">-</td>
+                <td th:text="${#numbers.formatDecimal(appareil.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${appareil.etatGeneral != null ? appareil.etatGeneral.intitule : 'N/A'}">-</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Pied de page -->
+    <div class="footer" style="text-align: center; margin-top: 40px;">
+        <p>Document généré le <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy à HH:mm')}">01/01/2025 à 12:00</span></p>
+    </div>
+</body>
+</html>

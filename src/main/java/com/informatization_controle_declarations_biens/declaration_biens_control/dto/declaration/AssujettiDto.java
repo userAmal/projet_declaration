@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import java.util.Date;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatAssujettiEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
@@ -14,6 +15,24 @@ public class AssujettiDto {
     public AssujettiDto() {
     }
 
+public AssujettiDto(Assujetti assujetti) {
+    this.id = assujetti.getId();
+    this.civilite = assujetti.getCivilite();
+    this.nom = assujetti.getNom();
+    this.prenom = assujetti.getPrenom();
+    this.contact = assujetti.getContacttel();
+    this.code = assujetti.getCode();
+    this.email = assujetti.getEmail();
+    this.institutions = assujetti.getInstitutions();  
+    this.administration = assujetti.getAdministration(); 
+    this.entite = assujetti.getEntite(); 
+    this.fonction = assujetti.getFonction();
+    this.matricule = assujetti.getMatricule();
+    this.etat = assujetti.getEtat();
+    this.datePriseDeService = assujetti.getDatePriseDeService();
+    this.dateCessationFonction = assujetti.getDateCessationFonction();
+    this.administrateur = assujetti.getAdministrateur();
+}
 
     public AssujettiDto(AssujettiProjection assujettiProjection) {
         this.id = assujettiProjection.getId();

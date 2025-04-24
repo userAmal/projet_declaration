@@ -55,7 +55,7 @@ public class FoncierNonBatiDto {
     private String superficie;
     private String localite;
     private String titrePropriete;
-    private int dateAcquis;
+    private LocalDate dateAcquis;
     private float valeurAcquisFCFA;
     private float coutInvestissements;
     private LocalDate dateCreation;

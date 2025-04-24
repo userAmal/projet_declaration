@@ -14,7 +14,7 @@ public interface FoncierNonBatiProjection {
     String getSuperficie();
     String getLocalite();
     String getTitrePropriete();
-    int getDateAcquis();
+    LocalDate getDateAcquis();
     float getValeurAcquisFCFA();
     float getCoutInvestissements();
     LocalDate getDateCreation();

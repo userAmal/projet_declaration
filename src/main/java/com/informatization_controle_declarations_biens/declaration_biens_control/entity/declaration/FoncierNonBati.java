@@ -40,7 +40,7 @@ public class FoncierNonBati {
     private String titrePropriete;
 
     @Column(nullable = false)
-    private int dateAcquis;
+    private LocalDate dateAcquis;
 
     @Column(nullable = false)
     private float valeurAcquisFCFA;

@@ -107,64 +107,7 @@
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-thymeleaf</artifactId>
 </dependency>
-<dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>kernel</artifactId>         
-         <version>7.0.2</version>     
-      </dependency>  
-      
-      <dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>io</artifactId>         
-         <version>7.0.2</version>     
-      </dependency>  
-      
-      <dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>layout</artifactId>         
-         <version>7.0.2</version>
-      </dependency>  
-      
-      <dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>forms</artifactId>         
-         <version>7.0.2</version>    
-      </dependency>  
-      
-      <dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>pdfa</artifactId>         
-         <version>7.0.2</version>     
-      </dependency>  
-      
-      <dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>sign</artifactId>         
-         <version>7.0.2</version>     
-      </dependency>  
-      
-      <dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>barcodes</artifactId>         
-         <version>7.0.2</version>     
-      </dependency>  
-      
-      <dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>font-asian</artifactId>         
-         <version>7.0.2</version>     
-      </dependency>  
-      
-      <dependency>         
-         <groupId>com.itextpdf</groupId>         
-         <artifactId>hyph</artifactId>         
-         <version>7.0.2</version>    
-      </dependency>
-<dependency>
-    <groupId>org.springframework.boot</groupId>
-    <artifactId>spring-boot-starter-thymeleaf</artifactId>
-    <version>3.2.2</version>
-</dependency>
+
 <!-- Pour la gestion des fichiers -->
 <dependency>
     <groupId>org.springframework.boot</groupId>
@@ -177,7 +120,94 @@
     <artifactId>commons-io</artifactId>
     <version>2.11.0</version>
 </dependency>
+<dependency>
+    <groupId>org.apache.poi</groupId>
+    <artifactId>poi</artifactId>
+    <version>5.2.3</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.poi</groupId>
+    <artifactId>poi-ooxml</artifactId>
+    <version>5.2.3</version>
+</dependency>
 
+<dependency>
+    <groupId>org.thymeleaf</groupId>
+    <artifactId>thymeleaf</artifactId>
+    <version>3.1.2.RELEASE</version> <!-- or newer -->
+</dependency>
+<dependency>
+    <groupId>org.thymeleaf</groupId>
+    <artifactId>thymeleaf-spring6</artifactId>
+    <version>3.1.2.RELEASE</version> <!-- if using Spring 6 -->
+</dependency>
+<dependency>
+    <groupId>ognl</groupId>
+    <artifactId>ognl</artifactId>
+    <version>3.3.4</version>
+    <scope>compile</scope>
+</dependency>
+<dependency>
+    <groupId>org.javassist</groupId>
+    <artifactId>javassist</artifactId>
+    <version>3.29.2-GA</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>kernel</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>io</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>layout</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>forms</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>pdfa</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>sign</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>barcodes</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>font-asian</artifactId>
+    <version>7.2.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>hyph</artifactId>
+    <version>7.2.5</version>
+</dependency>
+
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>html2pdf</artifactId>
+    <version>4.0.5</version>
+</dependency>
+<dependency>
+    <groupId>com.itextpdf</groupId>
+    <artifactId>commons</artifactId>
+    <version>7.2.5</version>
+</dependency>
 	</dependencies>
 
 	<build>

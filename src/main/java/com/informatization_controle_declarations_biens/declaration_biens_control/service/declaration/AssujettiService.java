@@ -10,9 +10,11 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatAssujettiEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAssujettiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -39,7 +41,8 @@ public class AssujettiService implements IAssujettiService {
 
     @Autowired
     private EmailService emailService;
-    
+    @Autowired
+private UtilisateurServiceImpl utilisateurService; // or UtilisateurData utilisateurData
     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
     
     private String generateJwtToken(Long declarationId) {
@@ -66,6 +69,8 @@ public class AssujettiService implements IAssujettiService {
         declaration.setDateDeclaration(LocalDate.now());
         declaration.setEtatDeclaration(EtatDeclarationEnum.valider); // Using enum instead of int
         declaration.setTypeDeclaration(TypeDeclarationEnum.Initiale); // Using enum instead of int
+        declaration.setUtilisateur(getDefaultUser()); // Add a method to get a default user
+
         
         // 3. Save the declaration to get its ID
         Declaration savedDeclaration = declarationService.save(declaration);
@@ -112,7 +117,15 @@ public class AssujettiService implements IAssujettiService {
             return null;
         }
     }
+    private Utilisateur getDefaultUser() {
+    // Option 1: Get a specific user by ID (most common approach)
+    return utilisateurService.findById(1L) // Use the ID of your admin/system user
+        .orElseThrow(() -> new RuntimeException("Default user not found"));
     
+    // Option 2: Get the first available user (less ideal but works for testing)
+    // return utilisateurService.findAll().stream().findFirst()
+    //    .orElseThrow(() -> new RuntimeException("No users found in the system"));
+}
     /**
      * Verify and extract declaration ID from a token
      * @param token JWT token to verify

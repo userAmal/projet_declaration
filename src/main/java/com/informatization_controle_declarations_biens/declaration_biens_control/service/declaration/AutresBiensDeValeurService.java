@@ -32,4 +32,10 @@ public class AutresBiensDeValeurService implements IAutresBiensDeValeurService {
     public AutresBiensDeValeur save(AutresBiensDeValeur entity) {
         return autresBiensDeValeurData.save(entity);
     }
+
+    @Override
+    public void deleteById(Long id) {
+        autresBiensDeValeurData.deleteById(id);
+    }
+    
 }

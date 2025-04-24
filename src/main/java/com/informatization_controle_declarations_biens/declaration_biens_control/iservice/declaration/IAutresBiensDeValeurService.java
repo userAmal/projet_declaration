@@ -10,5 +10,6 @@ public interface IAutresBiensDeValeurService {
     List<AutresBiensDeValeurProjection> getByDeclaration(Long declarationId);
     Optional<AutresBiensDeValeur> findById(Long id);
     AutresBiensDeValeur save(AutresBiensDeValeur entity);
+    void deleteById(Long id);
 
 }

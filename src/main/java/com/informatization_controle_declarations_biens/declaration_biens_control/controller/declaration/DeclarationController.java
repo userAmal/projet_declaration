@@ -46,13 +46,11 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 @RestController
 @RequestMapping("/api/declarations")
 public class DeclarationController {
-    @Autowired
-    private ParametrageService parametrageService;
-    
-    private final PdfFileService pdfFileService;
-    @Autowired
+
     private final IDeclarationService declarationService;
-    @Autowired
+    private final PdfFileService pdfFileService;
+
+    private final ParametrageService parametrageService;
     private final AssujettiService assujettiService;
     @Autowired
     private final UtilisateurServiceImpl utilisateurService;
@@ -60,13 +58,20 @@ public class DeclarationController {
     private JWTService jwtService;
     
    
-    public DeclarationController(IDeclarationService declarationService, AssujettiService assujettiService, PdfFileService pdfFileService, UtilisateurServiceImpl utilisateurService) {
+    
+
+    @Autowired
+    public DeclarationController(
+            IDeclarationService declarationService,PdfFileService pdfFileService,
+            ParametrageService parametrageService,AssujettiService assujettiService,UtilisateurServiceImpl utilisateurService
+            ) {
         this.declarationService = declarationService;
-        this.assujettiService = assujettiService;
         this.pdfFileService = pdfFileService;
         this.utilisateurService= utilisateurService;
+        this.parametrageService = parametrageService;
+        this.assujettiService = assujettiService;
+
     }
-    
     @GetMapping("/{id}/generate-pdf")
     public ResponseEntity<Resource> generateFullDeclarationPdf(@PathVariable Long id) throws IOException {
         DeclarationDto declarationDto = declarationService.getFullDeclarationDetails(id);
@@ -90,7 +95,6 @@ public class DeclarationController {
         Path fullPath = outputPath.resolve(fileName + ".pdf");
     
         pdfFileService.generateFullDeclarationPdf(declarationDto, fullPath.toString());
-    
         Resource resource = new FileSystemResource(fullPath.toFile());
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + ".pdf\"")
@@ -102,6 +106,7 @@ public class DeclarationController {
         return "declaration_" + declarationDto.getId() + "_" +
                new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
     }
+ 
     
     @GetMapping("/{id}/assujetti")
     public ResponseEntity<Assujetti> getAssujettiByDeclarationId(@PathVariable Long id) {
@@ -375,8 +380,9 @@ public ResponseEntity<List<Declaration>> getDeclarationsByUserId(@PathVariable L
     } catch (Exception e) {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
     }
-}
 
+
+}
 
 
 

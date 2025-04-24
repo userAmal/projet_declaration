@@ -56,7 +56,15 @@ public class AutresBiensDeValeurController {
         return ResponseEntity.ok(new AutresBiensDeValeurDto(updated));
     }
 
-
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        if (!service.findById(id).isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+        service.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+    
     private AutresBiensDeValeur convertToEntity(AutresBiensDeValeurDto dto) {
         AutresBiensDeValeur entity = new AutresBiensDeValeur();
         entity.setId(dto.getId());
