@@ -1,6 +1,8 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,6 +35,10 @@ public interface IDeclarationData extends JpaRepository<Declaration, Long> {
 
        @Query("SELECT d FROM Declaration d WHERE d.utilisateur = :utilisateur")
        List<Declaration> findByUtilisateur(@Param("utilisateur") Utilisateur utilisateur);
-       
+       boolean existsByUtilisateurId(Long utilisateurId);
+
+       boolean existsByAssujettiIdAndEtatDeclaration(Long assujettiId, EtatDeclarationEnum etatDeclaration);
+
+
 
 }

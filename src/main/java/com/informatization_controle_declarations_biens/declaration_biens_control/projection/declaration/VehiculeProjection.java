@@ -12,6 +12,7 @@ public interface VehiculeProjection {
     int getAnneeAcquisition();
     float getValeurAcquisition();
     Vocabulaire getEtatGeneral();
+    double getKilometrage();
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();

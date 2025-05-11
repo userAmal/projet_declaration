@@ -16,7 +16,8 @@ public interface IUtilisateurService {
     Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateur);
 
     void archiverUtilisateur(Long id);
-AuthenticationResponse changePassword(String email, String newPassword);
+    
+    AuthenticationResponse changePassword(String email, String newPassword);
 
     Optional<Utilisateur> findById(Long id);
     
@@ -24,10 +25,13 @@ AuthenticationResponse changePassword(String email, String newPassword);
     
     List<Utilisateur> findAll();
     
-List<Utilisateur> findByRole(@Param("role") RoleEnum role);
+    List<Utilisateur> findByRole(@Param("role") RoleEnum role);
     
     List<Utilisateur> searchByFirstnameOrLastname(String keyword);
     
     void deleteById(Long id);
+    List<Utilisateur> findAllArchived();
+    void restoreUtilisateur(Long id);
     
+
 }

@@ -60,6 +60,10 @@ public class SecurityConfiguration {
 .requestMatchers("/api/assujetti/**").hasAuthority("administrateur")
 .requestMatchers("/api/utilisateurs/**").permitAll()
 .requestMatchers("/api/parametrages**").hasAuthority("administrateur")
+.requestMatchers("/api/commentaires/**").permitAll()
+.requestMatchers("/api/conclusions/**").permitAll()
+
+
 //.requestMatchers("/api/declarations/mes-declarations").authenticated()
 
 .anyRequest().authenticated()

@@ -10,6 +10,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 @Data
@@ -24,20 +27,27 @@ public class Utilisateur implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(length = 200, nullable = false,unique = true)
+
+    @Column(length = 200, nullable = false, unique = true)
+    @Email(message = "L'email doit être valide.")
+    @NotNull(message = "L'email est obligatoire.")
     private String email;
 
     @Column(length = 100, nullable = false)
+    @NotBlank(message = "Le nom de famille est obligatoire.")
     private String lastname;
 
     
     @Column(length = 100, nullable = false)
+    @NotBlank(message = "Le prénom est obligatoire.")
     private String firstname;
 
     @Column(length = 100, nullable = false)
+    @NotBlank(message = "Le mot de passe est obligatoire.")
     private String password;
 
     @Column(length = 30, nullable = false, unique = true)
+    @NotBlank(message = "Le téléphone est obligatoire.")
     private String tel;
 
     @Enumerated(EnumType.STRING)

@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IFoncierNonBatiService extends IGenericService<FoncierNonBati, Long> {
     List<FoncierNonBatiProjection> getByDeclaration(Long declarationId);
+     double getPrediction(FoncierNonBati foncierNomBati);
+
 }

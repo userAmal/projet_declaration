@@ -7,6 +7,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AnimauxProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AppareilsElectroMenagersProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AutresBiensDeValeurProjection;
@@ -36,6 +37,7 @@ public class DeclarationDto {
         this.typeDeclaration = declarationProjection.getTypeDeclarationEnum();
         this.dateDeclaration = declarationProjection.getDateDeclaration();
         this.assujetti = declarationProjection.getAssujetti();
+        this.utilisateur = declarationProjection.getUtilisateur();
         this.etatDeclaration = declarationProjection.getEtatDeclarationEnum();
     }
 
@@ -44,6 +46,7 @@ public class DeclarationDto {
         this.typeDeclaration = declaration.getTypeDeclaration();
         this.dateDeclaration = declaration.getDateDeclaration();
         this.assujetti = declaration.getAssujetti();
+        this.utilisateur = declaration.getUtilisateur();
         this.etatDeclaration = declaration.getEtatDeclaration();
     }
 
@@ -51,7 +54,8 @@ public class DeclarationDto {
 
     private Long id;
     private LocalDate dateDeclaration;
-private Assujetti assujetti;
+    private Assujetti assujetti;
+    private Utilisateur utilisateur;
     private TypeDeclarationEnum typeDeclaration;
     private EtatDeclarationEnum etatDeclaration;
      private List<AnimauxProjection> animaux;

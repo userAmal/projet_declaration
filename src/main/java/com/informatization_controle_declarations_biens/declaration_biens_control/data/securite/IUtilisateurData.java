@@ -29,5 +29,9 @@ public interface IUtilisateurData extends JpaRepository<Utilisateur, Long> {
     @Query("SELECT u FROM Utilisateur u WHERE LOWER(u.firstname) LIKE LOWER(CONCAT('%', :keyword, '%')) OR LOWER(u.lastname) LIKE LOWER(CONCAT('%', :keyword, '%')) AND u.statutEmploi = true")
     List<Utilisateur> searchByFirstnameOrLastname(@Param("keyword") String keyword);
 
+    boolean existsByEmail(String email);
+    boolean existsByTel(String tel);
+    @Query("SELECT u FROM Utilisateur u WHERE u.statutEmploi = false")
+    List<Utilisateur> findAllArchivedUsers();
 
 }

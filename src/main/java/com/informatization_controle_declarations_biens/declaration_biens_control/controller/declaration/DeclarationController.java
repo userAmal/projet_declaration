@@ -8,6 +8,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IDeclarationService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.PdfFileService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.PdfRapportService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.declaration.AssujettiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.parametrage.ParametrageService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.JWTService;
@@ -26,6 +27,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -51,6 +53,9 @@ public class DeclarationController {
     private final PdfFileService pdfFileService;
 
     private final ParametrageService parametrageService;
+    private final PdfRapportService pdfRapportService;
+
+
     private final AssujettiService assujettiService;
     @Autowired
     private final UtilisateurServiceImpl utilisateurService;
@@ -62,7 +67,7 @@ public class DeclarationController {
 
     @Autowired
     public DeclarationController(
-            IDeclarationService declarationService,PdfFileService pdfFileService,
+            IDeclarationService declarationService,PdfFileService pdfFileService,PdfRapportService pdfRapportService,
             ParametrageService parametrageService,AssujettiService assujettiService,UtilisateurServiceImpl utilisateurService
             ) {
         this.declarationService = declarationService;
@@ -70,8 +75,90 @@ public class DeclarationController {
         this.utilisateurService= utilisateurService;
         this.parametrageService = parametrageService;
         this.assujettiService = assujettiService;
+        this.pdfRapportService = pdfRapportService;
 
     }
+
+
+    @GetMapping("/{id}/generate-rapport-evaluation")
+public ResponseEntity<Resource> generateRapportEvaluationPdf(@PathVariable Long id) throws IOException {
+    // Récupérer les détails de la déclaration
+    DeclarationDto declarationDto = declarationService.getFullDeclarationDetails(id);
+    
+    if (declarationDto == null || declarationDto.getAssujetti() == null) {
+        return ResponseEntity.notFound().build();
+    }
+    
+    // Vérifier si la date de déclaration est valide
+    if (declarationDto.getDateDeclaration() == null) {
+        return ResponseEntity.badRequest().body(null);
+    }
+    
+    // Récupérer le chemin depuis les paramètres - UTILISER PATH_GENERATION_REPORT
+    Parametrage rapportPath = parametrageService.getByCode("PATH_GENERATION_REPORT");
+    
+    if (rapportPath == null) {
+        throw new RuntimeException("Paramètre PATH_GENERATION_REPORT non configuré");
+    }
+    
+    // Créer le dossier si nécessaire
+    Path outputPath = Paths.get(rapportPath.getValeur());
+    Files.createDirectories(outputPath);
+    
+    // Créer les informations du rapport avec vérification des dates
+    Date dateOrdonnance = new Date(); // Date actuelle
+    
+    PdfRapportService.RapportInfos rapportInfos = new PdfRapportService.RapportInfos(
+        "2025-" + id,     // Numéro d'ordonnance
+        dateOrdonnance,   // Date de l'ordonnance
+        "NOM_DU_RAPPORTEUR"  // Nom du rapporteur
+    );
+    
+    // Générer un nom de fichier unique
+    String fileName = "rapport_evaluation_" + declarationDto.getId() + "_" +
+                    new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+    Path fullPath = outputPath.resolve(fileName + ".pdf");
+    
+    // Appeler le service pour générer le PDF
+    try {
+        pdfRapportService.generateRapportEvaluationPdf(declarationDto, rapportInfos, fullPath.toString());
+    } catch (Exception e) {
+        // Log l'erreur spécifique
+        e.printStackTrace();
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(null);
+    }
+    
+    // Retourner le fichier
+    Resource resource = new FileSystemResource(fullPath.toFile());
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + ".pdf\"")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(resource);
+}
+
+@GetMapping("/user/{userId}/declarations")
+public ResponseEntity<List<Declaration>> getDeclarationsByUser(@PathVariable Long userId) {
+    List<Declaration> declarations = declarationService.findByUtilisateurId(userId);
+
+    if (declarations.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+
+    return ResponseEntity.ok(declarations);
+}
+
+    // Dans DeclarationController.java
+    @GetMapping("/search1")
+    public ResponseEntity<List<Declaration>> searchByUser(
+            @RequestParam String q,
+            @RequestParam Long userId) {
+        return ResponseEntity.ok(
+            declarationService.searchByUserAndKeyword(userId, q)
+        );
+    }
+
+
     @GetMapping("/{id}/generate-pdf")
     public ResponseEntity<Resource> generateFullDeclarationPdf(@PathVariable Long id) throws IOException {
         DeclarationDto declarationDto = declarationService.getFullDeclarationDetails(id);
@@ -136,7 +223,7 @@ public class DeclarationController {
         return ResponseEntity.notFound().build();
     }
     @GetMapping
-public ResponseEntity<List<Declaration>> getAllDeclarations(@AuthenticationPrincipal UserDetails userDetails) {
+    public ResponseEntity<List<Declaration>> getAllDeclarations(@AuthenticationPrincipal UserDetails userDetails) {
     // Récupérer le nom d'utilisateur connecté (email ou username en général)
     String username = userDetails.getUsername();
 

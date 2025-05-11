@@ -47,7 +47,7 @@ public class FoncierNonBati {
 
     @Column(nullable = false)
     private float coutInvestissements;
-
+ 
     @Column(nullable = false)
     private LocalDate dateCreation;
 
