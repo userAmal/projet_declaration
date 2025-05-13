@@ -7,8 +7,16 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface IVehiculeData extends JpaRepository<Vehicule, Long> {
     @Query("SELECT v FROM Vehicule v WHERE v.idDeclaration.id = :declarationId")
     List<VehiculeProjection> findByIdDeclaration_Id(@Param("declarationId") Long declarationId);
+    
+    @Query("SELECT v FROM Vehicule v LEFT JOIN FETCH v.idDeclaration WHERE v.id = :id")
+    Optional<Vehicule> findSimplifiedById(@Param("id") Long id);
+
+    @Query("SELECT v FROM Vehicule v WHERE v.designation.id = :designationId")
+List<Vehicule> findByDesignationId(@Param("designationId") Long designationId);
+
 }

@@ -25,7 +25,10 @@ public class AutresBiensDeValeurService implements IAutresBiensDeValeurService {
 
        @Override
     public Optional<AutresBiensDeValeur> findById(Long id) {
-        return autresBiensDeValeurData.findById(id);
+        if (id == null) {
+            return Optional.empty();
+        }
+        return autresBiensDeValeurData.findSimplifiedById(id); // Utilisez la méthode simplifiée
     }
 
     @Override
@@ -37,5 +40,9 @@ public class AutresBiensDeValeurService implements IAutresBiensDeValeurService {
     public void deleteById(Long id) {
         autresBiensDeValeurData.deleteById(id);
     }
-    
+
+    @Override
+    public List<AutresBiensDeValeurProjection> findByDesignation(Long designationId) {
+        return autresBiensDeValeurData.findByDesignationId(designationId);
+    }    
 }

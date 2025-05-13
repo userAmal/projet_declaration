@@ -13,4 +13,7 @@ public interface TitresProjection {
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();
+    String getFileName();
+    String getFileType();
+
 }

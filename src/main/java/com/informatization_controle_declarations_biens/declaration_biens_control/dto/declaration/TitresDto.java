@@ -3,6 +3,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import java.time.LocalDate;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.TitresProjection;
 import lombok.Data;
@@ -18,7 +19,11 @@ public class TitresDto {
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
-
+    private String fileName;
+    private String fileType;
+    private String fileDownloadUri; 
+        @JsonIgnore
+    private byte[] fileData;
     public TitresDto() {}
 
     public TitresDto(TitresProjection titresProjection) {
@@ -30,6 +35,8 @@ public class TitresDto {
         this.dateCreation = titresProjection.getDateCreation();
         this.isSynthese = titresProjection.isSynthese();
         this.idDeclaration = titresProjection.getIdDeclaration();
+        this.fileName = titresProjection.getFileName();
+        this.fileType = titresProjection.getFileType();
     }
     public TitresDto(Titres titres) {
         this.id = titres.getId();
@@ -40,5 +47,10 @@ public class TitresDto {
         this.dateCreation = titres.getDateCreation();
         this.isSynthese = titres.isSynthese();
         this.idDeclaration = titres.getIdDeclaration();
+        this.fileName = titres.getFileName();
+        this.fileType = titres.getFileType();
+                if (titres.getFileName() != null) {
+            this.fileDownloadUri = "/api/foncier-bati/download/" + titres.getId();
+        }
     }
 }

@@ -17,7 +17,11 @@ public class EspecesService implements IEspecesService {
     public EspecesService(IEspecesData data) {
         this.data = data;
     }
-
+// Dans EspecesService.java
+@Override
+public List<EspecesProjection> findByMonnaie(Float monnaie) {
+    return data.findByMonnaie(monnaie);
+}
     @Override
     public List<EspecesProjection> getByDeclaration(Long declarationId) {
         return data.findByIdDeclaration_Id(declarationId);
@@ -30,8 +34,10 @@ public class EspecesService implements IEspecesService {
 
     @Override
     public Optional<Especes> findById(Long id) {
-        return data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return data.findSimplifiedById(id);    }
 
     @Override
     public Especes save(Especes entity) {

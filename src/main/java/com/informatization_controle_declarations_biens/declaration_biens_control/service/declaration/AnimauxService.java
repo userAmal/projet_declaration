@@ -4,6 +4,9 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Animaux;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAnimauxService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AnimauxProjection;
+
+import jakarta.transaction.Transactional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@Transactional
 public class AnimauxService implements IAnimauxService {
     @Autowired
     private final IAnimauxData animauxData;
@@ -19,7 +23,11 @@ public class AnimauxService implements IAnimauxService {
     public AnimauxService(IAnimauxData animauxData) {
         this.animauxData = animauxData;
     }
-
+    @Override
+    public List<Animaux> findByEspeces(String especes) {
+        return animauxData.findByEspecesContainingIgnoreCase(especes);
+    }
+    
     @Override
     public List<AnimauxProjection> getAnimauxByDeclaration(Long declarationId) {
         return animauxData.findByIdDeclaration_Id(declarationId);
@@ -32,7 +40,10 @@ public class AnimauxService implements IAnimauxService {
 
     @Override
     public Optional<Animaux> findById(Long id) {
-        return animauxData.findById(id);
+        if (id == null) {
+            return Optional.empty();
+        }
+        return animauxData.findSimplifiedById(id);
     }
 
     @Override

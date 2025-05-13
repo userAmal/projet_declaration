@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IVehiculeService extends IGenericService<Vehicule, Long> {
     List<VehiculeProjection> getByDeclaration(Long declarationId);
+    List<Vehicule> findByDesignation(Long designationId);
+
 }

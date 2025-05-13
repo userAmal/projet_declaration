@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IFoncierBatiService extends IGenericService<FoncierBati, Long> {
     List<FoncierBatiProjection> getByDeclaration(Long declarationId);
+    List<FoncierBati> findByNatureId(Long natureId);
+
 }

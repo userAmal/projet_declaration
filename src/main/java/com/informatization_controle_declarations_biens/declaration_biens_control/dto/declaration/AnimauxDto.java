@@ -3,6 +3,8 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.time.LocalDate;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Animaux;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AnimauxProjection;
@@ -10,6 +12,8 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import lombok.Data;
 
 @Data
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+
 public class AnimauxDto {
 
     public AnimauxDto() {
@@ -25,6 +29,13 @@ public AnimauxDto(Animaux animaux) {
     this.dateCreation = animaux.getDateCreation();
     this.isSynthese = animaux.isSynthese();
     this.idDeclaration = animaux.getIdDeclaration();
+    this.fileName = animaux.getFileName();
+    this.fileType = animaux.getFileType();
+    
+    // Générer l'URL de téléchargement si le fichier existe
+    if (animaux.getFileName() != null) {
+        this.fileDownloadUri = "/api/foncier-bati/download/" + animaux.getId();
+    }
 }
 
     public AnimauxDto(AnimauxProjection projection) {
@@ -38,6 +49,9 @@ public AnimauxDto(Animaux animaux) {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+
+        this.fileName = projection.getFileName();
+        this.fileType = projection.getFileType();
     }
 
     private Long id;
@@ -50,4 +64,10 @@ public AnimauxDto(Animaux animaux) {
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
+
+        private String fileName;
+    private String fileType;
+    private String fileDownloadUri; 
+        @JsonIgnore
+    private byte[] fileData;
 }

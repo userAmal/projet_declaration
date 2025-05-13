@@ -17,7 +17,11 @@ public class TitresService implements ITitresService {
     public TitresService(ITitreData Data) {
         this.Data = Data;
     }
-
+// Dans TitresService.java
+@Override
+public List<TitresProjection> findByDesignationNatureActions(Long designationId) {
+    return Data.findByDesignationNatureActionsId(designationId);
+}
     @Override
     public List<Titres> findAll() {
         return Data.findAll();
@@ -25,8 +29,10 @@ public class TitresService implements ITitresService {
 
     @Override
     public Optional<Titres> findById(Long id) {
-        return Data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return Data.findSimplifiedById(id);    }
 
     @Override
     public Titres save(Titres titres) {

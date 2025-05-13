@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 
 @Entity
 @Getter
@@ -40,4 +42,17 @@ public class AppareilsElectroMenagers {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Declaration idDeclaration;
+
+
+    @Column(name = "file_name")
+    private String fileName;
+    
+    @Column(name = "file_type")
+    private String fileType;
+    
+    @Lob
+        @JsonIgnore 
+    @Column(name = "file_data")
+    private byte[] fileData;
+
 }

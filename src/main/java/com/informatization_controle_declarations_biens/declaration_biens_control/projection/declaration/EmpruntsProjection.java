@@ -13,4 +13,6 @@ public interface EmpruntsProjection {
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();
+    String getFileName();
+    String getFileType();
 }

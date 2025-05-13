@@ -5,6 +5,8 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAppareilsElectroMenagersService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AppareilsElectroMenagersProjection;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +18,13 @@ public class AppareilsElectroMenagersService implements IAppareilsElectroMenager
     public AppareilsElectroMenagersService(IAppareilsElectroMenagersData data) {
         this.data = data;
     }
-
+    @Override
+    public List<AppareilsElectroMenagers> findByDesignation(String designation) {
+        if (designation == null || designation.trim().isEmpty()) {
+            return Collections.emptyList();
+        }
+        return data.findByDesignation(designation);
+    }
     @Override
     public List<AppareilsElectroMenagersProjection> getByDeclaration(Long declarationId) {
         return data.findByIdDeclaration_Id(declarationId);
@@ -29,8 +37,11 @@ public class AppareilsElectroMenagersService implements IAppareilsElectroMenager
 
     @Override
     public Optional<AppareilsElectroMenagers> findById(Long id) {
-        return data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return data.findSimplifiedById(id); 
+      }
 
     @Override
     public AppareilsElectroMenagers save(AppareilsElectroMenagers entity) {

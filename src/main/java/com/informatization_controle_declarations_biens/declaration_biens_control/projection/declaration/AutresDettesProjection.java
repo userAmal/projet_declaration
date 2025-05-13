@@ -13,4 +13,7 @@ public interface AutresDettesProjection {
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();
+    
+    String getFileName();
+    String getFileType();
 }

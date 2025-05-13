@@ -15,4 +15,7 @@ public interface VehiculeProjection {
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();
+    String getFileName();
+    String getFileType();
+
 }

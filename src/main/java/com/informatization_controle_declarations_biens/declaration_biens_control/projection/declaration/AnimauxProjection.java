@@ -16,4 +16,8 @@ public interface AnimauxProjection {
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();
+
+    String getFileName();
+    String getFileType();
+
 }

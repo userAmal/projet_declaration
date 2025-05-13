@@ -23,14 +23,20 @@ public class LesCreancesService implements ILesCreancesService {
 
     @Override
     public Optional<LesCreances> findById(Long id) {
-        return Data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return Data.findSimplifiedById(id);    }
 
     @Override
     public LesCreances save(LesCreances lesCreances) {
         return Data.save(lesCreances);
     }
-
+// Dans LesCreancesService.java
+@Override
+public List<LesCreancesProjection> findByDebiteur(Long debiteurId) {
+    return Data.findByDebiteurId(debiteurId);
+}
     @Override
     public void deleteById(Long id) {
         Data.deleteById(id);

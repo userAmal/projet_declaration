@@ -3,6 +3,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.time.LocalDate;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.AppareilsElectroMenagers;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AppareilsElectroMenagersProjection;
@@ -24,6 +25,8 @@ public class AppareilsElectroMenagersDto {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+        this.fileName = projection.getFileName();
+        this.fileType = projection.getFileType();
     }
 public AppareilsElectroMenagersDto(AppareilsElectroMenagers entity) {
     this.id = entity.getId();
@@ -34,6 +37,13 @@ public AppareilsElectroMenagersDto(AppareilsElectroMenagers entity) {
     this.dateCreation = entity.getDateCreation();
     this.isSynthese = entity.isSynthese();
     this.idDeclaration = entity.getIdDeclaration();
+    this.fileName = entity.getFileName();
+    this.fileType = entity.getFileType();
+    
+    // Générer l'URL de téléchargement si le fichier existe
+    if (entity.getFileName() != null) {
+        this.fileDownloadUri = "/api/foncier-bati/download/" + entity.getId();
+    }
 }
 
     private Long id;
@@ -44,4 +54,9 @@ public AppareilsElectroMenagersDto(AppareilsElectroMenagers entity) {
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
+        private String fileName;
+    private String fileType;
+    private String fileDownloadUri; 
+        @JsonIgnore
+    private byte[] fileData;
 }

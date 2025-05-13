@@ -19,7 +19,11 @@ public class MeublesMeublantsService implements IMeublesMeublantsService {
     public MeublesMeublantsService(IMeublesMeublantsData Data) {
         this.Data = Data;
     }
-
+    @Override
+    public List<MeublesMeublants> searchByDesignation(String designation) {
+        return Data.findByDesignationContainingIgnoreCase(designation);
+    }
+    
     @Override
     public List<MeublesMeublants> findAll() {
         return Data.findAll();
@@ -27,8 +31,10 @@ public class MeublesMeublantsService implements IMeublesMeublantsService {
 
     @Override
     public Optional<MeublesMeublants> findById(Long id) {
-        return Data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return Data.findSimplifiedById(id);    }
 
     @Override
     public MeublesMeublants save(MeublesMeublants meublesMeublants) {

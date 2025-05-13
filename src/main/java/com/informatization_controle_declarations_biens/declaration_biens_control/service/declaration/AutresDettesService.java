@@ -16,7 +16,11 @@ public class AutresDettesService implements IAutresDettesService {
     public AutresDettesService(IAutresDettesData data) {
         this.data = data;
     }
-
+// Dans AutresDettesService.java
+@Override
+public List<AutresDettesProjection> findByCreancier(Long creancierId) {
+    return data.findByCreancierId(creancierId);
+}
     @Override
     public List<AutresDettesProjection> getByDeclaration(Long declarationId) {
         return data.findByIdDeclaration_Id(declarationId);
@@ -29,7 +33,10 @@ public class AutresDettesService implements IAutresDettesService {
 
     @Override
     public Optional<AutresDettes> findById(Long id) {
-        return data.findById(id);
+        if (id == null) {
+            return Optional.empty();
+        }
+        return data.findSimplifiedById(id);
     }
 
     @Override

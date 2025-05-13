@@ -18,4 +18,7 @@ public interface FoncierBatiProjection {
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();
+    String getFileName();
+    String getFileType();
+
 }

@@ -3,6 +3,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.time.LocalDate;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.FoncierNonBati;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.FoncierNonBatiProjection;
@@ -30,6 +31,8 @@ public class FoncierNonBatiDto {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+        this.fileName = projection.getFileName();
+        this.fileType = projection.getFileType();
     }
     public FoncierNonBatiDto(FoncierNonBati foncierNonBati) {
         this.id = foncierNonBati.getId();
@@ -46,6 +49,11 @@ public class FoncierNonBatiDto {
         this.dateCreation = foncierNonBati.getDateCreation();
         this.isSynthese = foncierNonBati.isSynthese();
         this.idDeclaration = foncierNonBati.getIdDeclaration();
+        this.fileName = foncierNonBati.getFileName();
+        this.fileType = foncierNonBati.getFileType();
+                if (foncierNonBati.getFileName() != null) {
+            this.fileDownloadUri = "/api/foncier-bati/download/" + foncierNonBati.getId();
+        }
     }
     private Long id;
     private Vocabulaire nature;
@@ -61,4 +69,9 @@ public class FoncierNonBatiDto {
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
+        private String fileName;
+    private String fileType;
+    private String fileDownloadUri; 
+        @JsonIgnore
+    private byte[] fileData;
 }

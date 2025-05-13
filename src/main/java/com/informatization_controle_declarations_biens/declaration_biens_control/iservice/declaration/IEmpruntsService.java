@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IEmpruntsService extends IGenericService<Emprunts, Long> {
     List<EmpruntsProjection> getByDeclaration(Long declarationId);
+    List<Emprunts> getByInstitutionFinanciere(Long vocabulaireId);
+
 }

@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IEspecesService extends IGenericService<Especes, Long> {
     List<EspecesProjection> getByDeclaration(Long declarationId);
+    // Dans IEspecesService.java
+List<EspecesProjection> findByMonnaie(Float monnaie);
 }

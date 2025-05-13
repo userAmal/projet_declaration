@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IDisponibilitesEnBanqueService extends IGenericService<DisponibilitesEnBanque, Long> {
     List<DisponibilitesEnBanqueProjection> getByDeclaration(Long declarationId);
+    // Dans IDisponibilitesEnBanqueService.java
+List<DisponibilitesEnBanqueProjection> findByBanque(Long banqueId);
 }

@@ -20,11 +20,16 @@ public class FoncierNonBatiService implements IFoncierNonBatiService {
     public List<FoncierNonBati> findAll() {
         return Data.findAll();
     }
-
+    @Override
+    public List<FoncierNonBati> findByNatureId(Long natureId) {
+        return Data.findByNatureId(natureId);
+    }
     @Override
     public Optional<FoncierNonBati> findById(Long id) {
-        return Data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return Data.findSimplifiedById(id);    }
 
     @Override
     public FoncierNonBati save(FoncierNonBati foncierNonBati) {

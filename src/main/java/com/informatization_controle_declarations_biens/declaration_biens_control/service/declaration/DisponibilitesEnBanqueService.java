@@ -22,7 +22,11 @@ public class DisponibilitesEnBanqueService implements IDisponibilitesEnBanqueSer
     public List<DisponibilitesEnBanqueProjection> getByDeclaration(Long declarationId) {
         return data.findByIdDeclaration_Id(declarationId);
     }
-
+// Dans DisponibilitesEnBanqueService.java
+@Override
+public List<DisponibilitesEnBanqueProjection> findByBanque(Long banqueId) {
+    return data.findByBanqueId(banqueId);
+}
     @Override
     public List<DisponibilitesEnBanque> findAll() {
         return data.findAll();
@@ -30,8 +34,10 @@ public class DisponibilitesEnBanqueService implements IDisponibilitesEnBanqueSer
 
     @Override
     public Optional<DisponibilitesEnBanque> findById(Long id) {
-        return data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return data.findSimplifiedById(id);    }
 
     @Override
     public DisponibilitesEnBanque save(DisponibilitesEnBanque entity) {

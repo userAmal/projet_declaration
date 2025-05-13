@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import java.time.LocalDate;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.VehiculeProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vehicule;
@@ -25,6 +26,8 @@ public class VehiculeDto {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+        this.fileName = projection.getFileName();
+        this.fileType = projection.getFileType();
     }
     public VehiculeDto(Vehicule vehicule) {
         this.id = vehicule.getId();
@@ -37,6 +40,11 @@ public class VehiculeDto {
         this.dateCreation = vehicule.getDateCreation();
         this.isSynthese = vehicule.isSynthese();
         this.idDeclaration = vehicule.getIdDeclaration();
+        this.fileName = vehicule.getFileName();
+        this.fileType = vehicule.getFileType();
+                if (vehicule.getFileName() != null) {
+            this.fileDownloadUri = "/api/foncier-bati/download/" + vehicule.getId();
+        }
     }
 
     private Long id;
@@ -49,4 +57,9 @@ public class VehiculeDto {
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
+        private String fileName;
+    private String fileType;
+    private String fileDownloadUri; 
+        @JsonIgnore
+    private byte[] fileData;
 }

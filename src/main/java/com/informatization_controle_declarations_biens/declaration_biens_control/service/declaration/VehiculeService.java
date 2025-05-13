@@ -30,8 +30,10 @@ public class VehiculeService implements IVehiculeService {
 
     @Override
     public Optional<Vehicule> findById(Long id) {
-        return data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return data.findSimplifiedById(id);    }
 
     @Override
     public Vehicule save(Vehicule entity) {
@@ -41,5 +43,11 @@ public class VehiculeService implements IVehiculeService {
     @Override
     public void deleteById(Long id) {
         data.deleteById(id);
+    }
+
+    @Override
+    public List<Vehicule> findByDesignation(Long designationId) {
+    return data.findByDesignationId(designationId);
+
     }
 }

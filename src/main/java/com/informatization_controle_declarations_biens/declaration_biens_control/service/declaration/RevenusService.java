@@ -19,7 +19,11 @@ public class RevenusService implements IRevenusService {
     public RevenusService(IRevenusData Data) {
         this.Data = Data;
     }
-
+// Dans RevenusService.java
+@Override
+public List<RevenusProjection> findByAutresRevenus(Long autresRevenusId) {
+    return Data.findByAutresRevenusId(autresRevenusId);
+}
     @Override
     public List<Revenus> findAll() {
         return Data.findAll();
@@ -27,8 +31,10 @@ public class RevenusService implements IRevenusService {
 
     @Override
     public Optional<Revenus> findById(Long id) {
-        return Data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return Data.findSimplifiedById(id);    }
 
     @Override
     public Revenus save(Revenus revenus) {

@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface ILesCreancesService extends IGenericService<LesCreances, Long> {
     List<LesCreancesProjection> getByDeclaration(Long declarationId);
+    // Dans ILesCreancesService.java
+List<LesCreancesProjection> findByDebiteur(Long debiteurId);
 }

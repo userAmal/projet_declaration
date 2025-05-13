@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.AutresBiensDeValeur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
@@ -20,7 +21,11 @@ public class AutresBiensDeValeurDto {
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
-
+    private String fileName;
+    private String fileType;
+    private String fileDownloadUri; 
+        @JsonIgnore
+    private byte[] fileData;
     public AutresBiensDeValeurDto() {}
 
     public AutresBiensDeValeurDto(AutresBiensDeValeurProjection projection) {
@@ -34,6 +39,9 @@ public class AutresBiensDeValeurDto {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+        this.fileName = projection.getFileName();
+        this.fileType = projection.getFileType();
+
 
     }
 
@@ -48,6 +56,10 @@ public class AutresBiensDeValeurDto {
         this.dateCreation = autresBiensDeValeur.getDateCreation();
         this.isSynthese = autresBiensDeValeur.isSynthese();
         this.idDeclaration = autresBiensDeValeur.getIdDeclaration();
-
+        this.fileName = autresBiensDeValeur.getFileName();
+        this.fileType = autresBiensDeValeur.getFileType();
+        if (autresBiensDeValeur.getFileName() != null) {
+            this.fileDownloadUri = "/api/foncier-bati/download/" + autresBiensDeValeur.getId();
+        }
     }
 }

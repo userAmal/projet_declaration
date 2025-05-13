@@ -14,5 +14,7 @@ public interface MeublesMeublantsProjection {
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getidDeclaration();
+    String getFileName();
+    String getFileType();
 
 }

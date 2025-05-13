@@ -3,6 +3,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.time.LocalDate;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AutresDettesProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vocabulaire;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.AutresDettes;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import lombok.Data;
@@ -22,6 +23,9 @@ public class AutresDettesDto {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+        this.fileName = projection.getFileName();
+        this.fileType = projection.getFileType();
+
     }
     public AutresDettesDto(AutresDettes autresDettes) {
         this.id = autresDettes.getId();
@@ -32,6 +36,14 @@ public class AutresDettesDto {
         this.dateCreation = autresDettes.getDateCreation();
         this.isSynthese = autresDettes.isSynthese();
         this.idDeclaration = autresDettes.getIdDeclaration();
+        this.fileName = autresDettes.getFileName();
+        this.fileType = autresDettes.getFileType();
+        
+        // Générer l'URL de téléchargement si le fichier existe
+        if (autresDettes.getFileName() != null) {
+            this.fileDownloadUri = "/api/foncier-bati/download/" + autresDettes.getId();
+        }
+
     }
     private Long id;
     private Vocabulaire creanciers;
@@ -41,4 +53,12 @@ public class AutresDettesDto {
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
+      private String fileName;
+    private String fileType;
+    private String fileDownloadUri; 
+        @JsonIgnore
+    private byte[] fileData;
+
+
+
 }

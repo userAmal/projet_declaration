@@ -8,4 +8,7 @@ import java.util.List;
 
 public interface IRevenusService extends IGenericService<Revenus, Long> {
     List<RevenusProjection> getByDeclaration(Long declarationId);
+
+    // Dans IRevenusService.java
+List<RevenusProjection> findByAutresRevenus(Long autresRevenusId);
 }

@@ -27,10 +27,12 @@ public class FoncierBatiService implements IFoncierBatiService {
     public List<FoncierBati> findAll() {
         return data.findAll();
     }
-
     @Override
     public Optional<FoncierBati> findById(Long id) {
-        return data.findById(id);
+        if (id == null) {
+            return Optional.empty();
+        }
+        return data.findSimplifiedById(id); // Utilisez la méthode simplifiée
     }
 
     @Override
@@ -41,5 +43,10 @@ public class FoncierBatiService implements IFoncierBatiService {
     @Override
     public void deleteById(Long id) {
         data.deleteById(id);
+    }
+
+    @Override
+    public List<FoncierBati> findByNatureId(Long natureId) {
+        return data.findByNatureId(natureId);
     }
 }

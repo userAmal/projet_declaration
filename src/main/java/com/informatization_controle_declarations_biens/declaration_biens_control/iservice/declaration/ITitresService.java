@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface ITitresService extends IGenericService<Titres, Long> {
     List<TitresProjection> getByDeclaration(Long declarationId);
+    // Dans ITitresService.java
+List<TitresProjection> findByDesignationNatureActions(Long designationId);
 }

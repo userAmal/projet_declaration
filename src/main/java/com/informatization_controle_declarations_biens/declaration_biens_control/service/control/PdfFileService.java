@@ -3,11 +3,8 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.text.SimpleDateFormat;
-import java.util.List;
 
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
@@ -15,7 +12,6 @@ import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.DeclarationDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.*;
-import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.*;
 
 import com.itextpdf.html2pdf.ConverterProperties;
 import com.itextpdf.html2pdf.HtmlConverter;

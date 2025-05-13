@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface IAnimauxService extends IGenericService<Animaux, Long> {
     List<AnimauxProjection> getAnimauxByDeclaration(Long declarationId);
+    List<Animaux> findByEspeces(String especes);
+
 }

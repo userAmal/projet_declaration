@@ -7,4 +7,7 @@ import java.util.List;
 
 public interface IAppareilsElectroMenagersService extends IGenericService<AppareilsElectroMenagers, Long> {
     List<AppareilsElectroMenagersProjection> getByDeclaration(Long declarationId);
+
+    List<AppareilsElectroMenagers> findByDesignation(String designation);
+
 }

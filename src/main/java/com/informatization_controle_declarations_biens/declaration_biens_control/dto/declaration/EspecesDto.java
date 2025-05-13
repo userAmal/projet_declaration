@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Especes;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.EspecesProjection;
@@ -26,6 +27,8 @@ public class EspecesDto {
         this.dateCreation = projection.getDateCreation();
         this.isSynthese = projection.isSynthese();
         this.idDeclaration = projection.getIdDeclaration();
+        this.fileName = projection.getFileName();
+        this.fileType = projection.getFileType();
 
     }
     public EspecesDto(Especes especes) {
@@ -39,6 +42,12 @@ public class EspecesDto {
         this.dateCreation = especes.getDateCreation();
         this.isSynthese = especes.isSynthese();
         this.idDeclaration = especes.getIdDeclaration();
+        this.fileName = especes.getFileName();
+        this.fileType = especes.getFileType();
+        
+        if (especes.getFileName() != null) {
+            this.fileDownloadUri = "/api/foncier-bati/download/" + especes.getId();
+        }
 
     }
     private Long id;
@@ -51,4 +60,9 @@ public class EspecesDto {
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
+        private String fileName;
+    private String fileType;
+    private String fileDownloadUri; 
+        @JsonIgnore
+    private byte[] fileData;
 }

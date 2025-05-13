@@ -17,7 +17,10 @@ public class EmpruntsService implements IEmpruntsService {
     public EmpruntsService(IEmpruntsData data) {
         this.data = data;
     }
-
+    public List<Emprunts> getByInstitutionFinanciere(Long vocabulaireId) {
+        return data.findByInstitutionFinanciere(vocabulaireId);
+    }
+    
     @Override
     public List<EmpruntsProjection> getByDeclaration(Long declarationId) {
         return data.findByIdDeclaration_Id(declarationId);
@@ -30,8 +33,10 @@ public class EmpruntsService implements IEmpruntsService {
 
     @Override
     public Optional<Emprunts> findById(Long id) {
-        return data.findById(id);
-    }
+        if (id == null) {
+            return Optional.empty();
+        }
+        return data.findSimplifiedById(id);    }
 
     @Override
     public Emprunts save(Emprunts entity) {

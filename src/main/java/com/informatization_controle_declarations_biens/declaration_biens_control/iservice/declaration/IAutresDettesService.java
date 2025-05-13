@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface IAutresDettesService extends IGenericService<AutresDettes, Long> {
     List<AutresDettesProjection> getByDeclaration(Long declarationId);
+    // Dans IAutresDettesService.java
+List<AutresDettesProjection> findByCreancier(Long creancierId);
 }

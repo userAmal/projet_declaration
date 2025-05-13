@@ -11,5 +11,7 @@ public interface RevenusProjection {
     Vocabulaire getAutresRevenus();
     LocalDate getDateCreation();
         Declaration getIdDeclaration();
-
+        String getFileName();
+        String getFileType();
+    
 }
