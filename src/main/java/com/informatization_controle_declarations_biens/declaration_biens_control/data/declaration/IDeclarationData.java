@@ -40,5 +40,4 @@ public interface IDeclarationData extends JpaRepository<Declaration, Long> {
        boolean existsByAssujettiIdAndEtatDeclaration(Long assujettiId, EtatDeclarationEnum etatDeclaration);
 
 
-
 }
