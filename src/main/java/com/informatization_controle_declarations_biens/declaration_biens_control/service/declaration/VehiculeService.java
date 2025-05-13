@@ -71,7 +71,7 @@ public class VehiculeService implements IVehiculeService {
         requestData.put("etatGeneral", vehicule.getEtatGeneral());
         requestData.put("kilometrage", vehicule.getKilometrage());
         requestData.put("anneeAcquisition", vehicule.getAnneeAcquisition());
-/* agd */
+
         // Créer les headers
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
