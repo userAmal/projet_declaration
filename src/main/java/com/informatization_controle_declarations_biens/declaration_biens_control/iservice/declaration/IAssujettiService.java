@@ -25,6 +25,8 @@ public interface IAssujettiService extends IGenericService<Assujetti, Long> {
     List<AssujettiProjection> getAssujettiDetails(Long id);
     Long verifyToken(String token);
     void archiverAssujetti(Long id);
+    List<Assujetti> findAllStopped();
+    void restoreAssujetti(Long id);
 
 
     

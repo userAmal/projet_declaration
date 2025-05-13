@@ -39,6 +39,19 @@ public class Vehicule {
     private Vocabulaire etatGeneral;
 
     @Column(nullable = false)
+    private double kilometrage;
+    
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Vocabulaire carburant; 
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Vocabulaire transmission;
+
+
+    @Column(nullable = false)
     private LocalDate dateCreation;
 
     @Column(nullable = false)

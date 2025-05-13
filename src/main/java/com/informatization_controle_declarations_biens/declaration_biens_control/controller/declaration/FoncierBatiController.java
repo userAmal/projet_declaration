@@ -1,11 +1,13 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.controller.declaration;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.FoncierBatiDto;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.PredictionResult;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.FoncierBati;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IFoncierBatiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.payload.FileUploadResponse;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.FoncierBatiProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.parametrage.ParametrageService;
+import com.itextpdf.io.exceptions.IOException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ByteArrayResource;
@@ -18,8 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.io.IOException;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -317,4 +322,35 @@ public ResponseEntity<List<FoncierBatiDto>> getByNature(@PathVariable Long natur
 
         return entity;
     }
+
+
+    /* // Nouvelle méthode pour récupérer la prédiction
+    @GetMapping("/prediction/{id}")
+    public ResponseEntity<Double> getPrediction(@PathVariable Long id) {
+        FoncierBati foncierBati = service.findById(id).orElse(null);
+        if (foncierBati == null) {
+            return ResponseEntity.notFound().build();
+        }
+        // Appeler le service pour obtenir la prédiction
+        double prediction = service.getPrediction(foncierBati);
+        return ResponseEntity.ok(prediction);
+    } */
+    @GetMapping("/rapport-prediction/{declarationId}")
+    public ResponseEntity<byte[]> generatePredictionReport(@PathVariable Long declarationId) {
+        List<FoncierBati> list = service.getFullEntitiesByDeclaration(declarationId);
+        List<PredictionResult> results = new ArrayList<>();
+    
+        for (FoncierBati foncier : list) {
+            double prediction = service.getPrediction(foncier);
+            results.add(new PredictionResult(foncier, prediction));
+        }
+    
+        byte[] pdf = service.generatePdfRapport(results); // méthode à implémenter avec JasperReports ou autre
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=rapport_fraude.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
+    
+
 }

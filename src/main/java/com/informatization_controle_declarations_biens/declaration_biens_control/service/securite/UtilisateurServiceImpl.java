@@ -11,11 +11,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.AuthenticationResponse;
+import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.securite.IUtilisateurData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 
 @Service
@@ -24,17 +26,20 @@ public class UtilisateurServiceImpl implements IUtilisateurService {
 
     private final IUtilisateurData utilisateurData;
     private final PasswordEncoder passwordEncoder;
+    private final IDeclarationData declarationData;
 
     @Autowired
     private JWTService jwtService;
 
     public UtilisateurServiceImpl(
             IUtilisateurData utilisateurData,
+            IDeclarationData declarationData,
             @Lazy PasswordEncoder passwordEncoder
 
     ) {
         this.utilisateurData = utilisateurData;
         this.passwordEncoder = passwordEncoder;
+        this.declarationData = declarationData;
 
     }
 
@@ -95,7 +100,7 @@ public class UtilisateurServiceImpl implements IUtilisateurService {
         return sb.toString();
     }
 
-    @Override
+   /*  @Override
     public Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateurDetails) {
         Optional<Utilisateur> existingUtilisateurOpt = utilisateurData.findById(id);
 
@@ -127,15 +132,129 @@ public class UtilisateurServiceImpl implements IUtilisateurService {
         } else {
             throw new RuntimeException("Utilisateur non trouvé");
         }
+    }  */
+
+
+    @Override
+public Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateurDetails) {
+    Optional<Utilisateur> existingUtilisateurOpt = utilisateurData.findById(id);
+
+    if (existingUtilisateurOpt.isEmpty()) {
+        throw new RuntimeException("Utilisateur non trouvé");
+    }
+    
+    Utilisateur existingUtilisateur = existingUtilisateurOpt.get();
+
+    // Validation email
+    if (utilisateurDetails.getEmail() != null) {
+        if (utilisateurDetails.getEmail().isEmpty()) {
+            throw new RuntimeException("L'email ne peut pas être vide");
+        }
+        if (!utilisateurDetails.getEmail().matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+            throw new RuntimeException("Format d'email invalide");
+        }
+        // Vérifier si l'email existe déjà pour un autre utilisateur
+        if (!utilisateurDetails.getEmail().equals(existingUtilisateur.getEmail()) &&
+            utilisateurData.existsByEmail(utilisateurDetails.getEmail())) {
+            throw new RuntimeException("Cette adresse email est déjà utilisée");
+        }
+        existingUtilisateur.setEmail(utilisateurDetails.getEmail());
     }
 
+    // Validation nom et prénom
+    if (utilisateurDetails.getFirstname() != null) {
+        if (utilisateurDetails.getFirstname().trim().isEmpty()) {
+            throw new RuntimeException("Le prénom ne peut pas être vide");
+        }
+        existingUtilisateur.setFirstname(utilisateurDetails.getFirstname());
+    }
+    
+    if (utilisateurDetails.getLastname() != null) {
+        if (utilisateurDetails.getLastname().trim().isEmpty()) {
+            throw new RuntimeException("Le nom ne peut pas être vide");
+        }
+        existingUtilisateur.setLastname(utilisateurDetails.getLastname());
+    }
+    
+    // Validation téléphone
+    if (utilisateurDetails.getTel() != null) {
+        if (utilisateurDetails.getTel().trim().isEmpty()) {
+            throw new RuntimeException("Le numéro de téléphone ne peut pas être vide");
+        }
+        if (!utilisateurDetails.getTel().matches("^[+]?[(]?[0-9]{1,4}[)]?[-\\s./0-9]*$")) {
+            throw new RuntimeException("Format de téléphone invalide");
+        }
+        // Vérifier si le téléphone existe déjà pour un autre utilisateur
+        if (!utilisateurDetails.getTel().equals(existingUtilisateur.getTel()) &&
+            utilisateurData.existsByTel(utilisateurDetails.getTel())) {
+            throw new RuntimeException("Ce numéro de téléphone est déjà utilisé");
+        }
+        existingUtilisateur.setTel(utilisateurDetails.getTel());
+    }
+    
+    // Validation rôle
+    if (utilisateurDetails.getRole() != null) {
+        existingUtilisateur.setRole(utilisateurDetails.getRole());
+    }
+
+    // Validation mot de passe
+    if (utilisateurDetails.getPassword() != null && !utilisateurDetails.getPassword().isEmpty()) {
+        if (utilisateurDetails.getPassword().length() < 8) {
+            throw new RuntimeException("Le mot de passe doit contenir au moins 8 caractères");
+        }
+        String encodedPassword = passwordEncoder.encode(utilisateurDetails.getPassword());
+        existingUtilisateur.setPassword(encodedPassword);
+    }
+
+    return utilisateurData.save(existingUtilisateur);
+}
+
+@Override
+public List<Utilisateur> findAllArchived() {
+    // Cette méthode retourne tous les utilisateurs archivés (statutEmploi = false)
+    return utilisateurData.findAllArchivedUsers();
+}
+
+@Override
+public void restoreUtilisateur(Long id) {
+    Optional<Utilisateur> utilisateurOptional = utilisateurData.findById(id);
+    
+    if (utilisateurOptional.isPresent()) {
+        Utilisateur utilisateur = utilisateurOptional.get();
+        // Changer le statut d'emploi à true pour restaurer l'utilisateur
+        utilisateur.setStatutEmploi(true);
+        utilisateurData.save(utilisateur);
+    } else {
+        throw new IllegalArgumentException("Utilisateur non trouvé avec l'ID: " + id);
+    }
+}
+
+
+/* 
     @Override
     public void archiverUtilisateur(Long id) {
         utilisateurData.findById(id).ifPresent(utilisateur -> {
             utilisateur.setStatutEmploi(false);
             utilisateurData.save(utilisateur);
         });
+    }*/
+    
+
+
+
+    @Override
+    public void archiverUtilisateur(Long id) {
+        boolean hasDeclarations = declarationData.existsByUtilisateurId(id);
+        if (hasDeclarations) {
+            throw new IllegalStateException("Impossible d'archiver un utilisateur lié à une ou plusieurs déclarations.");
+        }
+
+        utilisateurData.findById(id).ifPresent(utilisateur -> {
+            utilisateur.setStatutEmploi(false);
+            utilisateurData.save(utilisateur);
+        });
     }
+
 
     @Override
     public Optional<Utilisateur> findById(Long id) {

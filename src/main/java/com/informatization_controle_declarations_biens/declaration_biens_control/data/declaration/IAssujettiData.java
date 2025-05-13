@@ -12,6 +12,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
 
 public interface IAssujettiData extends JpaRepository<Assujetti, Long> {
+        
     @Query(value = "from Assujetti a where a.code = :code")
     List<Assujetti> findByCode(@Param("code") String code);
     
@@ -50,4 +51,9 @@ public interface IAssujettiData extends JpaRepository<Assujetti, Long> {
             "LEFT JOIN Vocabulaire ent ON a.entite = ent.id " +
             "LEFT JOIN Vocabulaire fct ON a.fonction = fct.id " +
             "WHERE a.id = :id", nativeQuery = true)
-    List<AssujettiProjection> getAssujettiDetails(@Param("id") Long id);}
+    List<AssujettiProjection> getAssujettiDetails(@Param("id") Long id);
+    @Query("SELECT a FROM Assujetti a WHERE a.etat = :etat")
+        List<Assujetti> findAssujettisWithEtat(@Param("etat") EtatAssujettiEnum etat);
+
+
+}

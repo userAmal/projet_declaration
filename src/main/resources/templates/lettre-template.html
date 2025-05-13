@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Lettre Officielle</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            margin: 0;
+            padding: 2cm;
+            background-color: white;
+            position: relative;
+            height: 29.7cm;
+            box-sizing: border-box;
+        }
+        .main-content {
+            min-height: 22cm;
+            position: relative;
+        }
+        .letterhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2cm;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.5cm;
+        }
+        .logo {
+            text-align: center;
+        }
+        .logo img {
+            height: 80px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .header-info {
+            text-align: right;
+        }
+        .title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 1.5cm;
+            text-decoration: underline;
+            font-size: 16pt;
+        }
+        .aaa {
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .content {
+            text-align: justify;
+            margin-bottom: 1cm;
+        }
+        .signature {
+            margin-top: 2cm;
+            text-align: right;
+            margin-right: 1cm;
+        }
+        .signature-line {
+            width: 150px;
+            border-bottom: 1px solid black;
+            margin-left: auto;
+            margin-bottom: 0.2cm;
+        }
+        .footer {
+            position: absolute;
+            bottom: 1cm;
+            left: 0;
+            right: 0;
+            font-size: 10pt;
+            text-align: center;
+            border-top: 1px solid #ccc;
+            padding-top: 0.5cm;
+            margin: 0 2cm;
+        }
+        .user-content {
+            margin-top: 1cm;
+            margin-bottom: 1cm;
+            white-space: pre-line;
+        }
+        p {
+            margin: 0.5cm 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="letterhead">
+            <div class="logo">
+                <img src="logoniger.jpg" alt="Logo République du Niger"/>
+                <p>Référence: <span th:text="${reference}">REF-2023-001</span></p>
+            </div>
+        </div>
+        
+        <div class="title">
+            LETTRE OFFICIELLE
+        </div>
+        
+        <div class="content">
+            <p>
+                Nous, Monsieur <span th:text="${utilisateur.lastname}">Nom</span> <span th:text="${utilisateur.firstname}">Prénom</span>,
+                <span th:text="${utilisateur.role}">Rôle</span>;
+            </p>
+            <p>
+                Vu le rapport provisoire et la déclaration sur le contrôle de la déclaration 
+                <span th:text="${declaration.typeDeclaration}">initiale</span>
+                des biens de
+                <span th:text="${nomComplet}">Nom Assujetti</span>,
+                reçue le <span th:text="${dateDeclaration}">01/01/2023</span>.
+            </p>
+            <p>
+                Vu l'article 142 de la loi organique n° 2020-035 du 30 juillet 2020 déterminant les attributions, la composition, l'organisation et le fonctionnement de la Cour des Comptes ;
+            </p>
+            <div class="user-content" th:text="${contenuUtilisateur}">
+                [Le contenu saisi par l'utilisateur apparaîtra ici avec mise en forme préservée]
+            </div>
+            <p>
+                Nous sollicitons respectueusement de Monsieur le Procureur Général qu'il veuille bien examiner ledit rapport et se prononcer sur la recevabilité de la déclaration.
+            </p>
+        </div>
+        
+        <div class="signature">
+            <p>Le <span th:text="${dateGeneration}">01/01/2023</span></p>
+            <div class="signature-line"></div>
+            <p class="aaa">Avocat Général</p>
+            <p th:if="${utilisateur != null}" th:text="${utilisateur.firstname} + ' ' + ${utilisateur.lastname}">Prénom Nom</p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Cour des Comptes - BP 14040 Niamey, Niger - Tél: (+227) 20 72 32 50 - Email: contact@courdescomptes.ne</p>
+    </div>
+</body>
+</html>

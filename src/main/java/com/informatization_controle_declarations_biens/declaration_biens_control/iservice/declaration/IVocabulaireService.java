@@ -17,5 +17,9 @@ public interface IVocabulaireService extends IGenericService<Vocabulaire, Long> 
     List<VocabulaireProjection> getVocabulaireDetails(Long id);
 
     List<Vocabulaire> findByTypeVocabulaireId(Long typeId);
+    boolean existsByIntituleAndTypeVocabulaire(String intitule, Long typeVocabulaireId);
+    boolean existsByIntituleAndTypeVocabulaireAndIdNot(String intitule, Long typeVocabulaireId, Long id);
+
+
 
 }

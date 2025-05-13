@@ -40,6 +40,16 @@ public class VocabulaireService implements IVocabulaireService {
         //vocabulaireData.deleteById(id);
     }
 
+    public boolean existsByIntituleAndTypeVocabulaire(String intitule, Long typeVocabulaireId) {
+        return !vocabulaireData.findByIntituleAndTypevocabulaireId(intitule, typeVocabulaireId).isEmpty();
+    }
+
+    public boolean existsByIntituleAndTypeVocabulaireAndIdNot(String intitule, Long typeVocabulaireId, Long id) {
+        return vocabulaireData.existsByIntituleAndTypevocabulaireIdAndIdNot(intitule, typeVocabulaireId, id);
+    }
+    
+    
+
     @Override
     public List<Vocabulaire> findByIntitule(String intitule) {
         return vocabulaireData.findByIntitule(intitule).map(List::of).orElse(Collections.emptyList());

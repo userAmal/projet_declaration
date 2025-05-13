@@ -2,6 +2,8 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 public enum EtatDeclarationEnum {
     en_cours,
+    traitement,
+    jugement,
     valider,
     refuser,
 }

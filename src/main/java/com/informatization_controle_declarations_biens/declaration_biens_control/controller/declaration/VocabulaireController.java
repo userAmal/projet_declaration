@@ -29,19 +29,52 @@ public class VocabulaireController {
         return vocabulaire.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+/*     @PostMapping
     public ResponseEntity<Vocabulaire> createVocabulaire(@RequestBody Vocabulaire vocabulaire) {
         return ResponseEntity.ok(vocabulaireService.save(vocabulaire));
     }
+ */
 
-    @PutMapping("/{id}")
+ @PostMapping
+    public ResponseEntity<Object> createVocabulaire(@RequestBody Vocabulaire vocabulaire) {
+        // Vérifie si le vocabulaire avec le même intitule et typeVocabulaire existe déjà
+        if (vocabulaireService.existsByIntituleAndTypeVocabulaire(vocabulaire.getIntitule(), vocabulaire.getTypevocabulaire().getId())) {
+            // Retourne une réponse avec un message d'erreur
+            return ResponseEntity.badRequest().body("Le vocabulaire avec cet intitulé et ce type existe déjà.");
+    }
+    
+    // Si non existant, crée et sauvegarde le vocabulaire
+    Vocabulaire savedVocabulaire = vocabulaireService.save(vocabulaire);
+    return ResponseEntity.ok(savedVocabulaire);
+}
+
+ /*    @PutMapping("/{id}")
     public ResponseEntity<Vocabulaire> updateVocabulaire(@PathVariable Long id, @RequestBody Vocabulaire vocabulaireDetails) {
         if (!vocabulaireService.findById(id).isPresent()) {
             return ResponseEntity.notFound().build();
         }
         vocabulaireDetails.setId(id);
         return ResponseEntity.ok(vocabulaireService.save(vocabulaireDetails));
+    } */
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Object> updateVocabulaire(@PathVariable Long id, @RequestBody Vocabulaire vocabulaireDetails) {
+        // Vérifier si le vocabulaire à mettre à jour existe
+        if (!vocabulaireService.findById(id).isPresent()) {
+            return ResponseEntity.notFound().build();  // Si le vocabulaire n'existe pas, retour 404
+        }
+    
+        // Vérifier si un autre vocabulaire avec le même intitulé et type existe déjà, sauf celui que l'on met à jour
+        if (vocabulaireService.existsByIntituleAndTypeVocabulaireAndIdNot(vocabulaireDetails.getIntitule(), vocabulaireDetails.getTypevocabulaire().getId(), id)) {
+            // Si un vocabulaire avec le même intitulé et type existe, retourner une erreur
+            return ResponseEntity.badRequest().body("Le vocabulaire avec cet intitulé et ce type existe déjà.");
+        }
+    
+        // Si tout est correct, on effectue la mise à jour
+        vocabulaireDetails.setId(id); // On conserve l'ID pour la mise à jour
+        return ResponseEntity.ok(vocabulaireService.save(vocabulaireDetails)); // Sauvegarder et retourner le vocabulaire mis à jour
     }
+    
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteVocabulaire(@PathVariable Long id) {

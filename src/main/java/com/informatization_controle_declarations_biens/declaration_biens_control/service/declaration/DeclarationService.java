@@ -2,11 +2,14 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.INotificationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.DeclarationDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IDeclarationService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.NotificationService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
 
@@ -14,12 +17,13 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DeclarationService implements IDeclarationService {
 
     private final UtilisateurServiceImpl utilisateurServiceImpl;
-    
+    private final NotificationService notificationService;
     private final IDeclarationData declarationData;
     private final AnimauxService animauxService;
     private final AppareilsElectroMenagersService appareilElectroMenagerService;
@@ -36,6 +40,7 @@ public class DeclarationService implements IDeclarationService {
     private final TitresService titresService;
     private final VehiculeService vehiculeService;
 
+
     
     public DeclarationService(IDeclarationData declarationData,
                              AnimauxService animauxService,
@@ -51,6 +56,7 @@ public class DeclarationService implements IDeclarationService {
                              MeublesMeublantsService meublesMeublantsService,
                              RevenusService revenusService,
                              TitresService titresService,
+                             NotificationService notificationService,
                              VehiculeService vehiculeService, UtilisateurServiceImpl utilisateurServiceImpl) {
         this.declarationData = declarationData;
         this.animauxService = animauxService;
@@ -66,8 +72,10 @@ public class DeclarationService implements IDeclarationService {
         this.meublesMeublantsService = meublesMeublantsService;
         this.revenusService = revenusService;
         this.titresService = titresService;
+        this.notificationService=notificationService;
         this.vehiculeService = vehiculeService;
         this.utilisateurServiceImpl = utilisateurServiceImpl;
+        
     }
         
     public DeclarationDto getFullDeclarationDetails(Long declarationId) {
@@ -136,7 +144,7 @@ public Declaration refuseDeclaration(Long id) {
     return declarationData.save(declaration);
 }
 
-public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurId) {
+/* public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurId) {
     // Récupérer la déclaration
     Declaration declaration = declarationData.findById(declarationId)
         .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
@@ -150,7 +158,30 @@ public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurI
 
     // Sauvegarder la déclaration mise à jour
     return declarationData.save(declaration);
+} */
+
+public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurId) {
+    // Récupérer la déclaration
+    Declaration declaration = declarationData.findById(declarationId)
+        .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
+
+    // Récupérer l'utilisateur
+    Utilisateur utilisateur = utilisateurServiceImpl.findById(utilisateurId)
+        .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
+
+    // Affecter l'utilisateur à la déclaration
+    declaration.setUtilisateur(utilisateur);
+    Declaration savedDeclaration = declarationData.save(declaration);
+
+    // Création d'une notification avec la déclaration liée
+    String message = "Une déclaration vous a été affectée (N° de déclaration: " + declarationId + ").";
+    String type = "ASSIGNMENT";
+
+    notificationService.createAndSendNotification(utilisateurId, message, type, declarationId);
+
+    return savedDeclaration;
 }
+
 
 @Override
 public List<Declaration> searchByNomOrPrenomAssujetti(String keyword) {
@@ -168,6 +199,30 @@ public List<Declaration> findByUtilisateurId(Long utilisateurId) {
 
 public List<Declaration> getDeclarationsByUtilisateurId(Long utilisateurId) {
     return declarationData.findByUtilisateurId(utilisateurId);
+}
+
+@Override
+public boolean existsByUtilisateurId(Long utilisateurId) {
+    return declarationData.existsByUtilisateurId(utilisateurId);
+}
+
+
+
+@Override
+public boolean existsByAssujettiIdAndEtatDeclaration(Long assujettiId, EtatDeclarationEnum etatDeclaration) {
+    return declarationData.existsByAssujettiIdAndEtatDeclaration(assujettiId, etatDeclaration);
+}
+// Dans DeclarationService.java
+@Override
+public List<Declaration> searchByUserAndKeyword(Long userId, String keyword) {
+    // Solution 1: Utilisation de la méthode existante avec filtrage supplémentaire
+    List<Declaration> declarations = declarationData.searchByNomOrPrenomAssujetti(keyword);
+    return declarations.stream()
+            .filter(d -> d.getUtilisateur() != null && d.getUtilisateur().getId().equals(userId))
+            .collect(Collectors.toList());
+    
+    // Solution 2: Implémentation directe dans votre IDeclarationData
+    // return declarationData.searchByUserAndKeyword(userId, keyword);
 }
 
 

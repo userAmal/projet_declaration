@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Rapport Définitif</title>
+    <style>
+        @page {
+            size: A4;
+            margin: 0;
+        }
+        body {
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            margin: 0;
+            padding: 2cm;
+            background-color: white;
+            position: relative;
+            height: 29.7cm;
+            box-sizing: border-box;
+        }
+        .main-content {
+            min-height: 22cm;
+            position: relative;
+        }
+        .letterhead {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2cm;
+            border-bottom: 1px solid #ccc;
+            padding-bottom: 0.5cm;
+        }
+        .logo {
+            text-align: center;
+        }
+        .logo img {
+            height: 80px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .header-info {
+            text-align: right;
+        }
+        .title {
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 1.5cm;
+            text-decoration: underline;
+            font-size: 16pt;
+        }
+        .content {
+            text-align: justify;
+            margin-bottom: 1cm;
+        }
+        .signature {
+            margin-top: 2cm;
+            text-align: right;
+            margin-right: 1cm;
+        }
+        .signature-line {
+            width: 150px;
+            border-bottom: 1px solid black;
+            margin-left: auto;
+            margin-bottom: 0.2cm;
+        }
+        .footer {
+            position: absolute;
+            bottom: 1cm;
+            left: 0;
+            right: 0;
+            font-size: 10pt;
+            text-align: center;
+            border-top: 1px solid #ccc;
+            padding-top: 0.5cm;
+            margin: 0 2cm;
+        }
+        .user-content {
+            margin-top: 1cm;
+            margin-bottom: 1cm;
+            white-space: pre-line;
+        }
+        .decision {
+            font-weight: bold;
+            margin: 1cm 0;
+            padding: 0.5cm;
+            text-align: center;
+            border: 1px solid;
+        }
+        .decision-accepted {
+            border-color: green;
+            color: green;
+            background-color: #f0fff0;
+        }
+        .decision-rejected {
+            border-color: red;
+            color: red;
+            background-color: #fff0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div class="letterhead">
+            <div class="logo">
+                <img th:src="logoniger.jpg" alt="Logo République du Niger"/>
+                <p>Référence: <span th:text="${reference}">REF-2023-001</span></p>
+            </div>
+        </div>
+        
+        <div class="title">
+            RAPPORT DÉFINITIF DE CONTRÔLE
+        </div>
+        
+        <div class="content">
+            <p>
+                Nous,<p th:if="${utilisateur != null}" th:text="${utilisateur.firstname} + ' ' + ${utilisateur.lastname}">Prénom Nom</p>
+                <span th:text="${utilisateur.role}">Fonction</span>;
+            </p>
+            
+            <p>
+                Vu la déclaration <span th:text="${declaration.typeDeclaration}">initiale</span>
+                des biens de <span th:text="${nomComplet}">Nom Assujetti</span>,
+                reçue le <span th:text="${#temporals.format(declaration.dateDeclaration, 'dd/MM/yyyy')}">01/01/2023</span>;
+            </p>
+            
+            <p>
+                Vu le rapport provisoire établi le <span th:text="${#temporals.format(rapport.dateCreation, 'dd/MM/yyyy')}">01/01/2023</span>;
+            </p>
+            
+            <div class="user-content" th:utext="${#strings.replace(#strings.escapeXml(contenu),'&#10;','<br/>')}">
+                [Contenu du rapport...]
+            </div>
+            
+            <div th:classappend="${decision} ? 'decision-accepted' : 'decision-rejected'" 
+                 class="decision">
+                <p>DÉCISION : 
+                    <span th:text="${decision} ? 'ACCEPTÉE' : 'REFUSÉE'"></span>
+                </p>
+            </div>
+            
+            <p th:if="${decision}">
+                La déclaration est conforme aux exigences réglementaires en vigueur.
+            </p>
+            <p th:unless="${decision}">
+                La déclaration présente des anomalies nécessitant une régularisation.
+            </p>
+        </div>
+        
+        <div class="signature">
+            <p>Le <span th:text="${dateGeneration}">01/01/2023</span></p>
+            <div class="signature-line"></div>
+            <p>Le Procureur General</p>
+            <p th:if="${utilisateur != null}" th:text="${utilisateur.firstname} + ' ' + ${utilisateur.lastname}">Prénom Nom</p>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>Cour des Comptes - BP 14040 Niamey, Niger - Tél: (+227) 20 72 32 50 - Email: contact@courdescomptes.ne</p>
+    </div>
+</body>
+</html>
