@@ -1,8 +1,10 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.service.control;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.IRapportData;
+import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Rapport;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.controle.IRapportService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Rapport.Type;
@@ -31,7 +33,9 @@ public class RapportService implements IRapportService {
 
     @Autowired
     private IRapportData rapportData;
-    
+    @Autowired
+    private  IDeclarationData declarationData;
+
     private final TemplateEngine templateEngine;
 
     public RapportService() {
@@ -65,16 +69,13 @@ public class RapportService implements IRapportService {
                                         Boolean decision,
                                         String contenu) {
         try {
-            // Préparer le contexte
             Context context = new Context();
             
-            // Variables communes
             context.setVariable("utilisateur", utilisateur);
             context.setVariable("declaration", declaration);
             context.setVariable("contenu", contenu);
             context.setVariable("decision", decision);
             
-            // Formatage des dates
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
             context.setVariable("dateGeneration", LocalDateTime.now().format(formatter));
             
@@ -82,7 +83,6 @@ public class RapportService implements IRapportService {
                 declaration.getAssujetti().getNom() + " " + declaration.getAssujetti().getPrenom() : "N/A";
             context.setVariable("nomComplet", nomComplet);
 
-            // Référence
             String reference = generateReference(Type.DEFINITIF, declaration.getId());
             context.setVariable("reference", reference);
             
@@ -91,11 +91,18 @@ public class RapportService implements IRapportService {
             rapport.setDateCreation(LocalDateTime.now());
             context.setVariable("rapport", rapport);
             
-            // Générer le PDF
             String htmlContent = templateEngine.process("definitif-template", context);
             byte[] pdfContent = genererPdf(htmlContent);
             
-            // Créer et sauvegarder le rapport final
+            if (decision != null) {
+                if (decision) {
+                    declaration.setEtatDeclaration(EtatDeclarationEnum.valider);
+                } else {
+                    declaration.setEtatDeclaration(EtatDeclarationEnum.refuser);
+                }
+                declarationData.save(declaration); 
+            }
+            
             rapport = Rapport.builder()
                 .type(Type.DEFINITIF)
                 .declaration(declaration)

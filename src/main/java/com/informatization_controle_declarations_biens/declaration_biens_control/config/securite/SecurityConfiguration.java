@@ -61,7 +61,7 @@ public class SecurityConfiguration {
 .requestMatchers("/api/assujetti/declaration/access").permitAll()
 .requestMatchers("/api/assujetti/**").hasAuthority("administrateur")
 .requestMatchers("/api/utilisateurs/**").permitAll()
-.requestMatchers("/api/parametrages**").hasAuthority("administrateur")
+.requestMatchers("/api/parametrages**").permitAll()
 .requestMatchers("/api/commentaires/**").permitAll()
 .requestMatchers("/api/conclusions/**").permitAll()
 

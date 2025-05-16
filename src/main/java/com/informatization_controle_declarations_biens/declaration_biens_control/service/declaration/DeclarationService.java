@@ -1,12 +1,14 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.service.declaration;
 
-
+import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.HistoriqueDeclarationUserData;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.INotificationData;
+import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.HistoriqueDeclarationUserData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.DeclarationDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.HistoriqueDeclarationUser;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IDeclarationService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.NotificationService;
@@ -15,6 +17,9 @@ import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -39,6 +44,8 @@ public class DeclarationService implements IDeclarationService {
     private final RevenusService revenusService;
     private final TitresService titresService;
     private final VehiculeService vehiculeService;
+    private final HistoriqueDeclarationUserData historiqueRepository;
+
 
 
     
@@ -57,7 +64,7 @@ public class DeclarationService implements IDeclarationService {
                              RevenusService revenusService,
                              TitresService titresService,
                              NotificationService notificationService,
-                             VehiculeService vehiculeService, UtilisateurServiceImpl utilisateurServiceImpl) {
+                             VehiculeService vehiculeService, UtilisateurServiceImpl utilisateurServiceImpl, HistoriqueDeclarationUserData historiqueRepository) {
         this.declarationData = declarationData;
         this.animauxService = animauxService;
         this.appareilElectroMenagerService = appareilElectroMenagerService;
@@ -75,6 +82,7 @@ public class DeclarationService implements IDeclarationService {
         this.notificationService=notificationService;
         this.vehiculeService = vehiculeService;
         this.utilisateurServiceImpl = utilisateurServiceImpl;
+        this.historiqueRepository = historiqueRepository;
         
     }
         
@@ -160,7 +168,49 @@ public Declaration refuseDeclaration(Long id) {
     return declarationData.save(declaration);
 } */
 
+@Override
 public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurId) {
+    // Récupérer la déclaration
+    Declaration declaration = declarationData.findById(declarationId)
+        .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
+
+    // Récupérer l'utilisateur
+    Utilisateur utilisateur = utilisateurServiceImpl.findById(utilisateurId)
+        .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
+
+    // 1. Vérifier si la déclaration a déjà un utilisateur affecté
+    if (declaration.getUtilisateur() != null) {
+        // 2. Trouver l'historique actif et le clôturer
+        List<HistoriqueDeclarationUser> historiquesActifs = historiqueRepository
+            .findByDeclarationIdAndDateFinAffectationIsNull(declarationId);
+
+        if (!historiquesActifs.isEmpty()) {
+            HistoriqueDeclarationUser historiqueActif = historiquesActifs.get(0);
+            historiqueActif.setDateFinAffectation(LocalDate.now());
+            historiqueRepository.save(historiqueActif);
+        }
+    }
+
+    // 3. Affecter le nouvel utilisateur à la déclaration
+    declaration.setUtilisateur(utilisateur);
+    Declaration savedDeclaration = declarationData.save(declaration);
+
+    // 4. Créer un nouvel historique
+    HistoriqueDeclarationUser nouvelHistorique = new HistoriqueDeclarationUser();
+    nouvelHistorique.setDeclaration(declaration);
+    nouvelHistorique.setUtilisateur(utilisateur);
+    nouvelHistorique.setDateAffectation(LocalDate.now());
+    historiqueRepository.save(nouvelHistorique);
+
+    // Création d'une notification
+    String message = "Une déclaration vous a été affectée (N° de déclaration: " + declarationId + ").";
+    String type = "ASSIGNMENT";
+    notificationService.createAndSendNotification(utilisateurId, message, type, declarationId);
+
+    return savedDeclaration;
+} 
+
+/* public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurId) {
     // Récupérer la déclaration
     Declaration declaration = declarationData.findById(declarationId)
         .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
@@ -180,7 +230,8 @@ public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurI
     notificationService.createAndSendNotification(utilisateurId, message, type, declarationId);
 
     return savedDeclaration;
-}
+} */
+
 
 
 @Override
