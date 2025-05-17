@@ -31,6 +31,11 @@ public class FoncierBatiDto {
     private String fileName;
     private String fileType;
     private String fileDownloadUri; // URL pour télécharger le fichier
+
+    private int nbrChambres;
+    private Vocabulaire etatGeneral;
+
+
     
     // On exclut le contenu du fichier du DTO pour des raisons de sécurité et performance
     @JsonIgnore
@@ -55,6 +60,8 @@ public class FoncierBatiDto {
         this.idDeclaration = projection.getIdDeclaration();
         this.fileName = projection.getFileName();
         this.fileType = projection.getFileType();
+        this.nbrChambres =projection.getNbrChambres();
+        this.etatGeneral =projection.getEtatGeneral();
     }
 
     public FoncierBatiDto(FoncierBati foncierBati) {

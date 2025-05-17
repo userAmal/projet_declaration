@@ -20,5 +20,9 @@ public interface FoncierBatiProjection {
     Declaration getIdDeclaration();
     String getFileName();
     String getFileType();
+    Vocabulaire getEtatGeneral();
+    int getNbrChambres();
+
+
 
 }

@@ -6,6 +6,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IFoncierBatiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.FoncierBatiProjection;
 import com.itextpdf.layout.element.Table;
+import com.itextpdf.layout.properties.UnitValue;
 import com.itextpdf.kernel.colors.Color;
 import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.pdf.PdfDocument;
@@ -14,11 +15,16 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 
+import com.itextpdf.layout.properties.TextAlignment;
+import com.itextpdf.kernel.geom.PageSize;
+
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.ByteArrayOutputStream;
+import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -72,91 +78,194 @@ public class FoncierBatiService implements IFoncierBatiService {
     }
 
 
-    public double getPrediction(FoncierBati foncierBati) {
-        RestTemplate restTemplate = new RestTemplate();
+public double getPrediction(FoncierBati foncierBati) {
+    RestTemplate restTemplate = new RestTemplate();
+    String url = "http://localhost:5000/predict";
+
+    // 1. Conversion robuste de la superficie
+    double superficie;
+    try {
+        superficie = Double.parseDouble(foncierBati.getSuperficie().replaceAll("[^0-9.]", ""));
+    } catch (Exception e) {
+        superficie = 0; // Valeur par défaut si conversion échoue
+    }
+
+    // 2. Construction EXACTE du même payload qu'en Postman
+    Map<String, Object> requestData = new HashMap<>();
+    requestData.put("superficie", superficie);
+    requestData.put("nature", foncierBati.getNature().getIntitule());
+    requestData.put("localisation", foncierBati.getLocalis().getIntitule());
+    requestData.put("anneeConstruction", foncierBati.getAnneeConstruction());
     
-        // URL de l’endpoint Flask (POST avec entité "foncierbati")
-        String url = "http://localhost:5000/predict/foncierbati";
-    
-        // Préparer les données sous forme de JSON (Map)
-        Map<String, Object> requestData = new HashMap<>();
-        requestData.put("nature", foncierBati.getNature().getIntitule());
-    
-        // Prétraiter la superficie pour enlever les unités (ex: "500m²" -> "500")
-        String superficie = foncierBati.getSuperficie();
-        if (superficie != null) {
-            superficie = superficie.replaceAll("[^0-9]", ""); // Enlever les caractères non numériques
-        }
-        requestData.put("superficie", superficie);
-    
-        requestData.put("anneeConstruction", foncierBati.getAnneeConstruction());
-        requestData.put("localisation", foncierBati.getLocalis().getIntitule());
-    
-        // Créer les headers
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-    
-        // Créer l’objet HttpEntity (corps + headers)
-        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestData, headers);
-    
-        // Faire l’appel POST
+    // 3. Assurez-vous que ces champs existent dans votre entité
+    requestData.put("nbrChambres", foncierBati.getNbrChambres()); 
+    requestData.put("etatGeneral", foncierBati.getEtatGeneral().getIntitule());
+
+    // Debug: Affichez la requête pour comparaison avec Postman
+    System.out.println("Requête envoyée à Flask: " + requestData);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestData, headers);
+
+    try {
         ResponseEntity<Map> response = restTemplate.postForEntity(url, requestEntity, Map.class);
-    
-        // Récupérer la prédiction
+        System.out.println("Réponse reçue de Flask: " + response.getBody());
+
         if (response.getStatusCode().is2xxSuccessful()) {
             Map<String, Object> body = response.getBody();
             if (body != null && body.containsKey("prediction")) {
-                return Double.parseDouble(body.get("prediction").toString());
+                // Conversion robuste du résultat
+                Object prediction = body.get("prediction");
+                if (prediction instanceof Number) {
+                    return ((Number) prediction).doubleValue();
+                } else {
+                    return Double.parseDouble(prediction.toString());
+                }
             }
         }
-    
-        // En cas d’échec
-        throw new RuntimeException("Erreur lors de la prédiction avec l’API Flask.");
+    } catch (Exception e) {
+        e.printStackTrace();
     }
 
- public byte[] generatePdfRapport(List<PredictionResult> results) {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    throw new RuntimeException("Erreur lors de la prédiction avec l'API Flask.");
+}
 
+public byte[] generatePdfRapport(List<PredictionResult> results) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
     PdfWriter writer = new PdfWriter(out);
     PdfDocument pdfDoc = new PdfDocument(writer);
     Document document = new Document(pdfDoc);
+    
+    // Titre principal
+    Paragraph title = new Paragraph("RAPPORT DE CONTRÔLE DES DÉCLARATIONS")
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontSize(16)
+            .setBold()
+            .setMarginBottom(15);
+    document.add(title);
 
-    float[] columnWidths = {1, 1, 1, 1, 1}; // 5 colonnes égales
+    // Sous-titre
+    Paragraph subtitle = new Paragraph("Analyse des écarts entre valeurs déclarées et prédictions du modèle")
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontSize(12)
+            .setMarginBottom(20);
+    document.add(subtitle);
+
+    // Configuration du tableau (9 colonnes)
+    float[] columnWidths = {1.8f, 1.2f, 1.5f, 1, 1, 1, 1.8f, 2f, 2f};
     Table table = new Table(columnWidths);
+    table.setWidth(UnitValue.createPercentValue(100));
+    
+    // Style des en-têtes
+    Color headerColor = new DeviceRgb(31, 73, 125); // Bleu professionnel
+    Color headerTextColor = DeviceRgb.WHITE;
+    float fontSize = 9;
 
-    table.addHeaderCell("Nature");
-    table.addHeaderCell("Superficie");
-    table.addHeaderCell("Année construction");
-    table.addHeaderCell("Valeur déclarée");
-    table.addHeaderCell("Prédiction modèle");
+    // En-têtes du tableau
+    String[] headers = {
+        "Nature", "Superficie", "Localisation", 
+        "Chambres", "État", "Année", 
+        "Réf. Cadastrales", "Valeur déclarée", 
+        "Prédiction modèle"
+    };
+    
+    for (String header : headers) {
+        table.addHeaderCell(createHeaderCell(header, headerColor, headerTextColor, fontSize));
+    }
 
+    // Formatage des nombres
+    DecimalFormat df = new DecimalFormat("#,##0.00");
+    
+    // Remplissage des données
     for (PredictionResult result : results) {
         FoncierBati f = result.getFoncierBati();
         double prediction = result.getPrediction();
         double declaredValue = f.getCoutAcquisitionFCFA();
+        double ecartPourcentage = calculateEcartPercentage(declaredValue, prediction);
 
-        Color color = Math.abs(declaredValue - prediction) > 1_000_000
-                ? new DeviceRgb(255, 0, 0)   // Rouge
-                : new DeviceRgb(0, 255, 0);  // Vert
-
-        table.addCell(new Cell().add(new Paragraph(f.getNature().getIntitule())));
-        table.addCell(new Cell().add(new Paragraph(String.valueOf(f.getSuperficie()))));
-        table.addCell(new Cell().add(new Paragraph(String.valueOf(f.getAnneeConstruction()))));
-        table.addCell(createColoredCell(String.valueOf(declaredValue), color));
-        table.addCell(createColoredCell(String.format("%.2f", prediction), color));
+        // Ligne du tableau
+        table.addCell(createContentCell(f.getNature().getIntitule(), fontSize));
+        table.addCell(createContentCell(cleanSuperficie(f.getSuperficie()), fontSize));
+        table.addCell(createContentCell(f.getLocalis().getIntitule(), fontSize));
+        table.addCell(createContentCell(String.valueOf(f.getNbrChambres()), fontSize));
+        table.addCell(createContentCell(f.getEtatGeneral().getIntitule(), fontSize));
+        table.addCell(createContentCell(String.valueOf(f.getAnneeConstruction()), fontSize));
+        table.addCell(createContentCell(f.getReferencesCadastrales(), fontSize));
+        table.addCell(createFinancialCell(declaredValue, df, fontSize));
+        table.addCell(createPredictionCell(prediction, ecartPourcentage, df, fontSize));
     }
 
     document.add(table);
-    document.close();
+    
+    // Pied de page
+    Paragraph footer = new Paragraph("Généré le " + LocalDate.now() + " | Système de contrôle des déclarations")
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontSize(10)
+            .setItalic()
+            .setMarginTop(20);
+    document.add(footer);
 
+    document.close();
     return out.toByteArray();
 }
 
-private Cell createColoredCell(String text, Color backgroundColor) {
+// Méthodes utilitaires améliorées
+private Cell createHeaderCell(String text, Color bgColor, Color textColor, float fontSize) {
     return new Cell()
-            .add(new Paragraph(text))
-            .setBackgroundColor(backgroundColor);
+            .add(new Paragraph(text)
+                .setFontColor(textColor)
+                .setFontSize(fontSize)
+                .setBold())
+            .setBackgroundColor(bgColor)
+            .setPadding(7)
+            .setTextAlignment(TextAlignment.CENTER);
 }
 
+private Cell createContentCell(String content, float fontSize) {
+    return new Cell()
+            .add(new Paragraph(content).setFontSize(fontSize))
+            .setPadding(5)
+            .setTextAlignment(TextAlignment.CENTER);
+}
+
+private Cell createFinancialCell(double value, DecimalFormat df, float fontSize) {
+    return new Cell()
+            .add(new Paragraph(formatCurrency(value, df)).setFontSize(fontSize))
+            .setPadding(5)
+            .setTextAlignment(TextAlignment.RIGHT);
+}
+
+private Cell createPredictionCell(double prediction, double ecartPourcentage, 
+                                DecimalFormat df, float fontSize) {
+    Color bgColor = getEcartColor(ecartPourcentage);
+    String text = String.format("%s\n(Écart: %.1f%%)", 
+                  formatCurrency(prediction, df), 
+                  ecartPourcentage);
+    
+    return new Cell()
+            .add(new Paragraph(text).setFontSize(fontSize))
+            .setBackgroundColor(bgColor)
+            .setPadding(5)
+            .setTextAlignment(TextAlignment.RIGHT);
+}
+
+private String cleanSuperficie(String superficie) {
+    return superficie.replaceAll("[^0-9.]", "") + " m²";
+}
+
+private String formatCurrency(double amount, DecimalFormat df) {
+    return df.format(amount).replace(",", " ") + " FCFA";
+}
+
+private double calculateEcartPercentage(double declared, double predicted) {
+    return (Math.abs(declared - predicted) / declared) * 100;
+}
+
+private Color getEcartColor(double ecartPourcentage) {
+    if (ecartPourcentage > 20) return new DeviceRgb(255, 153, 153);  // Rouge clair
+    if (ecartPourcentage > 10) return new DeviceRgb(255, 204, 153);  // Orange clair
+    return new DeviceRgb(204, 255, 204);                             // Vert clair
+}
     
 }

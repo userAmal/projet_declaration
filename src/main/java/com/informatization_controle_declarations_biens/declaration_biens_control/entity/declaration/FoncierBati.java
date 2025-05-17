@@ -71,6 +71,14 @@ public class FoncierBati {
     @Column(name = "file_data")
     private byte[] fileData;
 
+    @Column(nullable = false)
+    private int nbrChambres;
+
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Vocabulaire etatGeneral;
+
+
 
 
 
