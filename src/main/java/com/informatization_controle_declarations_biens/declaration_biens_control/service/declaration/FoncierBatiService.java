@@ -80,7 +80,7 @@ public class FoncierBatiService implements IFoncierBatiService {
 
 public double getPrediction(FoncierBati foncierBati) {
     RestTemplate restTemplate = new RestTemplate();
-    String url = "http://localhost:5000/predict";
+    String url = "http://localhost:5001/predict";
 
     // 1. Conversion robuste de la superficie
     double superficie;

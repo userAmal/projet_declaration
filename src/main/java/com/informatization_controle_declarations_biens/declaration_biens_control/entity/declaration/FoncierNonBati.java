@@ -71,4 +71,9 @@ public class FoncierNonBati {
     @Column(name = "file_data")
     private byte[] fileData;
 
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Vocabulaire typeTerrain;
+
+
 }

@@ -1,6 +1,7 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.controller.declaration;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.VehiculeDto;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.PredictionResult;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vehicule;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IVehiculeService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.payload.FileUploadResponse;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.util.StringUtils;
@@ -216,4 +218,23 @@ public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
         entity.setFileData(dto.getFileData());
         return entity;
     }
+
+       @GetMapping("/rapport-prediction/{declarationId}")
+public ResponseEntity<byte[]> generatePredictionReport(@PathVariable Long declarationId) {
+    List<VehiculeProjection> projections = service.getByDeclaration(declarationId);
+    List<PredictionResult> results = new ArrayList<>();
+    
+    for (VehiculeProjection projection : projections) {
+        Vehicule vehicule = service.findById(projection.getId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Véhicule non trouvé"));
+        double prediction = service.getPrediction(vehicule);
+        results.add(new PredictionResult(vehicule, prediction));
+    }
+    
+    byte[] pdf = service.generatePdfRapport(results);
+    return ResponseEntity.ok()
+            .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=rapport_vehicules.pdf")
+            .contentType(MediaType.APPLICATION_PDF)
+            .body(pdf);
+}
 }

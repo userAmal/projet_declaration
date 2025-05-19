@@ -1,5 +1,6 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.PredictionResult;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vehicule;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.VehiculeProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IGenericService;
@@ -10,5 +11,7 @@ public interface IVehiculeService extends IGenericService<Vehicule, Long> {
     List<VehiculeProjection> getByDeclaration(Long declarationId);
     List<Vehicule> findByDesignation(Long designationId);
     double getPrediction(Vehicule vehicule);
+    byte[] generatePdfRapport(List<PredictionResult> results);
+
 
 }

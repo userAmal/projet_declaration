@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.FoncierBatiDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.FoncierNonBatiDto;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.PredictionResult;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.FoncierBati;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.FoncierNonBati;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IFoncierNonBatiService;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import org.springframework.util.StringUtils;
@@ -250,5 +252,30 @@ public ResponseEntity<List<FoncierNonBatiDto>> getByNature(@PathVariable Long na
         entity.setFileData(dto.getFileData());
         return entity;
     }
-    
+
+
+    @GetMapping("/rapport-prediction/{declarationId}")
+    public ResponseEntity<byte[]> generatePredictionReport(@PathVariable Long declarationId) {
+        // 1. Get full entities
+        List<FoncierNonBati> properties = foncierNonBatiService.getFullEntitiesByDeclaration(declarationId);
+        
+        // 2. Calculate predictions
+        List<PredictionResult> results = properties.stream()
+            .map(property -> {
+                double prediction = foncierNonBatiService.getPrediction(property);
+                return new PredictionResult(property, prediction);
+            })
+            .collect(Collectors.toList());
+        
+        // 3. Generate PDF
+        byte[] pdf = foncierNonBatiService.generatePdfRapportNonBati(results);
+        
+        // 4. Return response
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=rapport_non_bati.pdf")
+                .contentType(MediaType.APPLICATION_PDF)
+                .body(pdf);
+    }
 }
+    
+
