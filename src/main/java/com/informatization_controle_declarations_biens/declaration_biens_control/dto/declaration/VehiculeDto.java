@@ -28,6 +28,10 @@ public class VehiculeDto {
         this.idDeclaration = projection.getIdDeclaration();
         this.fileName = projection.getFileName();
         this.fileType = projection.getFileType();
+        this.kilometrage = projection.getKilometrage();
+this.carburant = projection.getCarburant();
+this.transmission = projection.getTransmission();
+
     }
     public VehiculeDto(Vehicule vehicule) {
         this.id = vehicule.getId();
@@ -45,6 +49,10 @@ public class VehiculeDto {
                 if (vehicule.getFileName() != null) {
             this.fileDownloadUri = "/api/foncier-bati/download/" + vehicule.getId();
         }
+        this.kilometrage = vehicule.getKilometrage();
+this.carburant = vehicule.getCarburant();
+this.transmission = vehicule.getTransmission();
+
     }
 
     private Long id;
@@ -62,4 +70,8 @@ public class VehiculeDto {
     private String fileDownloadUri; 
         @JsonIgnore
     private byte[] fileData;
+    private double kilometrage;
+private Vocabulaire carburant;
+private Vocabulaire transmission;
+
 }

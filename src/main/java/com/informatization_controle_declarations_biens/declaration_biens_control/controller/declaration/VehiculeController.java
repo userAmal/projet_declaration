@@ -201,23 +201,6 @@ public ResponseEntity<Resource> downloadFile(@PathVariable Long id) {
         return ResponseEntity.noContent().build();
     }
 
-    private Vehicule convertToEntity(VehiculeDto dto) {
-        Vehicule entity = new Vehicule();
-        entity.setId(dto.getId());
-        entity.setDesignation(dto.getDesignation());
-        entity.setMarque(dto.getMarque());
-        entity.setImmatriculation(dto.getImmatriculation());
-        entity.setAnneeAcquisition(dto.getAnneeAcquisition());
-        entity.setValeurAcquisition(dto.getValeurAcquisition());
-        entity.setEtatGeneral(dto.getEtatGeneral());
-        entity.setDateCreation(dto.getDateCreation());
-        entity.setSynthese(dto.isSynthese());
-        entity.setIdDeclaration(dto.getIdDeclaration());
-        entity.setFileName(dto.getFileName());
-        entity.setFileType(dto.getFileType());
-        entity.setFileData(dto.getFileData());
-        return entity;
-    }
 
        @GetMapping("/rapport-prediction/{declarationId}")
 public ResponseEntity<byte[]> generatePredictionReport(@PathVariable Long declarationId) {
@@ -237,4 +220,25 @@ public ResponseEntity<byte[]> generatePredictionReport(@PathVariable Long declar
             .contentType(MediaType.APPLICATION_PDF)
             .body(pdf);
 }
+private Vehicule convertToEntity(VehiculeDto dto) {
+    Vehicule entity = new Vehicule();
+    entity.setId(dto.getId());
+    entity.setDesignation(dto.getDesignation());
+    entity.setMarque(dto.getMarque());
+    entity.setImmatriculation(dto.getImmatriculation());
+    entity.setAnneeAcquisition(dto.getAnneeAcquisition());
+    entity.setValeurAcquisition(dto.getValeurAcquisition());
+    entity.setEtatGeneral(dto.getEtatGeneral());
+    entity.setKilometrage(dto.getKilometrage()); // <-- Ajouté
+    entity.setCarburant(dto.getCarburant());     // <-- Ajouté
+    entity.setTransmission(dto.getTransmission()); // <-- Ajouté
+    entity.setDateCreation(dto.getDateCreation());
+    entity.setSynthese(dto.isSynthese());
+    entity.setIdDeclaration(dto.getIdDeclaration());
+    entity.setFileName(dto.getFileName());
+    entity.setFileType(dto.getFileType());
+    entity.setFileData(dto.getFileData());
+    return entity;
+}
+
 }

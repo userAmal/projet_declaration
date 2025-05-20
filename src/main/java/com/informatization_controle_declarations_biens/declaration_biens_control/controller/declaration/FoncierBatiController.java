@@ -7,7 +7,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.payload.FileUploadResponse;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.FoncierBatiProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.parametrage.ParametrageService;
-import com.itextpdf.io.exceptions.IOException;
 
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ByteArrayResource;
@@ -23,6 +22,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;

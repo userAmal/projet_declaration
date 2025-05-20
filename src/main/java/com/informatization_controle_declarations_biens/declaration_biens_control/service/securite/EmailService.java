@@ -6,39 +6,60 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-import  jakarta.mail.internet.MimeMessage;
-import java.util.Map;
+import org.thymeleaf.templateresolver.FileTemplateResolver;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.parametrage.Parametrage;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.parametrage.ParametrageService;
+
+import jakarta.mail.internet.MimeMessage;
+import java.util.Map;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.io.File;
 
 @Service
 public class EmailService {
     @Autowired
     private final JavaMailSender mailSender;
-    @Autowired
-    private final TemplateEngine templateEngine;
+;
+    private final String templatesPath;
 
-    public EmailService(JavaMailSender mailSender, TemplateEngine templateEngine) {
+    @Autowired
+    public EmailService(JavaMailSender mailSender, ParametrageService parametrageService) {
         this.mailSender = mailSender;
-        this.templateEngine = templateEngine;
+        
+        // Get template path from parameters
+        Parametrage pathParam = parametrageService.getByCode("PATH_MODELES_MAIL");
+        if (pathParam == null || pathParam.getValeur() == null) {
+            throw new IllegalStateException("PATH_MODELES_MAIL parameter not configured");
+        }
+        this.templatesPath = pathParam.getValeur();
     }
 
-    public void sendEmail(String to, String subject, String templateName, Map<String, Object> variables) {
+    public void sendEmail(String to, String subject, String templateFileName, Map<String, Object> variables) {
         try {
-            Context context = new Context();
-            context.setVariables(variables);
+            // Read template file
+            Path templatePath = Paths.get(templatesPath, templateFileName + ".html");
+            String htmlContent = Files.readString(templatePath, StandardCharsets.UTF_8);
             
-            String htmlContent = templateEngine.process(templateName, context);
-
+            // Replace placeholders
+            for (Map.Entry<String, Object> entry : variables.entrySet()) {
+                htmlContent = htmlContent.replace("{" + entry.getKey() + "}", 
+                        entry.getValue() != null ? entry.getValue().toString() : "");
+            }
+            
+            // Send email
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlContent, true);
-
             mailSender.send(message);
+            
         } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de l'envoi de l'email : " + e.getMessage(), e);
+            throw new RuntimeException("Failed to send email: " + e.getMessage(), e);
         }
     }
 }

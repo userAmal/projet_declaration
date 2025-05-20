@@ -73,52 +73,46 @@ private Utilisateur getDefaultUser() {
                 .compact();
     }
 
-    @Override
-    public Assujetti save(Assujetti assujetti) {
-        try {
-            // Enregistrer l'assujetti
-            Assujetti savedAssujetti = assujettiData.save(assujetti);
-            
-            // Créer une nouvelle déclaration liée à cet assujetti
-            Declaration declaration = new Declaration();
-            declaration.setAssujetti(savedAssujetti);
-            declaration.setDateDeclaration(LocalDate.now());
-            declaration.setEtatDeclaration(EtatDeclarationEnum.valider);
-            declaration.setTypeDeclaration(TypeDeclarationEnum.Initiale);
-            declaration.setUtilisateur(getDefaultUser());
-            
-            // Sauvegarder la déclaration
-            Declaration savedDeclaration = declarationService.save(declaration);
-            
-            // Générer un token JWT avec l'ID de la déclaration
-            String token = generateJwtToken(savedDeclaration.getId());
-            
-            // Préparer les variables pour l'email
-            Map<String, Object> variables = Map.of(
-                "nom", savedAssujetti.getNom(),
-                "prenom", savedAssujetti.getPrenom(),
-                "magicLink", "http://localhost:4200/#/declaration?token=" + token
-            );
-            
-            // Envoyer l'email avec le lien magique
-            try {
-                emailService.sendEmail(savedAssujetti.getEmail(), 
-                                      "Accès à votre déclaration", 
-                                      "magic_link", 
-                                      variables);
-            } catch (Exception e) {
-                // Gestion des erreurs d'email
-                throw new RuntimeException("Erreur lors de l'envoi de l'email : " + e.getMessage(), e);
-            }
-            
-            return savedAssujetti;
-        } catch (Exception e) {
-            // Gestion globale des erreurs pour l'enregistrement
-            throw new RuntimeException("Erreur lors de la sauvegarde de l'assujetti et de la déclaration : " + e.getMessage(), e);
-        }
+ @Override
+public Assujetti save(Assujetti assujetti) {
+    try {
+        // Enregistrer l'assujetti
+        Assujetti savedAssujetti = assujettiData.save(assujetti);
+        
+        // Créer une nouvelle déclaration liée à cet assujetti
+        Declaration declaration = new Declaration();
+        declaration.setAssujetti(savedAssujetti);
+        declaration.setDateDeclaration(LocalDate.now());
+        declaration.setEtatDeclaration(EtatDeclarationEnum.valider);
+        declaration.setTypeDeclaration(TypeDeclarationEnum.Initiale);
+        declaration.setUtilisateur(getDefaultUser());
+        
+        // Sauvegarder la déclaration
+        Declaration savedDeclaration = declarationService.save(declaration);
+        
+         String token = generateJwtToken(savedDeclaration.getId());
+        String magicLink = "http://localhost:4200/#/declaration?token=" + token;
+        
+        // Prepare template variables
+        Map<String, Object> variables = Map.of(
+            "header", "initiale",
+            "body", "des biens et avoirs",
+            "url", magicLink
+        );
+        
+        // Send email with template
+        emailService.sendEmail(
+            savedAssujetti.getEmail(),
+            "Accès à votre déclaration initiale des biens",
+            "mail_Saisie_Declaration_ASJ", // Template filename without .html
+            variables
+        );
+        
+        return savedAssujetti;
+    } catch (Exception e) {
+        throw new RuntimeException("Erreur lors de la sauvegarde: " + e.getMessage(), e);
     }
-    
-
+}
     public Map<String, Object> verifyAndExtractTokenDetails(String token) {
         try {
             var claims = Jwts.parserBuilder()

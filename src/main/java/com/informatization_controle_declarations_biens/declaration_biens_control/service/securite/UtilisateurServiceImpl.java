@@ -42,35 +42,58 @@ public class UtilisateurServiceImpl implements IUtilisateurService {
         this.declarationData = declarationData;
 
     }
+@Autowired
+private EmailService emailService;
 
-    @Autowired
-    private EmailService emailService;
+@Override
+public Utilisateur save(Utilisateur utilisateur) {
+    String generatedPassword = generateSecurePassword();
+    String encodedPassword = passwordEncoder.encode(generatedPassword);
+    utilisateur.setPassword(encodedPassword);
 
-    @Override
-    public Utilisateur save(Utilisateur utilisateur) {
-        String generatedPassword = generateSecurePassword();
-        String encodedPassword = passwordEncoder.encode(generatedPassword);
-        utilisateur.setPassword(encodedPassword);
-    
-        utilisateurData.save(utilisateur);
-    
-        Map<String, Object> variables = Map.of(
-            "firstname", utilisateur.getFirstname(),
-            "email", utilisateur.getEmail(),
-            "password", generatedPassword,
-            "urlConnexion", "http://localhost:4200/api/auth/authenticate"
-        );
-    
-        try {
-            emailService.sendEmail(utilisateur.getEmail(), "Création de compte utilisateur", "account_creation", variables);
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de l'envoi de l'email : " + e.getMessage(), e);
-        }
-    
-        return utilisateur;
+    utilisateurData.save(utilisateur);
+
+    // Préparer les variables pour le template HTML avec un contenu enrichi
+    Map<String, Object> variables = Map.of(
+        "header", "Bienvenue à la Cour des comptes du Niger",
+        "body", "<strong>Cher(e) " + utilisateur.getFirstname() + ",</strong><br><br>" +
+                "Nous avons le plaisir de vous informer que votre compte utilisateur a été créé avec succès " +
+                "dans le système de gestion de la Cour des comptes du Niger.<br><br>" +
+                
+                "<strong style='color: #253342; font-size: 18px;'>Détails de votre compte</strong><br><br>" +
+                "<div style='background-color: #f8f9fa; border-left: 4px solid #ffa726; padding: 18px; margin: 15px auto; width: 85%; border-radius: 4px;'>" +
+                "  <div style='display: table; width: 100%;'>" +
+                "    <div style='display: table-row;'>" +
+                "      <div style='display: table-cell; width: 150px; padding-bottom: 12px; color: #555;'>Email :</div>" +
+                "      <div style='display: table-cell; font-weight: bold; color: #333;'>" + utilisateur.getEmail() + "</div>" +
+                "    </div>" +
+                "    <div style='display: table-row;'>" +
+                "      <div style='display: table-cell; width: 150px; color: #555;'>Mot de passe :</div>" +
+                "      <div style='display: table-cell; font-weight: bold;'>" +
+                "        <span style='color: #333; background-color: #fff; padding: 4px 10px; border-radius: 3px; border: 1px solid #ddd;'>" + 
+                            generatedPassword + 
+                        "</span>" +
+                "      </div>" +
+                "    </div>" +
+                "  </div>" +
+                "</div><br>" +
+                
+                "Pour des raisons de sécurité, nous vous recommandons vivement de modifier votre mot de passe " +
+                "dès votre première connexion.<br><br>" +
+                
+                "Veuillez cliquer sur le bouton ci-dessous pour accéder à la plateforme :<br>",
+        "url", "http://localhost:4200/api/auth/authenticate"
+    );
+
+    try {
+        // On utilise toujours le même service EmailService mais avec les nouvelles variables
+        emailService.sendEmail(utilisateur.getEmail(), "Bienvenue à la Cour des comptes du Niger", "account_creation", variables);
+    } catch (Exception e) {
+        throw new RuntimeException("Erreur lors de l'envoi de l'email : " + e.getMessage(), e);
     }
-    
 
+    return utilisateur;
+}
     public AuthenticationResponse changePassword(String email, String newPassword) {
         Utilisateur utilisateur = utilisateurData.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));

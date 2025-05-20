@@ -13,10 +13,11 @@ public interface VehiculeProjection {
     float getValeurAcquisition();
     Vocabulaire getEtatGeneral();
     double getKilometrage();
+    Vocabulaire getCarburant();           // <-- ajouté
+    Vocabulaire getTransmission();        // <-- ajouté
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();
     String getFileName();
     String getFileType();
-
 }
