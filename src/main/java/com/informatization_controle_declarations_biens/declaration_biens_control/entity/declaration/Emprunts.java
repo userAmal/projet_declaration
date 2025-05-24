@@ -32,6 +32,10 @@ public class Emprunts {
     private float montantEmprunt;
 
     @Column(nullable = false)
+    private float montantRestant;
+
+
+    @Column(nullable = false)
     private LocalDate dateCreation;
 
     @Column(nullable = false)
@@ -48,7 +52,7 @@ public class Emprunts {
     private String fileType;
     
     @Lob
-        @JsonIgnore 
+    @JsonIgnore 
     @Column(name = "file_data")
     private byte[] fileData;
 }

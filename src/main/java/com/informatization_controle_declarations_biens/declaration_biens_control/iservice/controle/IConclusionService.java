@@ -10,8 +10,8 @@ import java.util.Optional;
 
 public interface IConclusionService {
 
-    Conclusion genererConclusion(Declaration declaration, byte[] pdfContent, String fileName);
-    Conclusion genererLettreOfficielle(Utilisateur utilisateur, Declaration declaration, String contenuUtilisateur);
+    Conclusion genererConclusion(Declaration declaration, byte[] pdfContent, String fileName, boolean estAcceptation);
+    Conclusion genererLettreOfficielle(Utilisateur utilisateur, Declaration declaration, String contenuUtilisateur, boolean estAcceptation);
     ResponseEntity<Resource> telechargerConclusion(Long conclusionId);
     List<Conclusion> getConclusionsByDeclaration(Long declarationId);
     List<Conclusion> getConclusionsByUtilisateur(Long utilisateurId);

@@ -11,7 +11,6 @@ import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -52,7 +51,7 @@ public class ConclusionService implements IConclusionService {
     }
 
     @Override
-    public Conclusion genererConclusion(Declaration declaration, byte[] pdfContent, String fileName) {
+    public Conclusion genererConclusion(Declaration declaration, byte[] pdfContent, String fileName, boolean estAcceptation) {
         // Create and save the conclusion
         Conclusion conclusion = Conclusion.builder()
             .declaration(declaration)
@@ -61,79 +60,84 @@ public class ConclusionService implements IConclusionService {
             .contenuPdf(pdfContent)
             .reference(generateReference())
             .tailleFichier(pdfContent.length)
+            .estAcceptation(estAcceptation)
             .build();
 
         return conclusionData.save(conclusion);
     }
 
     @Override
-    public Conclusion genererLettreOfficielle(Utilisateur utilisateur,
-                                           Declaration declaration,
-                                           String contenuUtilisateur) {
-        // Générer le contenu PDF
-        byte[] pdfContent = genererPdfLettre(utilisateur, declaration, contenuUtilisateur);
+public Conclusion genererLettreOfficielle(Utilisateur utilisateur,
+                                       Declaration declaration,
+                                       String contenuUtilisateur,
+                                       boolean estAcceptation) {
+    // Générer le contenu PDF
+    byte[] pdfContent = genererPdfLettre(utilisateur, declaration, contenuUtilisateur, estAcceptation);
 
-        // Créer et sauvegarder la conclusion
-        String fileName = "lettre-" + generateReference() + ".pdf";
-        Conclusion conclusion = Conclusion.builder()
-            .declaration(declaration)
-            .utilisateur(utilisateur)
-            .dateCreation(LocalDateTime.now())
-            .nomFichier(fileName)
-            .contenuPdf(pdfContent)
-            .reference(generateReference())
-            .tailleFichier(pdfContent.length)
-            .build();
+    // Créer et sauvegarder la conclusion
+    String fileName = "lettre-" + generateReference() + ".pdf";
+    Conclusion conclusion = Conclusion.builder()
+        .declaration(declaration)
+        .utilisateur(utilisateur)
+        .dateCreation(LocalDateTime.now())
+        .nomFichier(fileName)
+        .contenuPdf(pdfContent)
+        .reference(generateReference())
+        .tailleFichier(pdfContent.length)
+        .estAcceptation(estAcceptation) // Ajout du nouveau champ
+        .build();
 
-        return conclusionData.save(conclusion);
+    return conclusionData.save(conclusion);
+}
+
+   private byte[] genererPdfLettre(Utilisateur utilisateur,
+                              Declaration declaration,
+                              String contenuUtilisateur,
+                              boolean estAcceptation) {
+    try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
+        // Préparer le contexte Thymeleaf
+        Context context = new Context();
+        context.setVariable("utilisateur", utilisateur);
+        context.setVariable("declaration", declaration);
+        context.setVariable("reference", generateReference());
+        context.setVariable("estAcceptation", estAcceptation); // Nouvelle variable
+        
+        // Format de date plus approprié pour l'affichage
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        context.setVariable("dateGeneration", LocalDateTime.now().format(formatter));
+        
+        // Récupérer le nom complet de l'assujetti depuis la déclaration
+        String nomComplet = declaration.getAssujetti() != null ? 
+            declaration.getAssujetti().getNom() + " " + declaration.getAssujetti().getPrenom() : "N/A";
+        context.setVariable("nomComplet", nomComplet);
+        
+        // Date de la déclaration
+        String dateDeclaration = declaration.getDateDeclaration() != null ? 
+            declaration.getDateDeclaration().format(formatter) : "N/A";
+        context.setVariable("dateDeclaration", dateDeclaration);
+        
+        context.setVariable("contenuUtilisateur", contenuUtilisateur);
+
+        // Traiter le template
+        String htmlContent = templateEngine.process("lettre-template", context);
+
+        // Configuration de la conversion PDF
+        ConverterProperties properties = new ConverterProperties();
+        
+        // Configurer le chemin de base pour les ressources
+        properties.setBaseUri("classpath:/static/");
+        
+        PdfWriter writer = new PdfWriter(outputStream);
+        PdfDocument pdf = new PdfDocument(writer);
+        
+        // Convertir HTML en PDF
+        HtmlConverter.convertToPdf(htmlContent, pdf, properties);
+        
+        return outputStream.toByteArray();
+    } catch (Exception e) {
+        throw new RuntimeException("Erreur lors de la génération du PDF", e);
     }
-
-    private byte[] genererPdfLettre(Utilisateur utilisateur,
-                                  Declaration declaration,
-                                  String contenuUtilisateur) {
-        try (ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
-            // Préparer le contexte Thymeleaf
-            Context context = new Context();
-            context.setVariable("utilisateur", utilisateur);
-            context.setVariable("declaration", declaration);
-            context.setVariable("reference", generateReference());
-            
-            // Format de date plus approprié pour l'affichage
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-            context.setVariable("dateGeneration", LocalDateTime.now().format(formatter));
-            
-            // Récupérer le nom complet de l'assujetti depuis la déclaration
-            String nomComplet = declaration.getAssujetti() != null ? 
-                declaration.getAssujetti().getNom() + " " + declaration.getAssujetti().getPrenom() : "N/A";
-            context.setVariable("nomComplet", nomComplet);
-            
-            // Date de la déclaration
-            String dateDeclaration = declaration.getDateDeclaration() != null ? 
-                declaration.getDateDeclaration().format(formatter) : "N/A";
-            context.setVariable("dateDeclaration", dateDeclaration);
-            
-            context.setVariable("contenuUtilisateur", contenuUtilisateur);
-
-            // Traiter le template
-            String htmlContent = templateEngine.process("lettre-template", context);
-
-            // Configuration de la conversion PDF
-            ConverterProperties properties = new ConverterProperties();
-            
-            // Configurer le chemin de base pour les ressources
-            properties.setBaseUri("classpath:/static/");
-            
-            PdfWriter writer = new PdfWriter(outputStream);
-            PdfDocument pdf = new PdfDocument(writer);
-            
-            // Convertir HTML en PDF
-            HtmlConverter.convertToPdf(htmlContent, pdf, properties);
-            
-            return outputStream.toByteArray();
-        } catch (Exception e) {
-            throw new RuntimeException("Erreur lors de la génération du PDF", e);
-        }
-    }
+}
 
     @Override
     public ResponseEntity<Resource> telechargerConclusion(Long conclusionId) {

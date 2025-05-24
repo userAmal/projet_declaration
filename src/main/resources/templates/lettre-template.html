@@ -99,9 +99,8 @@
             </div>
         </div>
         
-        <div class="title">
-            LETTRE OFFICIELLE
-        </div>
+        <!-- Titre dynamique seulement -->
+        <div class="title" th:text="${estAcceptation} ? 'RÉQUISITOIRE D\'ACCEPTATION' : 'RÉQUISITOIRE DE REFUS'"></div>
         
         <div class="content">
             <p>

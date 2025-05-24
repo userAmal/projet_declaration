@@ -10,7 +10,7 @@ public class ConclusionRequest {
     private String fileName;
     private Utilisateur utilisateur; // Ajoutez l'utilisateur ici
     private String contenuUtilisateur; // Ajoutez le contenu utilisateur ici
-
+    private boolean estAcceptation;
     // Getters et setters
 
     public Declaration getDeclaration() {
@@ -51,5 +51,13 @@ public class ConclusionRequest {
 
     public void setContenuUtilisateur(String contenuUtilisateur) {
         this.contenuUtilisateur = contenuUtilisateur;
+    }
+
+     public boolean isEstAcceptation() {
+        return estAcceptation;
+    }
+
+    public void setEstAcceptation(boolean estAcceptation) {
+        this.estAcceptation = estAcceptation;
     }
 }

@@ -3,603 +3,909 @@
 <head>
     <meta charset="UTF-8">
     <style>
-        body { 
-            font-family: 'DejaVu Sans', sans-serif; 
-            line-height: 1.3; 
-            margin: 30px;
-            font-size: 11pt;
+        /* Styles de base avec la nouvelle palette */
+       /* Styles de base avec fond blanc */
+        body {
+            font-family: 'DejaVu Sans', Arial, Helvetica, sans-serif;
+            line-height: 1.4;
+            color: #4B4B4B; /* Gris foncé pour le texte */
+            background-color: white !important; /* Fond blanc */
         }
+        
+        .container {
+            width: 94%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px;
+            background-color: white;
+        }
+        /* En-tête */
         .header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px; /* Réduit la marge */
+            padding: 10px 0; /* Réduit le padding */
+            border-bottom: 2px solid #800000;
+            position: relative;
         }
-        h2 { 
-            text-align: center; 
-            margin-bottom: 20px;
-            font-size: 16pt;
+        
+        .header img {
+            height: 70px; /* Taille réduite */
+            margin-bottom: 5px; /* Marge réduite */
         }
-        .section { 
-            margin-bottom: 15px; 
+        
+        /* Titres */
+        h1, h2, h3, h4, h5 {
+            color: #2E7D32;
+            margin-top: 0;
+            margin-bottom: 10px; /* Marge réduite */
         }
+        
+        h2 {
+            font-size: 22px; /* Taille réduite */
+            text-align: center;
+            margin-bottom: 15px; /* Marge réduite */
+            position: relative;
+            padding-bottom: 5px; /* Padding réduit */
+        }
+        
+        h2:after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px; /* Largeur réduite */
+            height: 2px; /* Épaisseur réduite */
+            background-color: #FF9933;
+        }
+        
+        /* Sections principales */
+        .section {
+            margin-bottom: 15px; /* Marge réduite */
+            padding: 10px; /* Padding réduit */
+            background-color: #fff;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
         .section-title {
-            text-align: center; 
+            text-align: center;
             font-weight: bold;
-            margin-bottom: 8px;
+            color: #2E7D32;
+            margin-bottom: 10px; /* Marge réduite */
+            font-size: 15px; /* Taille réduite */
+            padding-bottom: 3px; /* Padding réduit */
+            border-bottom: 1px solid #FF9933;
         }
+        
         .section-title1 {
             font-weight: bold;
-            margin-bottom: 8px;
+            color: #2E7D32;
+            margin-bottom: 8px; /* Marge réduite */
+            font-size: 16px; /* Taille réduite */
+            padding-left: 8px; /* Padding réduit */
+            border-left: 3px solid #FF9933; /* Épaisseur réduite */
         }
+        
         .section-title2 {
             font-weight: bold;
-            margin-bottom: 8px;
-            font-size: 13pt;
+            color: #2E7D32;
+            margin-bottom: 10px; /* Marge réduite */
+            font-size: 15px; /* Taille réduite */
+            background-color: #F2F2F2;
+            padding: 5px 8px; /* Padding réduit */
+            border-radius: 4px;
+            border-left: 3px solid #FF9933; /* Épaisseur réduite */
         }
-        .page-break {
-            page-break-before: always;
+        
+        /* Tableaux */
+        .table-section {
+            margin-bottom: 15px; /* Marge réduite */
         }
-        /* Pour éviter les sauts de page intempestifs */
-        .keep-together {
-            page-break-inside: avoid;
-        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 12px;
-            page-break-inside: auto;
+            margin-bottom: 10px; /* Marge réduite */
+            border-radius: 5px;
+            overflow: hidden;
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
         }
+        
         th, td {
-            border: 1px solid #ddd;
-            padding: 5px;
+            padding: 6px 5px; /* Padding réduit */
             text-align: left;
-            font-size: 10px;
-        }
-        th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        /* Réduire l'espace entre les sections de tableaux */
-        .table-section {
-            margin-bottom: 15px;
-        }
-        /* Style pour les sections de commentaires */
-        .commentaire-section {
-            margin-top: 5px;
-            margin-bottom: 10px;
-            font-size: 10px;
-            border-left: 3px solid #ddd;
-            padding-left: 10px;
-        }
-        .commentaire-section h4 {
-            margin: 5px 0;
             font-size: 11px;
+            border: 1px solid #e0e0e0;
         }
+        
+        th {
+            background-color: #2E7D32;
+            color: white;
+            font-weight: 600;
+        }
+        
+        tr:nth-child(even) {
+            background-color: #F2F2F2;
+        }
+        
+        tr:hover {
+            background-color: rgba(255, 153, 51, 0.1);
+        }
+        
+        /* Commentaires */
+        .commentaire-section {
+            margin: 8px 0; /* Marge réduite */
+            padding: 8px 10px; /* Padding réduit */
+            background-color: #F2F2F2;
+            border-left: 3px solid #800000; /* Épaisseur réduite */
+            border-radius: 0 4px 4px 0;
+        }
+        
+        .commentaire-section h4 {
+            margin: 3px 0; /* Marge réduite */
+            font-size: 11px; /* Taille réduite */
+            color: #800000;
+        }
+        
         .commentaire-section ul {
-            margin: 5px 0;
-            padding-left: 20px;
+            margin: 5px 0; /* Marge réduite */
+            padding-left: 15px; /* Padding réduit */
         }
+        
         .commentaire-section li {
-            margin-bottom: 3px;
+            margin-bottom: 3px; /* Marge réduite */
+            font-size: 10px; /* Taille réduite */
+            line-height: 1.2; /* Espacement réduit */
+            color: #000000; /* Texte en noir */
         }
-        /* Source information */
+        
+        /* Source info */
         .source-info {
             font-style: italic;
-            font-size: 9px;
-            margin-top: 2px;
-            margin-bottom: 5px;
+            font-size: 9px; /* Taille réduite */
+            color: #000000; /* Texte en noir */
+            margin: 3px 0 8px; /* Marge réduite */
+            text-align: right;
         }
-        /* Pour réduire l'espacement du texte */
+        
+        /* Contrôle des sauts de page */
+        .page-break {
+            page-break-before: always;
+            margin-top: 15px; /* Marge réduite */
+            padding-top: 15px; /* Padding réduit */
+            border-top: 1px dashed #FF9933;
+        }
+        
+        .keep-together {
+            page-break-inside: avoid;
+        }
+        
+        /* Améliorations paragraphes */
         p {
-            margin: 5px 0;
+            margin: 5px 0; /* Marge réduite */
+            line-height: 1.3; /* Espacement réduit */
+            text-align: justify;
+            color: #000000; /* Texte en noir */
         }
+        
+        /* Pied de page */
+        .footer {
+            margin-top: 15px; /* Marge réduite */
+            padding-top: 10px; /* Padding réduit */
+            border-top: 1px solid #FF9933;
+            font-size: 9px; /* Taille réduite */
+            color: #000000; /* Texte en noir */
+            text-align: center;
+        }
+        
+        .footer p {
+            margin: 3px 0; /* Marge réduite */
+        }
+        
+
+        
+        .signature-section p:first-child {
+            font-weight: bold;
+            margin-bottom: 30px; /* Marge réduite */
+            color: #000000;
+        }
+        
+        /* Badge de statut */
+        .status-badge {
+            display: inline-block;
+            padding: 2px 8px; /* Padding réduit */
+            background-color: #FF9933;
+            color: white;
+            font-weight: bold;
+            border-radius: 20px;
+            font-size: 11px; /* Taille réduite */
+            letter-spacing: 0.5px;
+            position: absolute;
+            top: 15px; /* Position ajustée */
+            right: 15px; /* Position ajustée */
+        }
+        
+        /* Bloc de coordonnées */
+        .contact-footer {
+            margin-top: 20px; /* Marge réduite */
+            color: white;
+            padding: 10px; /* Padding réduit */
+            border-radius: 5px;
+            font-size: 9px; /* Taille réduite */
+            text-align: center;
+        }
+        
+        .contact-footer p {
+            margin: 3px 0; /* Marge réduite */
+            text-align: center;
+        }
+        
+        .contact-footer a {
+            color: white;
+            text-decoration: none;
+        }
+        
+        /* Boutons/actions */
+        .btn-action {
+            background-color: #800000;
+            color: white;
+            padding: 6px 10px; /* Padding réduit */
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        /* Responsive design */
+        @media print {
+            body {
+                background-color: white;
+            }
+            
+            .container {
+                width: 100%;
+                box-shadow: none;
+            }
+            
+            .page-break {
+                page-break-before: always;
+            }
+            
+            .no-print {
+                display: none;
+            }
+        }
+        /* CSS pour l'évaluation du patrimoine - Style facture professionnelle */
+/* Style pour le label de total fusionné */
+.total-label {
+    font-weight: 700;
+    text-align: left;
+    padding-left: 15px !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+
+
+.total-row td {
+    border-top: 2px solid #34db34;
+    border-bottom: 2px solid #34db34;
+    padding-top: 15px;
+    padding-bottom: 15px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Styliser spécifiquement les montants dans les lignes de total */
+.total-row td:last-child {
+    color: #34db50;
+    font-size: 16px;
+}
+
+
+/* Section du patrimoine net */
+.patrimoine-net {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 5px;
+    margin-top: 20px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+    border-left: 5px solid #3498db;
+}
+
+.patrimoine-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.patrimoine-row:last-child {
+    border-bottom: none;
+}
+
+.patrimoine-row .label {
+    font-weight: 600;
+    color: #495057;
+}
+
+.patrimoine-row .value {
+    font-weight: 500;
+    color: #212529;
+}
+
+.patrimoine-row.total {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 2px solid #dee2e6;
+    font-size: 18px;
+    font-weight: 700;
+    color: #2c3e50;
+}
+
+.patrimoine-row.total .value {
+    color: #3498db;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+
+
+    .patrimoine-row.total {
+        font-size: 16px;
+    }
+}
+
     </style>
 </head>
 <body>
-    <div class="header">
-        <img src="logoniger.jpg" alt="Logo" style="height: 80px; margin-bottom: 5px;"/>    
-    </div>
-    <h2>RAPPORT PROVISOIRE</h2>
+    <div class="container">
+        <div class="header">
+<img th:src="'data:image/jpeg;base64,' + ${logoBase64}" alt="Logo" style="height: 70px;"/>         </div>
+        <h2>RAPPORT PROVISOIRE</h2>
 
-    <div class="section">
-        <div class="section-title">SAISINE</div>
-        <p>Le [[${dateDeclaration}]], [[${civilite}]] [[${nomComplet}]] a transmis sa déclaration [[${typeDeclaration}]] de biens à la Cour en sa qualité de de haut fonctionnaire..</p>
-        <p>A ce titre, il est assujetti à la déclaration des biens.</p>
-    </div>
-
-    <div class="section">
-        <div class="section-title">PRISE EN CHARGE</div>
-        <p>Par ordonnance n° [[${numeroOrdonnance}]] en date du [[${dateOrdonnance}]] du Procureur Général, j'ai, [[${rapporteur}]] été désigné Conseiller Rapporteur pour examiner la déclaration [[${typeDeclaration}]] de [[${civilite}]] [[${nomComplet}]], [[${fonction}]].</p>
-    </div>
-
-    <div class="section" th:if="${introduction != null}">
-        <div class="section-title">INTRODUCTION</div>
-        <p th:utext="${#strings.replace(#strings.escapeXml(introduction),'&#10;','<br/>')}">-</p>
-    </div>
-
-    <div class="section" th:if="${rappelsPreliminaires != null}">
-        <div class="section-title1">A. RAPPELS PRELIMINAIRES</div>
-        <p th:utext="${#strings.replace(#strings.escapeXml(rappelsPreliminaires),'&#10;','<br/>')}">-</p>
-    </div>
-
-    <div class="section" th:if="${methodologieControle != null}">
-        <div class="section-title1">B. METHODOLOGIE DU CONTROLE</div>
-        <p th:utext="${#strings.replace(#strings.escapeXml(methodologieControle),'&#10;','<br/>')}">-</p>
-    </div>
-
-    <!-- Page break stratégique après la section méthodologie -->
-    <div class="page-break"></div>
-
-    <div class="section" th:if="${etapesControle != null}">
-        <div class="section-title1">C. ÉTAPES DU CONTRÔLE</div>
-        <p th:utext="${#strings.replace(#strings.escapeXml(etapesControle),'&#10;','<br/>')}">-</p>
-    </div>
-
-    <div class="section">
-        <div class="section-title2">I. Le respect du délai, du modèle et du contenu de la déclaration des biens des biens institué par le décret no 2021-856/PRN/MJ du 07 octobre 2021</div>
-        <p>La déclaration [[${typeDeclaration}]] a été reçue à la Cour le [[${dateDeclaration}]].</p> 
-        <p>La déclaration transmise respecte le modèle et le contenu tels qu'institués par le décret précité.</p>
-    </div>
-        
-    <div class="section" th:if="${revueBiensDeclarés != null}">
-        <div class="section-title2">II. Biens déclarés</div>
-
-        <!-- SECTION VÉHICULES -->
-        <div class="table-section keep-together" id="section-vehicules" th:if="${vehicules != null and !vehicules.empty}">
-            <div class="section-title">Véhicules</div>
-            <table>
-                <tr>
-                    <th>Désignation</th>
-                    <th>Marque</th>
-                    <th>Immatriculation</th>
-                    <th>Année</th>
-                    <th>Valeur (FCFA)</th>
-                </tr>
-                <tr th:each="vehicule : ${vehicules}">
-                    <td th:text="${vehicule.designation != null ? vehicule.designation.intitule : 'N/A'}">-</td>
-                    <td th:text="${vehicule.marque != null ? vehicule.marque.intitule : 'N/A'}">-</td>
-                    <td th:text="${vehicule.immatriculation}">-</td>
-                    <td th:text="${vehicule.anneeAcquisition}">-</td>
-                    <td th:text="${#numbers.formatDecimal(vehicule.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesVehicules != null and !commentairesVehicules.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesVehicules}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
+        <div class="section">
+            <div class="section-title">SAISINE</div>
+            <p>Le [[${dateDeclaration}]], [[${civilite}]] [[${nomComplet}]] a transmis sa déclaration [[${typeDeclaration}]] de biens à la Cour en sa qualité de de haut fonctionnaire..</p>
+            <p>A ce titre, il est assujetti à la déclaration des biens.</p>
         </div>
-    
-        <!-- SECTION REVENUS -->
-        <div class="table-section keep-together" id="section-revenus" th:if="${revenus != null and !revenus.empty}">
-            <div class="section-title">Revenus</div>
-            <table>
-                <tr>
-                    <th>Salaire Mensuel Net</th>
-                    <th>Autres Revenus</th>
-                    <th>Date</th>
-                </tr>
-                <tr th:each="revenu : ${revenus}">
-                    <td th:text="${#numbers.formatDecimal(revenu.salaireMensuelNet, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${revenu.autresRevenus != null ? revenu.autresRevenus.intitule : 'N/A'}">-</td>
-                    <td th:text="${revenu.dateCreation}">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesRevenus != null and !commentairesRevenus.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesRevenus}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
+
+        <div class="section">
+            <div class="section-title">PRISE EN CHARGE</div>
+            <p>Par ordonnance n° [[${numeroOrdonnance}]] en date du [[${dateOrdonnance}]] du Procureur Général, j'ai, [[${rapporteur}]] été désigné Conseiller Rapporteur pour examiner la déclaration [[${typeDeclaration}]] de [[${civilite}]] [[${nomComplet}]], [[${fonction}]].</p>
         </div>
-    
-        <!-- SECTION FONCIERS BÂTIS -->
-        <div class="table-section keep-together" id="section-foncier-bati" th:if="${fonciersBatis != null and !fonciersBatis.empty}">
-            <div class="section-title">Biens Fonciers Bâtis</div>
-            <table>
-                <tr>
-                    <th>Nature</th>
-                    <th>Année</th>
-                    <th>Mode Acquisition</th>
-                    <th>Réf Cadastrales</th>
-                    <th>Superficie</th>
-                    <th>Localisation</th>
-                    <th>Usage</th>
-                    <th>Coût Acq. (FCFA)</th>
-                    <th>Investis. (FCFA)</th>
-                </tr>
-                <tr th:each="foncier : ${fonciersBatis}">
-                    <td th:text="${foncier.nature != null ? foncier.nature.intitule : 'N/A'}">-</td>
-                    <td th:text="${foncier.anneeConstruction}">-</td>
-                    <td th:text="${foncier.modeAcquisition != null ? foncier.modeAcquisition.intitule : 'N/A'}">-</td>
-                    <td th:text="${foncier.referencesCadastrales}">-</td>
-                    <td th:text="${foncier.superficie}">-</td>
-                    <td th:text="${foncier.localis != null ? foncier.localis.intitule : 'N/A'}">-</td>
-                    <td th:text="${foncier.typeUsage != null ? foncier.typeUsage.intitule : 'N/A'}">-</td>
-                    <td th:text="${#numbers.formatDecimal(foncier.coutAcquisitionFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${#numbers.formatDecimal(foncier.coutInvestissements, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesFonciersBatis != null and !commentairesFonciersBatis.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesFonciersBatis}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
+
+        <div class="section" th:if="${introduction != null}">
+            <div class="section-title">INTRODUCTION</div>
+            <p th:utext="${#strings.replace(#strings.escapeXml(introduction),'&#10;','<br/>')}">-</p>
         </div>
-    
-        <!-- SECTION FONCIERS NON BÂTIS -->
-        <div class="table-section keep-together" id="section-foncier-non-bati" th:if="${fonciersNonBatis != null and !fonciersNonBatis.empty}">
-            <div class="section-title">Biens Fonciers Non Bâtis</div>
-            <table>
-                <tr>
-                    <th>Nature</th>
-                    <th>Mode Acq.</th>
-                    <th>Ilot</th>
-                    <th>Lotissement</th>
-                    <th>Superficie</th>
-                    <th>Localité</th>
-                    <th>Titre</th>
-                    <th>Année</th>
-                    <th>Valeur (FCFA)</th>
-                    <th>Invest. (FCFA)</th>
-                </tr>
-                <tr th:each="foncier : ${fonciersNonBatis}">
-                    <td th:text="${foncier.nature != null ? foncier.nature.intitule : 'N/A'}">-</td>
-                    <td th:text="${foncier.modeAcquisition != null ? foncier.modeAcquisition.intitule : 'N/A'}">-</td>
-                    <td th:text="${foncier.ilot}">-</td>
-                    <td th:text="${foncier.lotissement}">-</td>
-                    <td th:text="${foncier.superficie}">-</td>
-                    <td th:text="${foncier.localite}">-</td>
-                    <td th:text="${foncier.titrePropriete}">-</td>
-                    <td th:text="${foncier.dateAcquis}">-</td>
-                    <td th:text="${#numbers.formatDecimal(foncier.valeurAcquisFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${#numbers.formatDecimal(foncier.coutInvestissements, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesFonciersNonBatis != null and !commentairesFonciersNonBatis.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesFonciersNonBatis}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
+
+        <div class="section" th:if="${rappelsPreliminaires != null}">
+            <div class="section-title1">A. RAPPELS PRELIMINAIRES</div>
+            <p th:utext="${#strings.replace(#strings.escapeXml(rappelsPreliminaires),'&#10;','<br/>')}">-</p>
         </div>
-        
-        <!-- Page break stratégique pour ne pas couper un tableau important -->
+
+        <div class="section" th:if="${methodologieControle != null}">
+            <div class="section-title1">B. METHODOLOGIE DU CONTROLE</div>
+            <p th:utext="${#strings.replace(#strings.escapeXml(methodologieControle),'&#10;','<br/>')}">-</p>
+        </div>
+
+        <!-- Page break stratégique après la section méthodologie -->
         <div class="page-break"></div>
+
+        <div class="section" th:if="${etapesControle != null}">
+            <div class="section-title1">C. ÉTAPES DU CONTRÔLE</div>
+            <p th:utext="${#strings.replace(#strings.escapeXml(etapesControle),'&#10;','<br/>')}">-</p>
+        </div>
+
+        <div class="section">
+            <div class="section-title2">I. Le respect du délai, du modèle et du contenu de la déclaration des biens des biens institué par le décret no 2021-856/PRN/MJ du 07 octobre 2021</div>
+            <p>La déclaration [[${typeDeclaration}]] a été reçue à la Cour le [[${dateDeclaration}]].</p> 
+            <p>La déclaration transmise respecte le modèle et le contenu tels qu'institués par le décret précité.</p>
+        </div>
+            
+        <div class="section" th:if="${revueBiensDeclarés != null}">
+            <div class="section-title2">II. Biens déclarés</div>
+
+            <!-- SECTION VÉHICULES -->
+            <div class="table-section keep-together" id="section-vehicules" th:if="${vehicules != null and !vehicules.empty}">
+                <div class="section-title">Véhicules</div>
+                <table>
+                    <tr>
+                        <th>Désignation</th>
+                        <th>Marque</th>
+                        <th>Immatriculation</th>
+                        <th>Année</th>
+                        <th>Valeur (FCFA)</th>
+                    </tr>
+                    <tr th:each="vehicule : ${vehicules}">
+                        <td th:text="${vehicule.designation != null ? vehicule.designation.intitule : 'N/A'}">-</td>
+                        <td th:text="${vehicule.marque != null ? vehicule.marque.intitule : 'N/A'}">-</td>
+                        <td th:text="${vehicule.immatriculation}">-</td>
+                        <td th:text="${vehicule.anneeAcquisition}">-</td>
+                        <td th:text="${#numbers.formatDecimal(vehicule.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesVehicules != null and !commentairesVehicules.isEmpty()}">
+                    <h4>Demande :</h4>
+                    
+                    <ul>
+                        <li th:each="commentaire : ${commentairesVehicules}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
         
-        <!-- SECTION EMPRUNTS -->
-        <div class="table-section keep-together" id="section-emprunts" th:if="${emprunts != null and !emprunts.empty}">
-            <div class="section-title">Emprunts</div>
-            <table>
-                <tr>
-                    <th>Institution</th>
-                    <th>Numéro Compte</th>
-                    <th>Type</th>
-                    <th>Montant (FCFA)</th>
-                </tr>
-                <tr th:each="emprunt : ${emprunts}">
-                    <td th:text="${emprunt.institutionsFinancieres != null ? emprunt.institutionsFinancieres.intitule : 'N/A'}">-</td>
-                    <td th:text="${emprunt.numeroCompte}">-</td>
-                    <td th:text="${emprunt.typeEmprunt != null ? emprunt.typeEmprunt.intitule : 'N/A'}">-</td>
-                    <td th:text="${#numbers.formatDecimal(emprunt.montantEmprunt, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesEmprunts != null and !commentairesEmprunts.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesEmprunts}" th:text="${commentaire.commentaire}"></li>
-                </ul>
+            <!-- SECTION REVENUS -->
+            <div class="table-section keep-together" id="section-revenus" th:if="${revenus != null and !revenus.empty}">
+                <div class="section-title">Revenus</div>
+                <table>
+                    <tr>
+                        <th>Salaire Mensuel Net</th>
+                        <th>Autres Revenus</th>
+                        <th>Date</th>
+                    </tr>
+                    <tr th:each="revenu : ${revenus}">
+                        <td th:text="${#numbers.formatDecimal(revenu.salaireMensuelNet, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${revenu.autresRevenus != null ? revenu.autresRevenus.intitule : 'N/A'}">-</td>
+                        <td th:text="${revenu.dateCreation}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesRevenus != null and !commentairesRevenus.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesRevenus}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- SECTION FONCIERS BÂTIS -->
+            <div class="table-section keep-together" id="section-foncier-bati" th:if="${fonciersBatis != null and !fonciersBatis.empty}">
+                <div class="section-title">Biens Fonciers Bâtis</div>
+                <table>
+                    <tr>
+                        <th>Nature</th>
+                        <th>Année</th>
+                        <th>Mode Acquisition</th>
+                        <th>Réf Cadastrales</th>
+                        <th>Superficie</th>
+                        <th>Localisation</th>
+                        <th>Usage</th>
+                        <th>Coût Acq. (FCFA)</th>
+                        <th>Investis. (FCFA)</th>
+                    </tr>
+                    <tr th:each="foncier : ${fonciersBatis}">
+                        <td th:text="${foncier.nature != null ? foncier.nature.intitule : 'N/A'}">-</td>
+                        <td th:text="${foncier.anneeConstruction}">-</td>
+                        <td th:text="${foncier.modeAcquisition != null ? foncier.modeAcquisition.intitule : 'N/A'}">-</td>
+                        <td th:text="${foncier.referencesCadastrales}">-</td>
+                        <td th:text="${foncier.superficie}">-</td>
+                        <td th:text="${foncier.localis != null ? foncier.localis.intitule : 'N/A'}">-</td>
+                        <td th:text="${foncier.typeUsage != null ? foncier.typeUsage.intitule : 'N/A'}">-</td>
+                        <td th:text="${#numbers.formatDecimal(foncier.coutAcquisitionFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${#numbers.formatDecimal(foncier.coutInvestissements, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesFonciersBatis != null and !commentairesFonciersBatis.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesFonciersBatis}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- SECTION FONCIERS NON BÂTIS -->
+            <div class="table-section keep-together" id="section-foncier-non-bati" th:if="${fonciersNonBatis != null and !fonciersNonBatis.empty}">
+                <div class="section-title">Biens Fonciers Non Bâtis</div>
+                <table>
+                    <tr>
+                        <th>Nature</th>
+                        <th>Mode Acq.</th>
+                        <th>Ilot</th>
+                        <th>Lotissement</th>
+                        <th>Superficie</th>
+                        <th>Localité</th>
+                        <th>Titre</th>
+                        <th>Année</th>
+                        <th>Valeur (FCFA)</th>
+                        <th>Invest. (FCFA)</th>
+                    </tr>
+                    <tr th:each="foncier : ${fonciersNonBatis}">
+                        <td th:text="${foncier.nature != null ? foncier.nature.intitule : 'N/A'}">-</td>
+                        <td th:text="${foncier.modeAcquisition != null ? foncier.modeAcquisition.intitule : 'N/A'}">-</td>
+                        <td th:text="${foncier.ilot}">-</td>
+                        <td th:text="${foncier.lotissement}">-</td>
+                        <td th:text="${foncier.superficie}">-</td>
+                        <td th:text="${foncier.localite}">-</td>
+                        <td th:text="${foncier.titrePropriete}">-</td>
+                        <td th:text="${foncier.dateAcquis}">-</td>
+                        <td th:text="${#numbers.formatDecimal(foncier.valeurAcquisFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${#numbers.formatDecimal(foncier.coutInvestissements, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesFonciersNonBatis != null and !commentairesFonciersNonBatis.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesFonciersNonBatis}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Page break stratégique pour ne pas couper un tableau important -->
+            <div class="page-break"></div>
+            
+            <!-- SECTION EMPRUNTS -->
+            <div class="table-section keep-together" id="section-emprunts" th:if="${emprunts != null and !emprunts.empty}">
+                <div class="section-title">Emprunts</div>
+                <table>
+                    <tr>
+                        <th>Institution</th>
+                        <th>Numéro Compte</th>
+                        <th>Type</th>
+                        <th>Montant (FCFA)</th>
+                    </tr>
+                    <tr th:each="emprunt : ${emprunts}">
+                        <td th:text="${emprunt.institutionsFinancieres != null ? emprunt.institutionsFinancieres.intitule : 'N/A'}">-</td>
+                        <td th:text="${emprunt.numeroCompte}">-</td>
+                        <td th:text="${emprunt.typeEmprunt != null ? emprunt.typeEmprunt.intitule : 'N/A'}">-</td>
+                        <td th:text="${#numbers.formatDecimal(emprunt.montantEmprunt, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesEmprunts != null and !commentairesEmprunts.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesEmprunts}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- SECTION DISPONIBILITÉS BANCAIRES -->
+            <div class="table-section keep-together" id="section-disponibilites-banque" th:if="${disponibilitesBanque != null and !disponibilitesBanque.empty}">
+                <div class="section-title">Disponibilités Bancaires</div>
+                <table>
+                    <tr>
+                        <th>Banque</th>
+                        <th>Numéro Compte</th>
+                        <th>Type Compte</th>
+                        <th>Solde (FCFA)</th>
+                        <th>Date Solde</th>
+                    </tr>
+                    <tr th:each="disponibilite : ${disponibilitesBanque}">
+                        <td th:text="${disponibilite.banque != null ? disponibilite.banque.intitule : 'N/A'}">-</td>
+                        <td th:text="${disponibilite.numeroCompte}">-</td>
+                        <td th:text="${disponibilite.typeCompte != null ? disponibilite.typeCompte.intitule : 'N/A'}">-</td>
+                        <td th:text="${#numbers.formatDecimal(disponibilite.soldeFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${disponibilite.dateSolde}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesDisponibilitesBanque != null and !commentairesDisponibilitesBanque.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesDisponibilitesBanque}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- SECTION ESPÈCES -->
+            <div class="table-section keep-together" id="section-especes" th:if="${especes != null and !especes.empty}">
+                <div class="section-title">Espèces</div>
+                <table>
+                    <tr>
+                        <th>Monnaie</th>
+                        <th>Devise</th>
+                        <th>Taux Change</th>
+                        <th>Montant FCFA</th>
+                        <th>Total FCFA</th>
+                        <th>Date</th>
+                    </tr>
+                    <tr th:each="espece : ${especes}">
+                        <td th:text="${#numbers.formatDecimal(espece.monnaie, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${#numbers.formatDecimal(espece.devise, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${espece.tauxChange}">-</td>
+                        <td th:text="${#numbers.formatDecimal(espece.montantFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${#numbers.formatDecimal(espece.montantTotalFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${espece.dateEspece}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesEspeces != null and !commentairesEspeces.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesEspeces}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- SECTION ANIMAUX -->
+            <div class="table-section keep-together" id="section-animaux" th:if="${animaux != null and !animaux.empty}">
+                <div class="section-title">Animaux</div>
+                <table>
+                    <tr>
+                        <th>Espèce</th>
+                        <th>Nombre Têtes</th>
+                        <th>Mode Acquisition</th>
+                        <th>Année</th>
+                        <th>Valeur (FCFA)</th>
+                        <th>Localité</th>
+                    </tr>
+                    <tr th:each="animal : ${animaux}">
+                        <td th:text="${animal.especes}">-</td>
+                        <td th:text="${animal.nombreTetes}">-</td>
+                        <td th:text="${animal.modeAcquisition != null ? animal.modeAcquisition.intitule : 'N/A'}">-</td>
+                        <td th:text="${animal.anneeAcquisition}">-</td>
+                        <td th:text="${#numbers.formatDecimal(animal.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${animal.localite != null ? animal.localite.intitule : 'N/A'}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesAnimaux != null and !commentairesAnimaux.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesAnimaux}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- Page break si nécessaire pour éviter de couper les tableaux suivants -->
+            <div class="page-break" th:if="${meublesMeublants != null and !meublesMeublants.empty and titres != null and !titres.empty}"></div>
+        
+            <!-- SECTION MEUBLES MEUBLANTS -->
+            <div class="table-section keep-together" id="section-meubles" th:if="${meublesMeublants != null and !meublesMeublants.empty}">
+                <div class="section-title">Meubles Meublants</div>
+                <table>
+                    <tr>
+                        <th>Désignation</th>
+                        <th>Année</th>
+                        <th>Valeur (FCFA)</th>
+                        <th>État</th>
+                    </tr>
+                    <tr th:each="meuble : ${meublesMeublants}">
+                        <td th:text="${meuble.designation != null ? meuble.designation.intitule : 'N/A'}">-</td>
+                        <td th:text="${meuble.anneeAcquisition}">-</td>
+                        <td th:text="${#numbers.formatDecimal(meuble.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${meuble.etatGeneral != null ? meuble.etatGeneral.intitule : 'N/A'}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesMeublesMeublants != null and !commentairesMeublesMeublants.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesMeublesMeublants}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- SECTION TITRES -->
+            <div class="table-section keep-together" id="section-titres" th:if="${titres != null and !titres.empty}">
+                <div class="section-title">Titres</div>
+                <table>
+                    <tr>
+                        <th>Nature/Actions</th>
+                        <th>Valeur (FCFA)</th>
+                        <th>Emplacement</th>
+                        <th>Précisions</th>
+                    </tr>
+                    <tr th:each="titre : ${titres}">
+                        <td th:text="${titre.designationNatureActions != null ? titre.designationNatureActions.intitule : 'N/A'}">-</td>
+                        <td th:text="${#numbers.formatDecimal(titre.valeurEmplacement, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${titre.emplacement != null ? titre.emplacement.intitule : 'N/A'}">-</td>
+                        <td th:text="${titre.autrePrecisions != null ? titre.autrePrecisions.intitule : 'N/A'}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesTitres != null and !commentairesTitres.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesTitres}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- SECTION CRÉANCES -->
+            <div class="table-section keep-together" id="section-creances" th:if="${creances != null and !creances.empty}">
+                <div class="section-title">Créances</div>
+                <table>
+                    <tr>
+                        <th>Débiteur</th>
+                        <th>Montant (FCFA)</th>
+                        <th>Précisions</th>
+                    </tr>
+                    <tr th:each="creance : ${creances}">
+                        <td th:text="${creance.debiteurs != null ? creance.debiteurs.intitule : 'N/A'}">-</td>
+                        <td th:text="${#numbers.formatDecimal(creance.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${creance.autresPrecisions != null ? creance.autresPrecisions.intitule : 'N/A'}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesCreances != null and !commentairesCreances.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesCreances}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- SECTION AUTRES DETTES -->
+            <div class="table-section keep-together" id="section-autres-dettes" th:if="${autresDettes != null and !autresDettes.empty}">
+                <div class="section-title">Autres Dettes</div>
+                <table>
+                    <tr>
+                        <th>Créancier</th>
+                        <th>Montant (FCFA)</th>
+                        <th>Justificatifs</th>
+                        <th>Précisions</th>
+                    </tr>
+                    <tr th:each="dette : ${autresDettes}">
+                        <td th:text="${dette.creanciers != null ? dette.creanciers.intitule : 'N/A'}">-</td>
+                        <td th:text="${#numbers.formatDecimal(dette.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${dette.justificatifs != null ? dette.justificatifs.intitule : 'N/A'}">-</td>
+                        <td th:text="${dette.autresPrecisions != null ? dette.autresPrecisions.intitule : 'N/A'}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesAutresDettes != null and !commentairesAutresDettes.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesAutresDettes}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- Section 14: Autres Biens de Valeur -->
+            <div class="section" id="section-autres-biens" th:if="${autresBiensDeValeur != null and !autresBiensDeValeur.empty}">
+                <div class="section-title">Autres Biens de Valeur</div>
+                <table>
+                    <tr>
+                        <th>Désignation</th>
+                        <th>Localité</th>
+                        <th>Année</th>
+                        <th>Valeur (FCFA)</th>
+                        <th>Précisions</th>
+                        <th>Type</th>
+                    </tr>
+                    <tr th:each="bien : ${autresBiensDeValeur}">
+                        <td th:text="${bien.designation != null ? bien.designation.intitule : 'N/A'}">-</td>
+                        <td th:text="${bien.localite != null ? bien.localite.intitule : 'N/A'}">-</td>
+                        <td th:text="${bien.anneeAcquis}">-</td>
+                        <td th:text="${#numbers.formatDecimal(bien.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${bien.autrePrecisions != null ? bien.autrePrecisions.intitule : 'N/A'}">-</td>
+                        <td th:text="${bien.type != null ? bien.type.intitule : 'N/A'}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesAutresBiensDeValeur != null and !commentairesAutresBiensDeValeur.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesAutresBiensDeValeur}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
+            </div>
+        
+            <!-- Section 15: Appareils Électroménagers -->
+            <div class="section" id="section-appareils-electro" th:if="${appareilsElectromenagers != null and !appareilsElectromenagers.empty}">
+                <div class="section-title">Appareils Électroménagers</div>
+                <table>
+                    <tr>
+                        <th>Désignation</th>
+                        <th>Année</th>
+                        <th>Valeur (FCFA)</th>
+                        <th>État</th>
+                    </tr>
+                    <tr th:each="appareil : ${appareilsElectromenagers}">
+                        <td th:text="${appareil.designation != null ? appareil.designation.intitule : 'N/A'}">-</td>
+                        <td th:text="${appareil.anneeAcquisition}">-</td>
+                        <td th:text="${#numbers.formatDecimal(appareil.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                        <td th:text="${appareil.etatGeneral != null ? appareil.etatGeneral.intitule : 'N/A'}">-</td>
+                    </tr>
+                </table>
+                <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
+                <!-- Affichage conditionnel des commentaires -->
+                <div class="commentaire-section" th:if="${commentairesAppareilsElectromenagers != null and !commentairesAppareilsElectromenagers.isEmpty()}">
+                    <h4>Demande :</h4>
+                    <ul>
+                        <li th:each="commentaire : ${commentairesAppareilsElectromenagers}" th:text="${commentaire.commentaire}"></li>
+                    </ul>
+                </div>
             </div>
         </div>
-    
-        <!-- SECTION DISPONIBILITÉS BANCAIRES -->
-        <div class="table-section keep-together" id="section-disponibilites-banque" th:if="${disponibilitesBanque != null and !disponibilitesBanque.empty}">
-            <div class="section-title">Disponibilités Bancaires</div>
-            <table>
-                <tr>
-                    <th>Banque</th>
-                    <th>Numéro Compte</th>
-                    <th>Type Compte</th>
-                    <th>Solde (FCFA)</th>
-                    <th>Date Solde</th>
-                </tr>
-                <tr th:each="disponibilite : ${disponibilitesBanque}">
-                    <td th:text="${disponibilite.banque != null ? disponibilite.banque.intitule : 'N/A'}">-</td>
-                    <td th:text="${disponibilite.numeroCompte}">-</td>
-                    <td th:text="${disponibilite.typeCompte != null ? disponibilite.typeCompte.intitule : 'N/A'}">-</td>
-                    <td th:text="${#numbers.formatDecimal(disponibilite.soldeFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${disponibilite.dateSolde}">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesDisponibilitesBanque != null and !commentairesDisponibilitesBanque.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesDisponibilitesBanque}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
-        </div>
-    
-        <!-- SECTION ESPÈCES -->
-        <div class="table-section keep-together" id="section-especes" th:if="${especes != null and !especes.empty}">
-            <div class="section-title">Espèces</div>
-            <table>
-                <tr>
-                    <th>Monnaie</th>
-                    <th>Devise</th>
-                    <th>Taux Change</th>
-                    <th>Montant FCFA</th>
-                    <th>Total FCFA</th>
-                    <th>Date</th>
-                </tr>
-                <tr th:each="espece : ${especes}">
-                    <td th:text="${#numbers.formatDecimal(espece.monnaie, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${#numbers.formatDecimal(espece.devise, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${espece.tauxChange}">-</td>
-                    <td th:text="${#numbers.formatDecimal(espece.montantFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${#numbers.formatDecimal(espece.montantTotalFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${espece.dateEspece}">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesEspeces != null and !commentairesEspeces.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesEspeces}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
-        </div>
-    
-        <!-- SECTION ANIMAUX -->
-        <div class="table-section keep-together" id="section-animaux" th:if="${animaux != null and !animaux.empty}">
-            <div class="section-title">Animaux</div>
-            <table>
-                <tr>
-                    <th>Espèce</th>
-                    <th>Nombre Têtes</th>
-                    <th>Mode Acquisition</th>
-                    <th>Année</th>
-                    <th>Valeur (FCFA)</th>
-                    <th>Localité</th>
-                </tr>
-                <tr th:each="animal : ${animaux}">
-                    <td th:text="${animal.especes}">-</td>
-                    <td th:text="${animal.nombreTetes}">-</td>
-                    <td th:text="${animal.modeAcquisition != null ? animal.modeAcquisition.intitule : 'N/A'}">-</td>
-                    <td th:text="${animal.anneeAcquisition}">-</td>
-                    <td th:text="${#numbers.formatDecimal(animal.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${animal.localite != null ? animal.localite.intitule : 'N/A'}">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesAnimaux != null and !commentairesAnimaux.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesAnimaux}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
-        </div>
-    
-        <!-- Page break si nécessaire pour éviter de couper les tableaux suivants -->
-        <div class="page-break" th:if="${meublesMeublants != null and !meublesMeublants.empty and titres != null and !titres.empty}"></div>
-    
-        <!-- SECTION MEUBLES MEUBLANTS -->
-        <div class="table-section keep-together" id="section-meubles" th:if="${meublesMeublants != null and !meublesMeublants.empty}">
-            <div class="section-title">Meubles Meublants</div>
-            <table>
-                <tr>
-                    <th>Désignation</th>
-                    <th>Année</th>
-                    <th>Valeur (FCFA)</th>
-                    <th>État</th>
-                </tr>
-                <tr th:each="meuble : ${meublesMeublants}">
-                    <td th:text="${meuble.designation != null ? meuble.designation.intitule : 'N/A'}">-</td>
-                    <td th:text="${meuble.anneeAcquisition}">-</td>
-                    <td th:text="${#numbers.formatDecimal(meuble.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${meuble.etatGeneral != null ? meuble.etatGeneral.intitule : 'N/A'}">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesMeublesMeublants != null and !commentairesMeublesMeublants.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesMeublesMeublants}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
-        </div>
-    
-        <!-- SECTION TITRES -->
-        <div class="table-section keep-together" id="section-titres" th:if="${titres != null and !titres.empty}">
-            <div class="section-title">Titres</div>
-            <table>
-                <tr>
-                    <th>Nature/Actions</th>
-                    <th>Valeur (FCFA)</th>
-                    <th>Emplacement</th>
-                    <th>Précisions</th>
-                </tr>
-                <tr th:each="titre : ${titres}">
-                    <td th:text="${titre.designationNatureActions != null ? titre.designationNatureActions.intitule : 'N/A'}">-</td>
-                    <td th:text="${#numbers.formatDecimal(titre.valeurEmplacement, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${titre.emplacement != null ? titre.emplacement.intitule : 'N/A'}">-</td>
-                    <td th:text="${titre.autrePrecisions != null ? titre.autrePrecisions.intitule : 'N/A'}">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesTitres != null and !commentairesTitres.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesTitres}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
-        </div>
-    
-        <!-- SECTION CRÉANCES -->
-        <div class="table-section keep-together" id="section-creances" th:if="${creances != null and !creances.empty}">
-            <div class="section-title">Créances</div>
-            <table>
-                <tr>
-                    <th>Débiteur</th>
-                    <th>Montant (FCFA)</th>
-                    <th>Précisions</th>
-                </tr>
-                <tr th:each="creance : ${creances}">
-                    <td th:text="${creance.debiteurs != null ? creance.debiteurs.intitule : 'N/A'}">-</td>
-                    <td th:text="${#numbers.formatDecimal(creance.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${creance.autresPrecisions != null ? creance.autresPrecisions.intitule : 'N/A'}">-</td>
-                </tr>
-            </table>
-            <div class="source-info">Source : Déclaration [[${typeDeclaration}]].</div>
-            <!-- Affichage conditionnel des commentaires -->
-            <div class="commentaire-section" th:if="${commentairesCreances != null and !commentairesCreances.isEmpty()}">
-                <h4>Demande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesCreances}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
-        </div>
-    
-        <!-- SECTION AUTRES DETTES -->
-        <div class="table-section keep-together" id="section-autres-dettes" th:if="${autresDettes != null and !autresDettes.empty}">
-            <div class="section-title">Autres Dettes</div>
-            <table>
-                <tr>
-                    <th>Créancier</th>
-                    <th>Montant (FCFA)</th>
-                    <th>Justificatifs</th>
-                    <th>Précisions</th>
-                </tr>
-                <tr th:each="dette : ${autresDettes}">
-                    <td th:text="${dette.creanciers != null ? dette.creanciers.intitule : 'N/A'}">-</td>
-                    <td th:text="${#numbers.formatDecimal(dette.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${dette.justificatifs != null ? dette.justificatifs.intitule : 'N/A'}">-</td>
-                    <td th:text="${dette.autresPrecisions != null ? dette.autresPrecisions.intitule : 'N/A'}">-</td>
-                </tr>
-            </table>
-            <p>Source : Déclaration  [[${typeDeclaration}]].</p>
-            <!-- Affichage conditionnel des commentaires -->
-            <div th:if="${commentairesAutresDettes != null and !commentairesAutresDettes.isEmpty()}">
-                <h4>Demmande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesAutresDettes}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
 
-        </div>
+<div class="section" th:if="${evaluationPatrimoine != null}">
+    <div class="section-title2">III. L'évaluation du patrimoine</div>
     
-        <!-- Section 14: Autres Biens de Valeur -->
-        <div class="section" id="section-autres-biens" th:if="${autresBiensDeValeur != null and !autresBiensDeValeur.empty}">
-            <div class="section-title">Autres Biens de Valeur</div>
-            <table>
-                <tr>
-                    <th>Désignation</th>
-                    <th>Localité</th>
-                    <th>Année</th>
-                    <th>Valeur (FCFA)</th>
-                    <th>Précisions</th>
-                    <th>Type</th>
-                </tr>
-                <tr th:each="bien : ${autresBiensDeValeur}">
-                    <td th:text="${bien.designation != null ? bien.designation.intitule : 'N/A'}">-</td>
-                    <td th:text="${bien.localite != null ? bien.localite.intitule : 'N/A'}">-</td>
-                    <td th:text="${bien.anneeAcquis}">-</td>
-                    <td th:text="${#numbers.formatDecimal(bien.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${bien.autrePrecisions != null ? bien.autrePrecisions.intitule : 'N/A'}">-</td>
-                    <td th:text="${bien.type != null ? bien.type.intitule : 'N/A'}">-</td>
-                </tr>
-            </table>
-            <p>Source : Déclaration  [[${typeDeclaration}]].</p>
-            <!-- Affichage conditionnel des commentaires -->
-            <div th:if="${commentairesAutresBiensDeValeur != null and !commentairesAutresBiensDeValeur.isEmpty()}">
-                <h4>Demmande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesAutresBiensDeValeur}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
-
-        </div>
+    <h3>Actifs</h3>
+    <table class="table-actifs">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nature</th>
+                <th>Montant (FCFA)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="actif : ${evaluationPatrimoine.actifs}"
+                 th:class="${actif.id == 'totalActifs'} ? 'total-row' : ''">
+                <td th:if="${actif.id != 'totalActifs'}" th:text="${actif.id}">-</td>
+                <td th:if="${actif.id == 'totalActifs'}" colspan="2" th:text="${actif.nature}" class="total-label">TOTAL ACTIFS</td>
+                <td th:if="${actif.id != 'totalActifs'}" th:text="${actif.nature}">-</td>
+                <td class="montant" th:text="${#numbers.formatDecimal(actif.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+            </tr>
+        </tbody>
+    </table>
     
-        <!-- Section 15: Appareils Électroménagers -->
-        <div class="section" id="section-appareils-electro" th:if="${appareilsElectromenagers != null and !appareilsElectromenagers.empty}">
-            <div class="section-title">Appareils Électroménagers</div>
-            <table>
-                <tr>
-                    <th>Désignation</th>
-                    <th>Année</th>
-                    <th>Valeur (FCFA)</th>
-                    <th>État</th>
-                </tr>
-                <tr th:each="appareil : ${appareilsElectromenagers}">
-                    <td th:text="${appareil.designation != null ? appareil.designation.intitule : 'N/A'}">-</td>
-                    <td th:text="${appareil.anneeAcquisition}">-</td>
-                    <td th:text="${#numbers.formatDecimal(appareil.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
-                    <td th:text="${appareil.etatGeneral != null ? appareil.etatGeneral.intitule : 'N/A'}">-</td>
-                </tr>
-            </table>
-            <p>Source : Déclaration  [[${typeDeclaration}]].</p>
-            <!-- Affichage conditionnel des commentaires -->
-            <div th:if="${commentairesAppareilsElectromenagers != null and !commentairesAppareilsElectromenagers.isEmpty()}">
-                <h4>Demmande :</h4>
-                <ul>
-                    <li th:each="commentaire : ${commentairesAppareilsElectromenagers}" th:text="${commentaire.commentaire}"></li>
-                </ul>
-            </div>
-
+    <h3>Passifs</h3>
+    <table class="table-passifs">
+        <thead>
+            <tr>
+                <th>Type</th>
+                <th>Montant Prêt (FCFA)</th>
+                <th>Date</th>
+                <th>Montant Restant (FCFA)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="passif : ${evaluationPatrimoine.passifs}"
+                th:class="${passif.typeDette == 'TOTAL PASSIFS'} ? 'total-row' : ''">
+                <td th:text="${passif.typeDette}">-</td>
+                <td th:text="${#numbers.formatDecimal(passif.montantPret, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${passif.datePret}">-</td>
+                <td th:text="${#numbers.formatDecimal(passif.montantRestant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="section-title">Patrimoine Net</div>
+    <div class="patrimoine-net">
+        <div class="patrimoine-row">
+            <span class="label">TOTAL ACTIFS:</span>
+            <span class="value" th:text="${#numbers.formatDecimal(evaluationPatrimoine.actifs[#lists.size(evaluationPatrimoine.actifs)-1].montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'"></span>
         </div>
+        <div class="patrimoine-row">
+            <span class="label">MOINS TOTAL PASSIFS:</span>
+            <span class="value" th:text="${#numbers.formatDecimal(evaluationPatrimoine.passifs[#lists.size(evaluationPatrimoine.passifs)-1].montantRestant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'"></span>
         </div>
-
-    <div class="section" th:if="${evaluationPatrimoine != null}">
-        <div class="section-title2">III. L'évaluation du patrimoine estimé par le déclarant</div>
-        <p th:utext="${#strings.replace(#strings.escapeXml(evaluationPatrimoine),'&#10;','<br/>')}">-</p>
+        <div class="patrimoine-row total">
+            <span class="label">PATRIMOINE NET:</span>
+            <span class="value" th:text="${#numbers.formatDecimal(evaluationPatrimoine.patrimoineNet, 1, 'COMMA', 2, 'POINT')} + ' FCFA'"></span>
+        </div>
     </div>
-
-    <div class="section">
-        <div class="section-title2">IV.	Transmission du rapport à l’assujetti </div>
-        <p>L’assujetti est invité à prendre connaissance du rapport provisoire, y apporter les réponses aux observations.
-            Sur la foi de l’accusé de réception du rapport provisoire, à l’écoulement du délai imparti pour réagir, le dossier sera délibéré en considérant le silence de l’assujetti comme un acquiescement. 
-            Fait en notre Cabinet à Niamey, le <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy à HH:mm')}">01/01/2025 à 12:00</span>
-            </p>
-            <p style="text-align: right; font-weight: bold;">Le Conseiller Rapporteur</p>
-            <p style="text-align: right;">[[${rapporteur}]]</p>
+</div>
+        
+        <div class="user-content" th:text="${contenu}">
+            [Le contenu saisi par l'utilisateur apparaîtra ici avec mise en forme préservée]
         </div>
 
-<!-- <div class="footer" style="text-align: center; margin-top: 60px; font-size: 10pt;">
-    <p>
-        BP: 14 034 Niamey-Niger &nbsp;|&nbsp;
-        Tél. : (+227) 20 72 68 00 &nbsp;|&nbsp;
-        Fax: (+227) 20 72 68 03 &nbsp;|&nbsp;
-        Email : courdescomptes@courdescomptes.ne &nbsp;|&nbsp;
-        Site Web: <a href="http://www.courdescomptes.ne" style="color: inherit; text-decoration: none;">www.courdescomptes.ne</a>
-    </p>
-    <p>
-        Document généré le 
-        <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy à HH:mm')}">01/01/2025 à 12:00</span>
-        — Page 3
-    </p>
-</div> -->
-    <!-- Pied de page -->
-    <!-- <div class="footer" style="text-align: center; margin-top: 40px;">
-        <p>Document généré le <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy à HH:mm')}">01/01/2025 à 12:00</span></p>
-    </div> -->
+        <div class="section">
+            
+            <div class="signature-section">
+                <p style="text-align: right; font-weight: bold;">Le Conseiller Rapporteur</p>
+            <p style="text-align: right;">[[${rapporteur}]]</p>
+            </div>
+        </div>
+
+        <div class="contact-footer">
+            <p>BP: 14 034 Niamey-Niger | Tél. : (+227) 20 72 68 00 | Fax: (+227) 20 72 68 03</p>
+            <p>Email : courdescomptes@courdescomptes.ne | Site Web: www.courdescomptes.ne</p>
+            <p>Document généré le <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy à HH:mm')}">01/01/2025 à 12:00</span></p>
+        </div>
+    </div>
 </body>
 </html>

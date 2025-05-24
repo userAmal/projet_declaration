@@ -158,16 +158,16 @@ public Utilisateur save(Utilisateur utilisateur) {
     }  */
 
 
-    @Override
+   @Override 
 public Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateurDetails) {
     Optional<Utilisateur> existingUtilisateurOpt = utilisateurData.findById(id);
-
+    
     if (existingUtilisateurOpt.isEmpty()) {
         throw new RuntimeException("Utilisateur non trouvé");
     }
     
     Utilisateur existingUtilisateur = existingUtilisateurOpt.get();
-
+    
     // Validation email
     if (utilisateurDetails.getEmail() != null) {
         if (utilisateurDetails.getEmail().isEmpty()) {
@@ -183,7 +183,7 @@ public Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateurDetails) 
         }
         existingUtilisateur.setEmail(utilisateurDetails.getEmail());
     }
-
+    
     // Validation nom et prénom
     if (utilisateurDetails.getFirstname() != null) {
         if (utilisateurDetails.getFirstname().trim().isEmpty()) {
@@ -219,16 +219,11 @@ public Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateurDetails) 
     if (utilisateurDetails.getRole() != null) {
         existingUtilisateur.setRole(utilisateurDetails.getRole());
     }
-
-    // Validation mot de passe
-    if (utilisateurDetails.getPassword() != null && !utilisateurDetails.getPassword().isEmpty()) {
-        if (utilisateurDetails.getPassword().length() < 8) {
-            throw new RuntimeException("Le mot de passe doit contenir au moins 8 caractères");
-        }
-        String encodedPassword = passwordEncoder.encode(utilisateurDetails.getPassword());
-        existingUtilisateur.setPassword(encodedPassword);
-    }
-
+    
+    // IMPORTANT: On ne modifie pas le mot de passe dans cette méthode
+    // Le mot de passe reste inchangé, peu importe ce qui est envoyé dans utilisateurDetails
+    // Pour modifier le mot de passe, utilisez une méthode dédiée (ex: changerMotDePasse)
+    
     return utilisateurData.save(existingUtilisateur);
 }
 

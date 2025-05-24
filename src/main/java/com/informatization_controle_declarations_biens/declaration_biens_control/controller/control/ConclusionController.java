@@ -33,37 +33,44 @@ public class ConclusionController {
     @PostMapping("/generer/{declarationId}")
     public Conclusion genererConclusion(
             @PathVariable Long declarationId,
-            @RequestParam("file") MultipartFile file) throws IOException {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam boolean estAcceptation) throws IOException {
         
-        // Récupérer la déclaration complète depuis la base de données
         Declaration declaration = declarationService.findById(declarationId)
                 .orElseThrow(() -> new RuntimeException("Déclaration non trouvée avec l'ID: " + declarationId));
         
         return conclusionService.genererConclusion(
             declaration, 
             file.getBytes(), 
-            file.getOriginalFilename());
+            file.getOriginalFilename(),
+            estAcceptation); // Ajout du paramètre
     }
 
     @PostMapping("/lettre/generer")
-public Conclusion genererLettreOfficielle(
-        @RequestParam Long utilisateurId,
-        @RequestParam Long declarationId,
-        @RequestParam String contenuUtilisateur) {
-    
-    // DEBUG - À ajouter temporairement
-    System.out.println("Reçu utilisateurId: " + utilisateurId);
-    System.out.println("Reçu declarationId: " + declarationId);
-    System.out.println("Reçu contenu: " + contenuUtilisateur);
-    
-    Utilisateur utilisateur = utilisateurService.findById(utilisateurId)
-            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-    
-    Declaration declaration = declarationService.findById(declarationId)
-            .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
-    
-    return conclusionService.genererLettreOfficielle(utilisateur, declaration, contenuUtilisateur);
-}
+    public Conclusion genererLettreOfficielle(
+            @RequestParam Long utilisateurId,
+            @RequestParam Long declarationId,
+            @RequestParam String contenuUtilisateur,
+            @RequestParam boolean estAcceptation) {
+        
+        // Debug (optionnel)
+        System.out.println("Reçu utilisateurId: " + utilisateurId);
+        System.out.println("Reçu declarationId: " + declarationId);
+        System.out.println("Reçu contenu: " + contenuUtilisateur);
+        System.out.println("Type de réquisitoire: " + (estAcceptation ? "Acceptation" : "Refus"));
+        
+        Utilisateur utilisateur = utilisateurService.findById(utilisateurId)
+                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+        
+        Declaration declaration = declarationService.findById(declarationId)
+                .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
+        
+        return conclusionService.genererLettreOfficielle(
+            utilisateur, 
+            declaration, 
+            contenuUtilisateur,
+            estAcceptation); // Ajout du paramètre
+    }
 
     @GetMapping("/telecharger/{conclusionId}")
     public ResponseEntity<Resource> telechargerConclusion(@PathVariable Long conclusionId) {

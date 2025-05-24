@@ -12,6 +12,8 @@ public interface IVehiculeService extends IGenericService<Vehicule, Long> {
     List<Vehicule> findByDesignation(Long designationId);
     double getPrediction(Vehicule vehicule);
     byte[] generatePdfRapport(List<PredictionResult> results);
+    List<Vehicule> findAllById(List<Long> ids);
+
 
 
 }

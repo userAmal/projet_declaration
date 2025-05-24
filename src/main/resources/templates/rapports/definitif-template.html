@@ -16,18 +16,19 @@
             padding: 2cm;
             background-color: white;
             position: relative;
-            height: 29.7cm;
             box-sizing: border-box;
         }
+        .page-break {
+            page-break-before: always;
+        }
         .main-content {
-            min-height: 22cm;
             position: relative;
         }
         .letterhead {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 2cm;
+            margin-bottom: 1.5cm;
             border-bottom: 1px solid #ccc;
             padding-bottom: 0.5cm;
         }
@@ -42,12 +43,23 @@
         .header-info {
             text-align: right;
         }
-        .title {
+        .title-page {
+            height: 18cm;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
             text-align: center;
+        }
+        .title {
             font-weight: bold;
-            margin-bottom: 1.5cm;
             text-decoration: underline;
             font-size: 16pt;
+            margin-bottom: 2cm;
+        }
+        .subtitle {
+            font-style: italic;
+            margin-top: 2cm;
         }
         .content {
             text-align: justify;
@@ -97,40 +109,338 @@
             color: red;
             background-color: #fff0f0;
         }
+        .section-title {
+            text-align: center;
+            font-weight: bold;
+            font-size: 14pt;
+            margin: 1cm 0;
+            text-decoration: underline;
+        }
+        .delibere-section {
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            margin-bottom: 1cm;
+        }
+        .delibere-section p {
+            margin-bottom: 0.5cm;
+            text-align: justify;
+        }
+        .introduction-section {
+            font-family: "Times New Roman", serif;
+            font-size: 12pt;
+            line-height: 1.5;
+            text-align: justify;
+            margin-bottom: 1cm;
+        }
+        .declarant-info {
+            margin: 1cm 0;
+            padding: 0.5cm;
+            border-left: 3px solid #333;
+            background-color: #f9f9f9;
+        }
+        .reference {
+            font-weight: bold;
+            margin-bottom: 0.5cm;
+        }
+.grouped-sections {
+        page-break-before: always; /* Nouvelle page avant A, B, C */
+    }
+    .section-title-left {
+        text-align: left;
+        font-weight: bold;
+        font-size: 14pt;
+        margin: 1cm 0 0.5cm 0;
+        text-decoration: underline;
+    }
+    .section-content {
+        font-family: "Times New Roman", serif;
+        font-size: 12pt;
+        line-height: 1.5;
+        text-align: justify;
+        margin-bottom: 1cm;
+    }
+
+     .table-actifs, .table-passifs {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1cm 0;
+        font-size: 11pt;
+    }
+    
+    .table-actifs th, .table-passifs th {
+        background-color: #f2f2f2;
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+        font-weight: bold;
+    }
+    
+    .table-actifs td, .table-passifs td {
+        border: 1px solid #ddd;
+        padding: 8px;
+    }
+    
+    .table-actifs tr:nth-child(even), .table-passifs tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+    
+    .table-actifs tr:hover, .table-passifs tr:hover {
+        background-color: #f1f1f1;
+    }
+    
+    .total-row {
+        font-weight: bold;
+        background-color: #fff5e6 !important;
+    }
+    
+    .total-label {
+        text-align: right !important;
+        padding-right: 10px !important;
+    }
+    
+    .montant {
+        text-align: right;
+        font-family: "Courier New", monospace;
+    }
+    
+    .patrimoine-net {
+        margin: 1cm 0;
+        border: 1px solid #ddd;
+        padding: 15px;
+        background-color: #f9f9f9;
+    }
+    
+    .patrimoine-row {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+    }
+    
+    .patrimoine-row.total {
+        border-top: 1px solid #333;
+        padding-top: 8px;
+        font-weight: bold;
+        font-size: 13pt;
+    }
+    
+    .section-title2 {
+        font-weight: bold;
+        font-size: 14pt;
+        margin: 1cm 0 0.5cm 0;
+        text-decoration: underline;
+    }
+    
+    h3 {
+        margin: 0.8cm 0 0.3cm 0;
+        font-size: 12pt;
+        color: #333;
+    }
+    
+
+    
     </style>
 </head>
 <body>
-    <div class="main-content">
+    <!-- Page de titre -->
+    <div class="title-page">
         <div class="letterhead">
             <div class="logo">
-                <img th:src="logoniger.jpg" alt="Logo République du Niger"/>
-                <p>Référence: <span th:text="${reference}">REF-2023-001</span></p>
+                <img th:src="'data:image/jpeg;base64,' + ${logoBase64}" alt="Logo" style="height: 70px;"/> 
             </div>
         </div>
         
         <div class="title">
             RAPPORT DÉFINITIF DE CONTRÔLE
+                    <div class="declarant-info">
+            <p>
+                <strong>Déclarant:</strong> <span th:text="${nomComplet}">Nom Assujetti</span>
+            </p>
+            <p>
+                <strong>Fonction:</strong> <span th:text="${declaration.assujetti.fonction.intitule}">Fonction</span>
+            </p>
+            <p>
+                <strong>Type de déclaration:</strong> <span th:text="${declaration.typeDeclaration}">initiale</span>
+            </p>
+            <p>
+                <strong>Date de déclaration:</strong> <span th:text="${#temporals.format(declaration.dateDeclaration, 'dd/MM/yyyy')}">01/01/2023</span>
+            </p>
+        </div>
         </div>
         
+        
+    </div>
+    
+    <!-- Page DELIBERE -->
+    <div class="page-break"></div>
+    <div class="main-content">
+        <div class="letterhead">
+            <div class="logo">
+                <img th:src="logoniger.jpg" alt="Logo République du Niger"/>
+                <p class="reference">Référence: <span th:text="${reference}">REF-2023-001</span></p>
+            </div>
+        </div>
+        
+        <div class="section-title">DELIBERE</div>
+        
+        <div class="delibere-section">
+            <p th:utext="${delibereText}"></p>
+        </div>
+    </div>
+    
+    <!-- ===== INTRODUCTION (sur sa propre page) ===== -->
+<div class="page-break"></div>
+<div class="main-content">
+    <div class="letterhead">
+        <div class="logo">
+            <img th:src="logoniger.jpg" alt="Logo République du Niger"/>
+            <p class="reference">Référence: <span th:text="${reference}">REF-2023-001</span></p>
+        </div>
+    </div>
+    <div class="section-title">INTRODUCTION</div>
+    <div class="introduction-section">
+        <div th:utext="${#strings.replace(introduction, '&#10;', '<br/>')}"></div>
+    </div>
+</div>
+
+<!-- ===== SECTIONS A, B, C (regroupées sur une NOUVELLE PAGE) ===== -->
+<div class="grouped-sections">
+    <div class="main-content">
+        <div class="letterhead">
+            <div class="logo">
+                <img th:src="logoniger.jpg" alt="Logo République du Niger"/>
+                <p class="reference">Référence: <span th:text="${reference}">REF-2023-001</span></p>
+            </div>
+        </div>
+
+        <!-- Section A -->
+        <div class="section-title-left">A. RAPPELS PRELIMINAIRES</div>
+        <div class="section-content" th:utext="${#strings.replace(rappelspreliminaires, '&#10;', '<br/>')}"></div>
+
+        <!-- Section B -->
+        <div class="section-title-left">B. PRINCIPES DU CONTROLE ET METHODOLOGIE</div>
+        <div class="section-content" th:utext="${#strings.replace(principesducontroleetmethodologie, '&#10;', '<br/>')}"></div>
+
+        <!-- Section C -->
+        <div class="section-title-left">C. ETAPES DU CONTROLE</div>
+        <div class="section-content" th:utext="${#strings.replace(etapesducontrole, '&#10;', '<br/>')}"></div>
+    </div>
+</div>
+
+
+<!-- ===== SECTIONS I, II, III (regroupées sur une NOUVELLE PAGE) ===== -->
+<div class="grouped-sections">
+    <div class="main-content">
+        <div class="letterhead">
+            <div class="logo">
+                <img th:src="logoniger.jpg" alt="Logo République du Niger"/>
+                <p class="reference">Référence: <span th:text="${reference}">REF-2023-001</span></p>
+            </div>
+        </div>
+
+        <!-- Section A -->
+        <div class="section-title-left">I.  Le respect du délai, du modèle et du contenu de la déclaration des biens institué par le décret no 2021-856/PRN/MJ du 07 octobre 2021</div>
+        <div class="section-content" th:utext="${#strings.replace(respectdudélai, '&#10;', '<br/>')}"></div>
+
+        <!-- Section II - Evaluation du patrimoine -->
+        <div class="section-title-left">II. L'évaluation des biens estimés par le déclarant</div>
+        <p>L'évaluation du patrimoine estimé par le déclarant se présente comme suit :</p>
+
+                
+        <div class="section" th:if="${evaluationPatrimoine != null}">
+    <div class="section-title2">III. L'évaluation du patrimoine</div>
+    
+    <div class="section-title2">Actifs</div>
+    <table class="table-actifs">
+        <thead>
+            <tr>
+                <th style="width: 10%">ID</th>
+                <th style="width: 60%">Nature</th>
+                <th style="width: 30%">Montant (FCFA)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="actif : ${evaluationPatrimoine.actifs}"
+                th:class="${actif.id == 'totalActifs'} ? 'total-row' : ''">
+                <td th:if="${actif.id != 'totalActifs'}" th:text="${actif.id}">-</td>
+                <td th:if="${actif.id == 'totalActifs'}" colspan="2" th:text="${actif.nature}" class="total-label">TOTAL ACTIFS</td>
+                <td th:if="${actif.id != 'totalActifs'}" th:text="${actif.nature}">-</td>
+                <td class="montant" th:text="${#numbers.formatDecimal(actif.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="section-title2">Passifs</div>
+    <table class="table-passifs">
+        <thead>
+            <tr>
+                <th style="width: 30%">Type</th>
+                <th style="width: 20%">Montant Prêt (FCFA)</th>
+                <th style="width: 20%">Date</th>
+                <th style="width: 30%">Montant Restant (FCFA)</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="passif : ${evaluationPatrimoine.passifs}"
+                th:class="${passif.typeDette == 'TOTAL PASSIFS'} ? 'total-row' : ''">
+                <td th:text="${passif.typeDette}">-</td>
+                <td class="montant" th:text="${#numbers.formatDecimal(passif.montantPret, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td th:text="${passif.datePret}">-</td>
+                <td class="montant" th:text="${#numbers.formatDecimal(passif.montantRestant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+            </tr>
+        </tbody>
+    </table>
+    
+    <div class="section-title2">Patrimoine Net</div>
+    <div class="patrimoine-net">
+        <div class="patrimoine-row">
+            <span class="label">TOTAL ACTIFS:</span>
+            <span class="value montant" th:text="${#numbers.formatDecimal(evaluationPatrimoine.actifs[#lists.size(evaluationPatrimoine.actifs)-1].montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'"></span>
+        </div>
+        <div class="patrimoine-row">
+            <span class="label">MOINS TOTAL PASSIFS:</span>
+            <span class="value montant" th:text="${#numbers.formatDecimal(evaluationPatrimoine.passifs[#lists.size(evaluationPatrimoine.passifs)-1].montantRestant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'"></span>
+        </div>
+        <div class="patrimoine-row total">
+            <span class="label">PATRIMOINE NET:</span>
+            <span class="value montant" th:text="${#numbers.formatDecimal(evaluationPatrimoine.patrimoineNet, 1, 'COMMA', 2, 'POINT')} + ' FCFA'"></span>
+        </div>
+    </div>
+</div>
+
+        <!-- Section C -->
+    <div class="section-title-left">III.  Le dispositif </div>
         <div class="content">
-            <p>
-                Nous,<p th:if="${utilisateur != null}" th:text="${utilisateur.firstname} + ' ' + ${utilisateur.lastname}">Prénom Nom</p>
-                <span th:text="${utilisateur.role}">Fonction</span>;
-            </p>
             
             <p>
                 Vu la déclaration <span th:text="${declaration.typeDeclaration}">initiale</span>
                 des biens de <span th:text="${nomComplet}">Nom Assujetti</span>,
                 reçue le <span th:text="${#temporals.format(declaration.dateDeclaration, 'dd/MM/yyyy')}">01/01/2023</span>;
             </p>
-            
             <p>
                 Vu le rapport provisoire établi le <span th:text="${#temporals.format(rapport.dateCreation, 'dd/MM/yyyy')}">01/01/2023</span>;
             </p>
-            
+            <p>
+                Nous, <span th:text="${utilisateur.firstname} + ' ' + ${utilisateur.lastname}">Prénom Nom</span>,
+                <span th:text="${utilisateur.role}">Fonction</span>,
+            </p>
             <div class="user-content" th:utext="${#strings.replace(#strings.escapeXml(contenu),'&#10;','<br/>')}">
                 [Contenu du rapport...]
             </div>
+            
+    </div>
+</div>
+
+<div class="main-content">
+        <div class="letterhead">
+            <div class="logo">
+                <img th:src="logoniger.jpg" alt="Logo République du Niger"/>
+                <p class="reference">Référence: <span th:text="${reference}">REF-2023-001</span></p>
+            </div>
+        </div>
+            <div class="section-title">CONCLUSIONS</div>
+            
+            
             
             <div th:classappend="${decision} ? 'decision-accepted' : 'decision-rejected'" 
                  class="decision">
@@ -145,18 +455,20 @@
             <p th:unless="${decision}">
                 La déclaration présente des anomalies nécessitant une régularisation.
             </p>
-        </div>
-        
+
+             <p>En foi de quoi le présent rapport a été signé par </p>
+
         <div class="signature">
-            <p>Le <span th:text="${dateGeneration}">01/01/2023</span></p>
             <div class="signature-line"></div>
-            <p>Le Procureur General</p>
+            <p>Le Procureur Général</p>
             <p th:if="${utilisateur != null}" th:text="${utilisateur.firstname} + ' ' + ${utilisateur.lastname}">Prénom Nom</p>
+            <p>Niamey, le <span th:text="${dateGeneration}">01/01/2023</span></p>
         </div>
-    </div>
+        </div>
     
     <div class="footer">
         <p>Cour des Comptes - BP 14040 Niamey, Niger - Tél: (+227) 20 72 32 50 - Email: contact@courdescomptes.ne</p>
+    </div>
     </div>
 </body>
 </html>

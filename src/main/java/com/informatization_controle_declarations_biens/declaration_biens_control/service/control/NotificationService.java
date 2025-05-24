@@ -52,7 +52,7 @@ public class NotificationService implements INotificationService {
             emailService.sendEmail(
                 utilisateur.getEmail(),
                 "Nouvelle notification: " + type,
-                "magic_link",
+                "account_creation",
                 variables
             );
         }

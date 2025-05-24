@@ -7,6 +7,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.HistoriqueDeclarationUser;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IDeclarationService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.NotificationService;
@@ -165,6 +166,7 @@ public Declaration refuseDeclaration(Long id) {
     return declarationData.save(declaration);
 } */
 
+
 @Override
 public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurId) {
     // Récupérer la déclaration
@@ -175,9 +177,8 @@ public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurI
     Utilisateur utilisateur = utilisateurServiceImpl.findById(utilisateurId)
         .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
 
-    // 1. Vérifier si la déclaration a déjà un utilisateur affecté
+    // Gestion de l'historique
     if (declaration.getUtilisateur() != null) {
-        // 2. Trouver l'historique actif et le clôturer
         List<HistoriqueDeclarationUser> historiquesActifs = historiqueRepository
             .findByDeclarationIdAndDateFinAffectationIsNull(declarationId);
 
@@ -188,24 +189,43 @@ public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurI
         }
     }
 
-    // 3. Affecter le nouvel utilisateur à la déclaration
+    // Gestion du changement d'état en fonction du rôle
+    String messageNotification;
+if (utilisateur.getRole() == RoleEnum.procureur_general) {
+        if (declaration.getEtatDeclaration() == EtatDeclarationEnum.en_cours) {
+            declaration.setEtatDeclaration(EtatDeclarationEnum.traitement);
+            messageNotification = "Une nouvelle déclaration nécessite votre traitement (N°: " + declarationId + ")";
+        } else if (declaration.getEtatDeclaration() == EtatDeclarationEnum.traitement) {
+            declaration.setEtatDeclaration(EtatDeclarationEnum.jugement);
+            messageNotification = "Une déclaration est prête pour jugement (N°: " + declarationId + ")";
+        } else {
+            messageNotification = "Une déclaration vous a été affectée (N°: " + declarationId + ")";
+        }
+    } else {
+        messageNotification = "Une déclaration vous a été affectée (N°: " + declarationId + ")";
+    }
+
+    // Affectation du nouvel utilisateur
     declaration.setUtilisateur(utilisateur);
     Declaration savedDeclaration = declarationData.save(declaration);
 
-    // 4. Créer un nouvel historique
+    // Création du nouvel historique
     HistoriqueDeclarationUser nouvelHistorique = new HistoriqueDeclarationUser();
     nouvelHistorique.setDeclaration(declaration);
     nouvelHistorique.setUtilisateur(utilisateur);
     nouvelHistorique.setDateAffectation(LocalDate.now());
     historiqueRepository.save(nouvelHistorique);
 
-    // Création d'une notification
-    String message = "Une déclaration vous a été affectée (N° de déclaration: " + declarationId + ").";
-    String type = "ASSIGNMENT";
-    notificationService.createAndSendNotification(utilisateurId, message, type, declarationId);
+    // Envoi de la notification
+    notificationService.createAndSendNotification(
+        utilisateurId, 
+        messageNotification, 
+        "ASSIGNMENT", 
+        declarationId
+    );
 
     return savedDeclaration;
-} 
+}
 
 /* public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurId) {
     // Récupérer la déclaration

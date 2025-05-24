@@ -58,5 +58,8 @@ public class Conclusion {
     private String reference;
 
     @Column(nullable = false)
+    private boolean estAcceptation;
+
+    @Column(nullable = false)
     private long tailleFichier;
 }

@@ -47,6 +47,11 @@ public class VehiculeService implements IVehiculeService {
         this.data = data;
 
     }
+    @Override
+    public List<Vehicule> findAllById(List<Long> ids) {
+        return data.findAllById(ids);
+    }
+
 
     @Override
     public List<VehiculeProjection> getByDeclaration(Long declarationId) {
@@ -258,4 +263,5 @@ public byte[] generatePdfRapport(List<PredictionResult> results) {
         if (ecartPourcentage > 10) return new DeviceRgb(255, 204, 153);
         return new DeviceRgb(204, 255, 204);
     }
+    
 }

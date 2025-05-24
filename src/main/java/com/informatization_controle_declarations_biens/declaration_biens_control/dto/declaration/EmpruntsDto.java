@@ -15,6 +15,7 @@ public class EmpruntsDto {
     private String numeroCompte;
     private Vocabulaire typeEmprunt;
     private float montantEmprunt;
+    private float montantRestant;
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
@@ -31,6 +32,7 @@ public class EmpruntsDto {
         this.numeroCompte = empruntsProjection.getNumeroCompte();
         this.typeEmprunt = empruntsProjection.getTypeEmprunt();
         this.montantEmprunt = empruntsProjection.getMontantEmprunt();
+        this.montantRestant = empruntsProjection.getMontantRestant(); // assure-toi que ça existe
         this.dateCreation = empruntsProjection.getDateCreation();
         this.isSynthese = empruntsProjection.isSynthese();
         this.idDeclaration = empruntsProjection.getIdDeclaration();

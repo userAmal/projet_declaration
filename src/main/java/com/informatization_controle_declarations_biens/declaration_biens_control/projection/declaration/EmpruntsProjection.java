@@ -10,6 +10,7 @@ public interface EmpruntsProjection {
     String getNumeroCompte();
     Vocabulaire getTypeEmprunt();
     float getMontantEmprunt();
+    float getMontantRestant();
     LocalDate getDateCreation();
     boolean isSynthese();
     Declaration getIdDeclaration();
