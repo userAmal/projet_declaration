@@ -2,8 +2,6 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.HistoriqueDeclarationUserData;
 
-import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.INotificationData;
-import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.HistoriqueDeclarationUserData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.DeclarationDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
@@ -18,8 +16,7 @@ import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;

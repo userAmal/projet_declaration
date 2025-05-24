@@ -1,11 +1,14 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.service.declaration;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IAssujettiData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Amende;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.StatutAmendeEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatAssujettiEnum;
@@ -14,6 +17,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAssujettiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.AmendeService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 
@@ -21,6 +25,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 
+import java.math.BigDecimal;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -33,7 +39,6 @@ import javax.crypto.SecretKey;
 @Service
 @Transactional
 public class AssujettiService implements IAssujettiService {
-
     @Autowired
     private IAssujettiData assujettiData;
     
@@ -43,9 +48,28 @@ public class AssujettiService implements IAssujettiService {
     @Autowired
     private EmailService emailService;
 
+@Autowired
+private TaskScheduler taskScheduler;
+   @Autowired
+    public AssujettiService(IAssujettiData assujettiData, 
+                          DeclarationService declarationService,
+                          EmailService emailService,
+                          TaskScheduler taskScheduler,
+                          AmendeService amendeService) {
+        this.assujettiData = assujettiData;
+        this.declarationService = declarationService;
+        this.emailService = emailService;
+        this.taskScheduler = taskScheduler;
+        this.amendeService = amendeService;
+    }
+
+@Autowired
+private AmendeService amendeService;
     @Autowired
     private IDeclarationData declarationData;
-
+private static final int RAPPEL_JOURS = 15;
+private static final int EXPIRATION_JOURS = 30;
+private static final BigDecimal MONTANT_AMENDE = new BigDecimal("500.00"); // Montant de l'amende
     @Autowired
 private UtilisateurServiceImpl utilisateurService; // or UtilisateurData utilisateurData
     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
@@ -72,8 +96,7 @@ private Utilisateur getDefaultUser() {
                 .signWith(secretKey)
                 .compact();
     }
-
- @Override
+@Override
 public Assujetti save(Assujetti assujetti) {
     try {
         // Enregistrer l'assujetti
@@ -83,35 +106,120 @@ public Assujetti save(Assujetti assujetti) {
         Declaration declaration = new Declaration();
         declaration.setAssujetti(savedAssujetti);
         declaration.setDateDeclaration(LocalDate.now());
-        declaration.setEtatDeclaration(EtatDeclarationEnum.valider);
+        declaration.setEtatDeclaration(EtatDeclarationEnum.nouveau);
         declaration.setTypeDeclaration(TypeDeclarationEnum.Initiale);
         declaration.setUtilisateur(getDefaultUser());
         
         // Sauvegarder la déclaration
         Declaration savedDeclaration = declarationService.save(declaration);
         
-         String token = generateJwtToken(savedDeclaration.getId());
+        // Générer le token avec expiration après 30 jours
+        String token = generateJwtToken(savedDeclaration.getId());
         String magicLink = "http://localhost:4200/#/declaration?token=" + token;
         
-        // Prepare template variables
-        Map<String, Object> variables = Map.of(
+        // Envoyer l'email initial
+        Map<String, Object> initialVariables = Map.of(
             "header", "initiale",
             "body", "des biens et avoirs",
             "url", magicLink
         );
         
-        // Send email with template
         emailService.sendEmail(
             savedAssujetti.getEmail(),
             "Accès à votre déclaration initiale des biens",
-            "mail_Saisie_Declaration_ASJ", // Template filename without .html
-            variables
+            "mail_Saisie_Declaration_ASJ",
+            initialVariables
         );
+        
+        // Planifier le rappel après 15 jours
+scheduleRappel(savedDeclaration, savedAssujetti, magicLink, Duration.ofMinutes(1));
+        
+        // Planifier la vérification d'expiration après 30 jours
+scheduleExpirationVerification(savedDeclaration, savedAssujetti, Duration.ofMinutes(2));
         
         return savedAssujetti;
     } catch (Exception e) {
         throw new RuntimeException("Erreur lors de la sauvegarde: " + e.getMessage(), e);
     }
+}
+private void scheduleRappel(Declaration declaration, Assujetti assujetti, String magicLink, Duration delay) {
+    LocalDateTime rappelDate = LocalDateTime.now().plus(delay);
+    
+    taskScheduler.schedule(() -> {
+        // Vérifier si la déclaration est toujours en état "nouveau"
+        Declaration currentDeclaration = declarationService.findById(declaration.getId())
+            .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
+            
+        if (currentDeclaration.getEtatDeclaration() == EtatDeclarationEnum.nouveau) {
+            // Envoyer email de rappel
+            Map<String, Object> rappelVariables = Map.of(
+                "header", "rappel",
+                "body", "des biens et avoirs",
+                "url", magicLink,
+                "joursRestants", EXPIRATION_JOURS - RAPPEL_JOURS
+            );
+            
+            emailService.sendEmail(
+                assujetti.getEmail(),
+                "Rappel : Déclaration initiale des biens à compléter",
+                "mail_Rappel_Declaration_ASJ",
+                rappelVariables
+            );
+        }
+    }, rappelDate.atZone(ZoneId.systemDefault()).toInstant());
+}
+
+private void scheduleExpirationVerification(Declaration declaration, Assujetti assujetti, Duration delay) {
+    LocalDateTime verificationDate = LocalDateTime.now().plus(delay);
+    
+    taskScheduler.schedule(() -> {
+        Declaration currentDeclaration = declarationService.findById(declaration.getId())
+            .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
+            
+        if (currentDeclaration.getEtatDeclaration() == EtatDeclarationEnum.nouveau) {
+            // Créer une amende
+            Amende amende = new Amende();
+            amende.setDeclaration(currentDeclaration);
+            amende.setDateAmende(LocalDate.now());
+            amende.setMontant(MONTANT_AMENDE);
+            amende.setStatut(StatutAmendeEnum.NonPayee);
+            amende.setMotif("Déclaration non soumise dans les délais");
+            
+            amendeService.save(amende);
+            
+            // Envoyer email d'amende
+            Map<String, Object> amendeVariables = Map.of(
+                "header", "amende",
+                "body", "des biens et avoirs",
+                "montant", MONTANT_AMENDE,
+                "dateLimite", LocalDate.now().plusDays(30)
+            );
+            
+            emailService.sendEmail(
+                assujetti.getEmail(),
+                "Amende pour déclaration non soumise",
+                "mail_Amende_Declaration_ASJ",
+                amendeVariables
+            );
+        } else if (currentDeclaration.getEtatDeclaration() == EtatDeclarationEnum.en_cours) {
+            // Changer l'état à "valider" et envoyer email de succès
+            currentDeclaration.setEtatDeclaration(EtatDeclarationEnum.valider);
+            declarationService.save(currentDeclaration);
+            
+            Map<String, Object> successVariables = Map.of(
+                "header", "confirmation",
+                "body", "des biens et avoirs",
+                "dateSoumission", currentDeclaration.getDateDeclaration()
+            );
+            
+            emailService.sendEmail(
+                assujetti.getEmail(),
+                "Confirmation de soumission de votre déclaration",
+                "mail_Confirmation_Declaration_ASJ",
+                successVariables
+            );
+        }
+    }, verificationDate.atZone(ZoneId.systemDefault()).toInstant());
 }
     public Map<String, Object> verifyAndExtractTokenDetails(String token) {
         try {
