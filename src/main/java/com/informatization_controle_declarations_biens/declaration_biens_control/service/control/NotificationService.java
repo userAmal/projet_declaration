@@ -4,17 +4,27 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Notification;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.controle.INotificationService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.declaration.AssujettiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.springframework.security.core.Authentication; // L'import CRUCIAL
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Service
 @RequiredArgsConstructor
@@ -24,41 +34,124 @@ public class NotificationService implements INotificationService {
     private final UtilisateurServiceImpl utilisateurServiceImpl;
     private final IDeclarationData declarationData;
     private final EmailService emailService;
+    private final UtilisateurServiceImpl utilisateurService;
+
 
     @Override
-    @Transactional
-    public Notification createAndSendNotification(Long utilisateurId, String message, String type, Long declarationId) {
-        Utilisateur utilisateur = utilisateurServiceImpl.findById(utilisateurId)
-                .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
+@Transactional
+public Notification createAndSendNotification(Long utilisateurId, String message, String type, Long declarationId) {
+    Utilisateur utilisateur = utilisateurServiceImpl.findById(utilisateurId)
+            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
 
-        Declaration declaration = declarationData.findById(declarationId)
-                .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
+    Declaration declaration = declarationData.findById(declarationId)
+            .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
 
-        Notification notification = Notification.builder()
-                .message(message)
-                .type(type)
-                .recipient(utilisateur)
-                .declaration(declaration)
-                .build();
+    Notification notification = Notification.builder()
+            .message(message)
+            .type(type)
+            .recipient(utilisateur)
+            .declaration(declaration)
+            .build();
 
-        Notification savedNotification = notificationData.save(notification);
+    Notification savedNotification = notificationData.save(notification);
 
-        if (utilisateur.isStatutEmploi()) {
-            Map<String, Object> variables = Map.of(
-                "nomComplet", utilisateur.getFirstname() + " " + utilisateur.getLastname(),
-                "message", message
-            );
+    if (utilisateur.isStatutEmploi()) {
+        // Préparation du contenu email en fonction du type de notification
+        String emailSubject;
+        String emailBody;
 
-            emailService.sendEmail(
-                utilisateur.getEmail(),
-                "Nouvelle notification: " + type,
-                "account_creation",
-                variables
-            );
+        if (type.equals("ASSIGNMENT")) {
+            if (utilisateur.getRole() == RoleEnum.procureur_general) {
+                if (declaration.getEtatDeclaration() == EtatDeclarationEnum.traitement) {
+                    emailSubject = "Déclaration à traiter - Cour des comptes";
+                    emailBody = prepareAssignmentEmailContent(utilisateur, declaration, "traitement");
+                } else if (declaration.getEtatDeclaration() == EtatDeclarationEnum.jugement) {
+                    emailSubject = "Déclaration prête pour jugement - Cour des comptes";
+                    emailBody = prepareAssignmentEmailContent(utilisateur, declaration, "jugement");
+                } else {
+                    emailSubject = "Nouvelle déclaration assignée - Cour des comptes";
+                    emailBody = prepareAssignmentEmailContent(utilisateur, declaration, "affectation");
+                }
+            } else {
+                emailSubject = "Nouvelle déclaration assignée - Cour des comptes";
+                emailBody = prepareAssignmentEmailContent(utilisateur, declaration, "affectation");
+            }
+        } else {
+            // Cas par défaut pour les autres types de notifications
+            emailSubject = "Nouvelle notification: " + type;
+            emailBody = "<strong>Cher(e) " + utilisateur.getFirstname() + ",</strong><br><br>" +
+                       message + "<br><br>" +
+                       "Veuillez vous connecter à la plateforme pour plus de détails.";
         }
 
-        return savedNotification;
+        Map<String, Object> variables = Map.of(
+            "header", "Cour des comptes du Niger - Notification",
+            "body", emailBody,
+            "url", "http://localhost:4201/declarations/" + declarationId
+        );
+
+        emailService.sendEmail(
+            utilisateur.getEmail(),
+            emailSubject,
+            "account_creation", // Même template que pour la création de compte
+            variables
+        );
     }
+
+    return savedNotification;
+}
+private String formatRole(RoleEnum role) {
+        if (role == null) {
+            return "rôle non défini";
+        }
+        // Convertit "PROCUREUR_GENERAL" en "Procureur général"
+        return Arrays.stream(role.name().split("_"))
+                .map(word -> word.substring(0, 1).toUpperCase() + word.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
+    }
+
+private String prepareAssignmentEmailContent(Utilisateur utilisateur, Declaration declaration, String actionType) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    Utilisateur currentUser = (Utilisateur) authentication.getPrincipal();
+    
+    // 2. Formatage des informations avec le rôle
+    String initiateurInfo = String.format("%s %s (%s)", 
+            currentUser.getFirstname(),
+            currentUser.getLastname(),
+            formatRole(currentUser.getRole()));
+
+
+    String actionDescription = switch(actionType) {
+        case "traitement" -> "a son rapport provisoire prêt";
+        case "jugement" -> "est prête pour jugement";
+        default -> "vous a été assignée";
+    };
+
+     String nomCompletAssujetti = declaration.getAssujetti().getPrenom() + " " + declaration.getAssujetti().getNom();
+    
+    return "<strong>Cher(e) " + utilisateur.getFirstname() + ",</strong><br><br>" +
+           "Nous vous informons que la déclaration N°" + declaration.getId() + " " + actionDescription + " (envoyée par <strong>" + initiateurInfo + "</strong>).<br><br>" +
+           
+           "<strong style='color: #253342; font-size: 18px;'>Détails de la déclaration</strong><br><br>" +
+           "<div style='background-color: #f8f9fa; border-left: 4px solid #ffa726; padding: 18px; margin: 15px auto; width: 85%; border-radius: 4px;'>" +
+           "  <div style='display: table; width: 100%;'>" +
+           "    <div style='display: table-row;'>" +
+           "      <div style='display: table-cell; width: 150px; padding-bottom: 12px; color: #555;'>Numéro :</div>" +
+           "      <div style='display: table-cell; font-weight: bold; color: #333;'>" + declaration.getId() + "</div>" +
+           "    </div>" +
+           "    <div style='display: table-row;'>" +
+           "      <div style='display: table-cell; width: 150px; color: #555;'>Assujetti :</div>" +
+           "      <div style='display: table-cell; font-weight: bold;'>" +
+           "        <span style='color: #333; background-color: #fff; padding: 4px 10px; border-radius: 3px; border: 1px solid #ddd;'>" + 
+                      nomCompletAssujetti + 
+                   "</span>" +
+           "      </div>" +
+           "    </div>" +
+           "  </div>" +
+           "</div><br>" +
+           
+           "Veuillez cliquer sur le lien ci-dessous pour accéder à la plateforme :<br>";
+}
 
     @Override
     public List<Notification> getNotificationsByUtilisateur(Long utilisateurId) {
