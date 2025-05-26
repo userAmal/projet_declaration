@@ -39,5 +39,17 @@ public interface IDeclarationData extends JpaRepository<Declaration, Long> {
 
        boolean existsByAssujettiIdAndEtatDeclaration(Long assujettiId, EtatDeclarationEnum etatDeclaration);
 
+       List<Declaration> findByEtatDeclarationIn(List<EtatDeclarationEnum> etats);
+       boolean existsByUtilisateurIdAndEtatDeclarationNotIn(Long utilisateurId, List<EtatDeclarationEnum> etats);
 
-}
+       @Query("SELECT d FROM Declaration d WHERE d.utilisateur.id = :userId AND d.etatDeclaration IN :etats")
+       List<Declaration> findByUtilisateurIdAndEtatDeclarationIn(@Param("userId") Long userId, @Param("etats") List<EtatDeclarationEnum> etats);
+
+       @Query("SELECT COUNT(d) FROM Declaration d WHERE d.utilisateur.id = :userId AND d.etatDeclaration IN :etats")
+       long countByUtilisateurIdAndEtatDeclarationIn(@Param("userId") Long userId, @Param("etats") List<EtatDeclarationEnum> etats);
+
+       @Query("SELECT d FROM Declaration d WHERE d.id IN :ids AND d.utilisateur.id = :userId")
+       List<Declaration> findByIdInAndUtilisateurId(@Param("ids") List<Long> ids, @Param("userId") Long userId);
+
+       }
+       

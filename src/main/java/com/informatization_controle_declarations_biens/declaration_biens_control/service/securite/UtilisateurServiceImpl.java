@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.AuthenticationResponse;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.securite.IUtilisateurData;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
@@ -260,13 +261,33 @@ public void restoreUtilisateur(Long id) {
 
 
 
-    @Override
+   /*  @Override
     public void archiverUtilisateur(Long id) {
         boolean hasDeclarations = declarationData.existsByUtilisateurId(id);
         if (hasDeclarations) {
             throw new IllegalStateException("Impossible d'archiver un utilisateur lié à une ou plusieurs déclarations.");
         }
 
+        utilisateurData.findById(id).ifPresent(utilisateur -> {
+            utilisateur.setStatutEmploi(false);
+            utilisateurData.save(utilisateur);
+        });
+    } */
+
+    @Override
+    public void archiverUtilisateur(Long id) {
+        // Vérifier s'il existe des déclarations avec un état différent de "valider" ou "refuser"
+        boolean hasNonArchivableDeclarations = declarationData.existsByUtilisateurIdAndEtatDeclarationNotIn(
+            id, 
+            List.of(EtatDeclarationEnum.valider, EtatDeclarationEnum.refuser)
+        );
+        
+        if (hasNonArchivableDeclarations) {
+            throw new IllegalStateException("Impossible d'archiver un utilisateur lié à des déclarations non terminées (état différent de 'valider' ou 'refuser').");
+        }
+
+        // Si on arrive ici, soit l'utilisateur n'a aucune déclaration, 
+        // soit toutes ses déclarations sont dans un état "valider" ou "refuser"
         utilisateurData.findById(id).ifPresent(utilisateur -> {
             utilisateur.setStatutEmploi(false);
             utilisateurData.save(utilisateur);

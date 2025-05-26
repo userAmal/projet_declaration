@@ -1,5 +1,6 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.HistoriqueDeclarationUser;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
@@ -47,4 +48,7 @@ public interface HistoriqueDeclarationUserData extends JpaRepository<HistoriqueD
     Optional<Utilisateur> findFirstUtilisateurByRoleAndDeclarationId(
     @Param("role") RoleEnum role,
     @Param("declarationId") Long declarationId);
+
+    Optional<HistoriqueDeclarationUser> findByDeclarationAndDateFinAffectationIsNull(Declaration declaration);
+    void deleteByDeclaration(Declaration declaration);
 }

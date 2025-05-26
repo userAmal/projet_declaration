@@ -470,6 +470,38 @@ public ResponseEntity<List<Declaration>> getDeclarationsByUserId(@PathVariable L
 
 
 }
+@GetMapping("/validated-or-refused")
+public ResponseEntity<List<Declaration>> getValidatedOrRefusedDeclarations() {
+    List<Declaration> declarations = declarationService.findValidatedOrRefusedDeclarations();
+    
+    if (declarations.isEmpty()) {
+        return ResponseEntity.noContent().build();
+    }
+    
+    return ResponseEntity.ok(declarations);
+}
+
+@PostMapping("/transfer/{sourceUserId}/{targetUserId}")
+public ResponseEntity<String> transfererDeclarations(
+    @PathVariable Long sourceUserId,
+    @PathVariable Long targetUserId,
+    @RequestBody List<Long> declarationIds) {
+    
+    try {
+        if (declarationIds == null || declarationIds.isEmpty()) {
+            return ResponseEntity.badRequest().body("Aucune déclaration spécifiée pour le transfert");
+        }
+        
+        declarationService.transfererDeclarationsUtilisateur(sourceUserId, targetUserId, declarationIds);
+        return ResponseEntity.ok("Transfert des déclarations effectué avec succès");
+        
+    } catch (IllegalArgumentException e) {
+        return ResponseEntity.badRequest().body(e.getMessage());
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError()
+               .body("Erreur technique lors du transfert: " + e.getMessage());
+    }
+}
 
 
 

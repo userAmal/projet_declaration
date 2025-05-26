@@ -23,6 +23,8 @@ public interface IDeclarationService extends IGenericService<Declaration, Long> 
   boolean existsByUtilisateurId(Long utilisateurId);
   boolean existsByAssujettiIdAndEtatDeclaration(Long assujettiId, EtatDeclarationEnum etatDeclaration);
   List<Declaration> searchByUserAndKeyword(Long userId, String keyword);
+  List<Declaration> findValidatedOrRefusedDeclarations();
+  void transfererDeclarationsUtilisateur(Long sourceUserId, Long targetUserId, List<Long> declarationIds);
 
 
 

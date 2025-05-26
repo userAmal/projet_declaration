@@ -152,6 +152,62 @@ private String prepareAssignmentEmailContent(Utilisateur utilisateur, Declaratio
            
            "Veuillez cliquer sur le lien ci-dessous pour accéder à la plateforme :<br>";
 }
+@Transactional
+public void notifyTransferDeclarations(Utilisateur source, Utilisateur cible, List<Declaration> declarations) {
+    if (declarations.isEmpty()) return;
+
+    // 1. Notification concise dans l'application
+    String notificationMessage = String.format(
+        "📩 %s %s vous a transféré %d déclaration(s)",
+        source.getFirstname(),
+        source.getLastname(),
+        declarations.size()
+    );
+
+    Notification notification = Notification.builder()
+        .message(notificationMessage)
+        .type("TRANSFER")
+        .recipient(cible)
+        .declaration(declarations.get(0)) // Référence à la première déclaration
+        .isRead(false)
+        .build();
+
+    notificationData.save(notification);
+
+    // 2. Email inchangé (identique à votre version actuelle)
+    if (cible.isStatutEmploi()) {
+        String emailSubject = "Nouvelles déclarations transférées - Cour des comptes";
+        
+        StringBuilder declarationsList = new StringBuilder();
+        declarations.forEach(decl -> {
+            declarationsList.append("<li style='margin-bottom: 10px;'>")
+                .append("Déclaration #").append(decl.getId())
+                .append(" - ").append(decl.getAssujetti().getNom()).append(" ").append(decl.getAssujetti().getPrenom())
+                .append(" (").append(decl.getEtatDeclaration().toString().replace("_", " ")).append(")")
+                .append("</li>");
+        });
+
+        String emailBody = "<strong>Cher(e) " + cible.getFirstname() + ",</strong><br><br>" +
+            "Vous avez reçu " + declarations.size() + " nouvelle(s) déclaration(s) :<br><br>" +
+            "<ul style='list-style-type: none; padding-left: 0;'>" + declarationsList.toString() + "</ul><br>" +
+            "Transféré par : <strong>" + formatRole(source.getRole())+" ( "+ source.getFirstname() + " " + source.getLastname()+" )." + "</strong><br><br>" +
+            "E-mail: " + source.getEmail()+"<br>"+
+            "Veuillez vous connecter à la plateforme pour les traiter :<br>";
+
+        Map<String, Object> variables = Map.of(
+            "header", "Transfert de déclarations - Cour des comptes",
+            "body", emailBody,
+            "url", "http://localhost:4201/declarations"
+        );
+
+        emailService.sendEmail(
+            cible.getEmail(),
+            emailSubject,
+            "account_creation",
+            variables
+        );
+    }
+}
 
     @Override
     public List<Notification> getNotificationsByUtilisateur(Long utilisateurId) {

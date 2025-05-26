@@ -13,15 +13,20 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.NotificationService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
+@Slf4j
 @Service
 public class DeclarationService implements IDeclarationService {
 
@@ -250,6 +255,82 @@ if (utilisateur.getRole() == RoleEnum.procureur_general) {
 } */
 
 
+@Transactional
+public void transfererDeclarationsUtilisateur(Long utilisateurSourceId, Long utilisateurCibleId, List<Long> declarationIds) {
+    log.info("Début transfert de {} vers {} pour {} déclaration(s)", 
+        utilisateurSourceId, utilisateurCibleId, declarationIds.size());
+    
+    // 1. Validation des utilisateurs
+    Utilisateur source = utilisateurServiceImpl.findById(utilisateurSourceId)
+        .orElseThrow(() -> {
+            log.error("Utilisateur source {} non trouvé", utilisateurSourceId);
+            return new IllegalArgumentException("Utilisateur source non trouvé");
+        });
+
+    Utilisateur cible = utilisateurServiceImpl.findById(utilisateurCibleId)
+        .orElseThrow(() -> {
+            log.error("Utilisateur cible {} non trouvé", utilisateurCibleId);
+            return new IllegalArgumentException("Utilisateur cible non trouvé");
+        });
+
+    // 2. Récupération et validation des déclarations
+    List<Declaration> declarationsATransferer = declarationData.findByIdInAndUtilisateurId(declarationIds, utilisateurSourceId);
+    
+    if (declarationsATransferer.isEmpty()) {
+        log.warn("Aucune déclaration valide à transférer");
+        throw new IllegalStateException("Aucune déclaration éligible trouvée");
+    }
+
+    log.info("{} déclaration(s) éligible(s) sur {} demandée(s)", 
+        declarationsATransferer.size(), declarationIds.size());
+
+    // 3. Transfert des déclarations
+    List<Declaration> transferredDeclarations = new ArrayList<>();
+    
+    for (Declaration declaration : declarationsATransferer) {
+        try {
+            // 3.1 Mise à jour de l'historique
+            historiqueRepository.deleteByDeclaration(declaration);
+            HistoriqueDeclarationUser nouvelHistorique = HistoriqueDeclarationUser.builder()
+                .declaration(declaration)
+                .utilisateur(cible)
+                .dateAffectation(LocalDate.now())
+                .build();
+            historiqueRepository.save(nouvelHistorique);
+            
+            // 3.2 Changement de propriétaire
+            declaration.setUtilisateur(cible);
+            declarationData.save(declaration);
+            
+            transferredDeclarations.add(declaration);
+            log.debug("Déclaration {} transférée avec succès", declaration.getId());
+            
+        } catch (Exception e) {
+            log.error("Échec du transfert pour la déclaration {} : {}", declaration.getId(), e.getMessage());
+            // Compensation partielle possible ici si nécessaire
+        }
+    }
+
+    // 4. Notification si au moins une déclaration transférée
+    if (!transferredDeclarations.isEmpty()) {
+        try {
+            notificationService.notifyTransferDeclarations(source, cible, transferredDeclarations);
+            log.info("Notification envoyée pour {} déclaration(s)", transferredDeclarations.size());
+        } catch (Exception e) {
+            log.error("Échec de l'envoi des notifications : {}", e.getMessage());
+            // L'erreur de notification ne rollback pas le transfert
+        }
+    }
+    
+    log.info("Transfert terminé : {} déclaration(s) transférée(s) à {}", 
+        transferredDeclarations.size(), cible.getEmail());
+}
+@Override
+public List<Declaration> findValidatedOrRefusedDeclarations() {
+    return declarationData.findByEtatDeclarationIn(
+        List.of(EtatDeclarationEnum.valider, EtatDeclarationEnum.refuser)
+    );
+}
 
 @Override
 public List<Declaration> searchByNomOrPrenomAssujetti(String keyword) {
