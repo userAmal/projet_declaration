@@ -36,4 +36,6 @@ public interface IHistoriqueDeclarationUserService {
     // Récupérer les affectations dans une période
     List<HistoriqueDeclarationUser> getHistoriqueByPeriod(LocalDate startDate, LocalDate endDate);
     Optional<Utilisateur> getFirstUtilisateurByRoleAndDeclaration(RoleEnum role, Long declarationId);
+    List<HistoriqueDeclarationUser> findAll();
+
 }

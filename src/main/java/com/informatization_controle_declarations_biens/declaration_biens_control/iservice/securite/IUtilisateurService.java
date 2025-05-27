@@ -32,6 +32,7 @@ public interface IUtilisateurService {
     void deleteById(Long id);
     List<Utilisateur> findAllArchived();
     void restoreUtilisateur(Long id);
+    void reinitialiserMotDePasse(String email);
     
 
 }

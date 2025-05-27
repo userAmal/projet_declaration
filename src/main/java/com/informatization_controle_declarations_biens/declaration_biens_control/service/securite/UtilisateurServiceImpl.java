@@ -83,7 +83,7 @@ public Utilisateur save(Utilisateur utilisateur) {
                 "dès votre première connexion.<br><br>" +
                 
                 "Veuillez cliquer sur le bouton ci-dessous pour accéder à la plateforme :<br>",
-        "url", "http://localhost:4200/api/auth/authenticate"
+        "url", "http://localhost:4201/api/auth/authenticate"
     );
 
     try {
@@ -111,6 +111,82 @@ public Utilisateur save(Utilisateur utilisateur) {
                 .id(utilisateur.getId())
                 .build();
     }
+
+  @Override
+@Transactional
+public void reinitialiserMotDePasse(String email) {
+    // Trouver l'utilisateur par email
+    Utilisateur utilisateur = utilisateurData.findByEmail(email)
+            .orElseThrow(() -> new EntityNotFoundException("Aucun utilisateur trouvé avec cet email: " + email));
+
+    // Générer un nouveau mot de passe sécurisé
+    String nouveauMotDePasse = generateSecurePassword();
+    String encodedPassword = passwordEncoder.encode(nouveauMotDePasse);
+
+    // Mettre à jour le mot de passe de l'utilisateur
+    utilisateur.setPassword(encodedPassword);
+    // Ne pas forcer le changement de mot de passe (commenté)
+    // utilisateur.setFirstLogin(true);
+    
+    // Sauvegarder les changements AVANT d'envoyer l'email
+    utilisateurData.save(utilisateur);
+    
+    // Log pour debug (à supprimer en production)
+    System.out.println("Nouveau mot de passe généré: " + nouveauMotDePasse);
+    System.out.println("Mot de passe encodé: " + encodedPassword);
+
+    // Préparer le contenu de l'email avec HTML corrigé
+    Map<String, Object> variables = Map.of(
+        "header", "Réinitialisation de votre mot de passe",
+        "body", buildEmailBody(utilisateur.getFirstname(), utilisateur.getEmail(), nouveauMotDePasse),
+        "url", "http://localhost:4201/api/auth/authenticate"
+    );
+
+    try {
+        // Envoyer l'email
+        emailService.sendEmail(
+            utilisateur.getEmail(), 
+            "Réinitialisation de votre mot de passe - Cour des comptes du Niger", 
+            "account_creation", 
+            variables
+        );
+        
+        System.out.println("Email envoyé avec succès à: " + utilisateur.getEmail());
+        
+    } catch (Exception e) {
+        // En cas d'erreur d'envoi d'email, on peut choisir de :
+        // 1. Garder le nouveau mot de passe (recommandé)
+        // 2. Ou restaurer l'ancien mot de passe (si critique)
+        
+        System.err.println("Erreur lors de l'envoi de l'email: " + e.getMessage());
+        throw new RuntimeException("Erreur lors de l'envoi de l'email de réinitialisation: " + e.getMessage(), e);
+    }
+}
+
+private String buildEmailBody(String firstname, String email, String nouveauMotDePasse) {
+    return String.format("""
+        <p><strong>Cher(e) %s,</strong></p>
+        <p>Vous avez demandé la réinitialisation de votre mot de passe pour votre compte à la Cour des comptes du Niger.</p>
+        
+        <h3>Nouveau mot de passe</h3>
+        <div style="background-color: #f5f5f5; padding: 15px; border-radius: 5px; margin: 10px 0;">
+            <table style="width: 100%%;">
+                <tr>
+                    <td style="font-weight: bold;">Email :</td>
+                    <td>%s</td>
+                </tr>
+                <tr>
+                    <td style="font-weight: bold;">Mot de passe :</td>
+                    <td style="background-color: #fff; padding: 5px; border: 1px solid #ddd; font-family: monospace;">%s</td>
+                </tr>
+            </table>
+        </div>
+        
+        <p>Vous pouvez maintenant vous connecter avec ce nouveau mot de passe. (C'est à vous le choix de changer ou de garder le mot de passe.)</p>
+        <p>Veuillez cliquer sur le bouton ci-dessous pour accéder à la plateforme :</p>
+        """, 
+        firstname, email, nouveauMotDePasse);
+}
 
     private String generateSecurePassword() {
         String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";

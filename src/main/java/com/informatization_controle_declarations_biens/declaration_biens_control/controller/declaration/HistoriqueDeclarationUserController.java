@@ -85,4 +85,9 @@ public class HistoriqueDeclarationUserController {
                .map(ResponseEntity::ok)
                .orElse(ResponseEntity.notFound().build());
     }
+
+    @GetMapping
+    public ResponseEntity<List<HistoriqueDeclarationUser>> getAllHistoriques() {
+        return ResponseEntity.ok(historiqueService.findAll());
+    }
 }

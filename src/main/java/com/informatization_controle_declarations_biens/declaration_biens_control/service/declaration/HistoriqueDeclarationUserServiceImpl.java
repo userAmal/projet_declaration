@@ -87,4 +87,8 @@ public class HistoriqueDeclarationUserServiceImpl implements IHistoriqueDeclarat
     public List<HistoriqueDeclarationUser> getHistoriqueByPeriod(LocalDate startDate, LocalDate endDate) {
         return historiqueRepository.findByPeriod(startDate, endDate);
     }
+     @Override
+    public List<HistoriqueDeclarationUser> findAll() {
+        return historiqueRepository.findAll();
+    }
 }

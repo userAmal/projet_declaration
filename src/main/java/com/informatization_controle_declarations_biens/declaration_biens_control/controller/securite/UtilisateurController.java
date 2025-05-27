@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -24,6 +25,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
 
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 
 import org.slf4j.Logger;
@@ -273,6 +275,40 @@ public ResponseEntity<?> modifierUtilisateur(@PathVariable Long id, @Valid @Requ
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Erreur lors de la récupération de l'utilisateur courant", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> reinitialiserMotDePasse(@RequestParam String email) {
+        try {
+            // Appeler le service pour réinitialiser le mot de passe
+            utilisateurService.reinitialiserMotDePasse(email);
+            
+            // Retourner une réponse réussie
+            return ResponseEntity.ok().body(Map.of(
+                "message", "Un email avec un nouveau mot de passe a été envoyé à " + email
+            ));
+        } catch (EntityNotFoundException e) {
+            // Si l'utilisateur n'est pas trouvé
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", e.getMessage()));
+        } catch (RuntimeException e) {
+            // Pour les autres erreurs (comme l'envoi d'email)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", e.getMessage()));
+        }
+    }
+    
+    @GetMapping("/by-email")
+    public ResponseEntity<Utilisateur> getUtilisateurByEmail(@RequestParam String email) {
+        try {
+            Optional<Utilisateur> utilisateur = utilisateurService.findByEmail(email);
+            return utilisateur
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (Exception e) {
+            logger.error("Erreur lors de la recherche de l'utilisateur par email", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
