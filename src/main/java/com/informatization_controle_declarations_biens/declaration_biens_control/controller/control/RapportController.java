@@ -11,9 +11,11 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import org.springframework.core.io.Resource;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/rapports")
@@ -92,5 +94,27 @@ public class RapportController {
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         rapportService.deleteRapport(id);
+    }
+
+    @PostMapping("/envoyer/{declarationId}")
+    public ResponseEntity<?> envoyerRapportExistante(@PathVariable Long declarationId) {
+        try {
+            Declaration declaration = declarationService.findById(declarationId)
+                    .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
+            
+            rapportService.envoyerRapportDefinitifParEmail(declaration);
+            
+            return ResponseEntity.ok(Map.of(
+                "success", true,
+                "message", "Rapport envoyé avec succès"
+            ));
+            
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of(
+                        "success", false,
+                        "message", "Erreur lors de l'envoi: " + e.getMessage()
+                    ));
+        }
     }
 }

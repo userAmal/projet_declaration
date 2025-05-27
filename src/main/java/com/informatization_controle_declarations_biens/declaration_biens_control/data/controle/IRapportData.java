@@ -8,4 +8,6 @@ public interface IRapportData extends JpaRepository<Rapport, Long> {
     List<Rapport> findByDeclarationId(Long declarationId);
     List<Rapport> findByUtilisateurId(Long utilisateurId);
     List<Rapport> findByType(Rapport.Type type);
+    List<Rapport> findByDeclarationIdAndType(Long declarationId, Rapport.Type type); // Ajoutez cette ligne
+
 }

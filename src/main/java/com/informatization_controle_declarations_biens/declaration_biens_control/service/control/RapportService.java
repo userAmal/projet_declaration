@@ -10,6 +10,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.controle.IRapportService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Rapport.Type;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.TypeEntiteEnum;
 import com.itextpdf.html2pdf.ConverterProperties;
@@ -47,6 +48,8 @@ public class RapportService implements IRapportService {
     private IRapportData rapportData;
     @Autowired
     private  IDeclarationData declarationData;
+    @Autowired
+    private EmailService emailService;
     private final CommentaireGeneriqueService commentaireService;  // <<== J'ajoute ici
     private final DeclarationDtoLoader declarationDtoLoader;
     private final TemplateEngine templateEngine;
@@ -508,8 +511,42 @@ private Map<String, Object> createPassifEntry(String typeDette, float montantPre
             throw new RuntimeException("Erreur lors de la génération du rapport définitif", e);
         }
     }
-
     
+public void envoyerRapportDefinitifParEmail(Declaration declaration) {
+    List<Rapport> rapports = rapportData.findByDeclarationIdAndType(declaration.getId(), Rapport.Type.DEFINITIF);
+
+    if (rapports.isEmpty()) {
+        throw new RuntimeException("Aucun rapport définitif trouvé pour cette déclaration");
+    }
+
+    Rapport rapport = rapports.get(0);
+    Assujetti assujetti = declaration.getAssujetti();
+    String nomComplet = assujetti.getPrenom() + " " + assujetti.getNom();
+
+        Map<String, Object> variables = Map.of(
+        "header", "Rapport définitif de déclaration de biens",
+        "body", "<strong>Cher(e) " + nomComplet + ",</strong><br><br>" +
+                "Veuillez trouver ci-joint le rapport définitif.<br><br>" +
+                "Cordialement,<br>L'équipe de la Cour des Comptes"
+               
+        // "btnText" supprimé
+    );
+
+
+    try {
+        emailService.sendEmailWithAttachment(
+            assujetti.getEmail(),
+            "Rapport définitif - " + rapport.getReference(),
+            "Rapport-creer", // nom du fichier de template HTML sans extension
+            variables,
+            rapport.getContenuPdf(),
+            rapport.getNomFichier()
+        );
+    } catch (Exception e) {
+        throw new RuntimeException("Erreur d'envoi: " + e.getMessage(), e);
+    }
+}
+
 
 private String getFrenchDeclarationType(TypeDeclarationEnum type) {
     switch (type) {

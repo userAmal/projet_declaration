@@ -19,4 +19,6 @@ Rapport genererRapportDefinitif(Utilisateur utilisateur,
     List<Rapport> getRapportsByType(Rapport.Type type);
     Rapport getRapportById(Long id);
     void deleteRapport(Long id);
+        void envoyerRapportDefinitifParEmail(Declaration declaration);
+
 }
