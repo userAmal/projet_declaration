@@ -1,8 +1,8 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration;
 
-import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -50,6 +50,9 @@ public interface IDeclarationData extends JpaRepository<Declaration, Long> {
 
        @Query("SELECT d FROM Declaration d WHERE d.id IN :ids AND d.utilisateur.id = :userId")
        List<Declaration> findByIdInAndUtilisateurId(@Param("ids") List<Long> ids, @Param("userId") Long userId);
-
+ long countByTypeDeclaration(TypeDeclarationEnum type);
+    
+    @Query("SELECT COUNT(d) FROM Declaration d WHERE d.etatDeclaration = :etat")
+    long countByEtatDeclaration(@Param("etat") EtatDeclarationEnum etat);
        }
        

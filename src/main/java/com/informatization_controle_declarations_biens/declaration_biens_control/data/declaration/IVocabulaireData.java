@@ -40,6 +40,8 @@ List<Vocabulaire> findRootsByType(@Param("typeId") Long typeId);
 List<VocabulaireProjection> getVocabulaireDetails(@Param("id") Long id);
 List<Vocabulaire> findByIntituleAndTypevocabulaireId(String intitule, Long typevocabulaireId);
 boolean existsByIntituleAndTypevocabulaireIdAndIdNot(String intitule, Long typeVocabulaireId, Long id);
+@Query("SELECT v.typevocabulaire.intitule, COUNT(v) FROM Vocabulaire v GROUP BY v.typevocabulaire.intitule")
+List<Object[]> countByType();  // Retourne [String type, Long count]
 
 
 

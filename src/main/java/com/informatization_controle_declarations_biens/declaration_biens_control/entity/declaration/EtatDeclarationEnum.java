@@ -6,5 +6,6 @@ public enum EtatDeclarationEnum {
     traitement,
     jugement,
     valider,
+    No_declaré,
     refuser,
 }

@@ -50,11 +50,32 @@
         .page-break {
             page-break-before: always;
         }
+        .document-link {
+            color: #0066cc;
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .no-document {
+            color: #666;
+            font-style: italic;
+        }
+        .document-column {
+            width: 150px;
+        }
+        .document-available {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .file-info {
+            font-size: 10px;
+            color: #666;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-<img src="logoniger.jpg" alt="Logo" style="height: 80px; margin-bottom: 10px;"/>    <div class="header">
+        <img src="logoniger.jpg" alt="Logo" style="height: 80px; margin-bottom: 10px;"/>
         <h1>Déclaration de Biens</h1>
         <p th:text="'Date de Déclaration: ' + ${dateDeclaration}">Date de Déclaration: </p>
         <p th:text="'Type de Déclaration: ' + ${typeDeclaration}">Type de Déclaration: </p>
@@ -92,13 +113,21 @@
                 <th>Immatriculation</th>
                 <th>Année</th>
                 <th>Valeur (FCFA)</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="vehicule : ${vehicules}">
+            <tr th:each="vehicule, iterStat : ${vehicules}">
                 <td th:text="${vehicule.designation != null ? vehicule.designation.intitule : 'N/A'}">-</td>
                 <td th:text="${vehicule.marque != null ? vehicule.marque.intitule : 'N/A'}">-</td>
                 <td th:text="${vehicule.immatriculation}">-</td>
                 <td th:text="${vehicule.anneeAcquisition}">-</td>
                 <td th:text="${#numbers.formatDecimal(vehicule.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td>
+                    <div th:if="${vehicule.fileName != null}">
+                        <a th:href="'#vehicules-' + ${iterStat.index}" class="document-link" th:text="${vehicule.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (vehicule.fileType != null ? vehicule.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${vehicule.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
@@ -110,11 +139,19 @@
                 <th>Salaire Mensuel Net</th>
                 <th>Autres Revenus</th>
                 <th>Date</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="revenu : ${revenus}">
+            <tr th:each="revenu, iterStat : ${revenus}">
                 <td th:text="${#numbers.formatDecimal(revenu.salaireMensuelNet, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${revenu.autresRevenus != null ? revenu.autresRevenus.intitule : 'N/A'}">-</td>
                 <td th:text="${revenu.dateCreation}">-</td>
+                <td>
+                    <div th:if="${revenu.fileName != null}">
+                        <a th:href="'#revenus-' + ${iterStat.index}" class="document-link" th:text="${revenu.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (revenu.fileType != null ? revenu.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${revenu.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
@@ -132,8 +169,9 @@
                 <th>Usage</th>
                 <th>Coût Acquisition (FCFA)</th>
                 <th>Investissements (FCFA)</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="foncier : ${fonciersBatis}">
+            <tr th:each="foncier, iterStat : ${fonciersBatis}">
                 <td th:text="${foncier.nature != null ? foncier.nature.intitule : 'N/A'}">-</td>
                 <td th:text="${foncier.anneeConstruction}">-</td>
                 <td th:text="${foncier.modeAcquisition != null ? foncier.modeAcquisition.intitule : 'N/A'}">-</td>
@@ -143,6 +181,13 @@
                 <td th:text="${foncier.typeUsage != null ? foncier.typeUsage.intitule : 'N/A'}">-</td>
                 <td th:text="${#numbers.formatDecimal(foncier.coutAcquisitionFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${#numbers.formatDecimal(foncier.coutInvestissements, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td>
+                    <div th:if="${foncier.fileName != null}">
+                        <a th:href="'#biens-fonciers-bâtis-' + ${iterStat.index}" class="document-link" th:text="${foncier.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (foncier.fileType != null ? foncier.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${foncier.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
@@ -161,8 +206,9 @@
                 <th>Année Acquisition</th>
                 <th>Valeur (FCFA)</th>
                 <th>Investissements (FCFA)</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="foncier : ${fonciersNonBatis}">
+            <tr th:each="foncier, iterStat : ${fonciersNonBatis}">
                 <td th:text="${foncier.nature != null ? foncier.nature.intitule : 'N/A'}">-</td>
                 <td th:text="${foncier.modeAcquisition != null ? foncier.modeAcquisition.intitule : 'N/A'}">-</td>
                 <td th:text="${foncier.ilot}">-</td>
@@ -173,6 +219,13 @@
                 <td th:text="${foncier.dateAcquis}">-</td>
                 <td th:text="${#numbers.formatDecimal(foncier.valeurAcquisFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${#numbers.formatDecimal(foncier.coutInvestissements, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td>
+                    <div th:if="${foncier.fileName != null}">
+                        <a th:href="'#biens-fonciers-non-bâtis-' + ${iterStat.index}" class="document-link" th:text="${foncier.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (foncier.fileType != null ? foncier.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${foncier.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
@@ -187,12 +240,20 @@
                 <th>Numéro Compte</th>
                 <th>Type</th>
                 <th>Montant (FCFA)</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="emprunt : ${emprunts}">
+            <tr th:each="emprunt, iterStat : ${emprunts}">
                 <td th:text="${emprunt.institutionsFinancieres != null ? emprunt.institutionsFinancieres.intitule : 'N/A'}">-</td>
                 <td th:text="${emprunt.numeroCompte}">-</td>
                 <td th:text="${emprunt.typeEmprunt != null ? emprunt.typeEmprunt.intitule : 'N/A'}">-</td>
                 <td th:text="${#numbers.formatDecimal(emprunt.montantEmprunt, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
+                <td>
+                    <div th:if="${emprunt.fileName != null}">
+                        <a th:href="'#emprunts-' + ${iterStat.index}" class="document-link" th:text="${emprunt.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (emprunt.fileType != null ? emprunt.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${emprunt.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
@@ -206,13 +267,21 @@
                 <th>Type Compte</th>
                 <th>Solde (FCFA)</th>
                 <th>Date Solde</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="disponibilite : ${disponibilitesBanque}">
+            <tr th:each="disponibilite, iterStat : ${disponibilitesBanque}">
                 <td th:text="${disponibilite.banque != null ? disponibilite.banque.intitule : 'N/A'}">-</td>
                 <td th:text="${disponibilite.numeroCompte}">-</td>
                 <td th:text="${disponibilite.typeCompte != null ? disponibilite.typeCompte.intitule : 'N/A'}">-</td>
                 <td th:text="${#numbers.formatDecimal(disponibilite.soldeFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${disponibilite.dateSolde}">-</td>
+                <td>
+                    <div th:if="${disponibilite.fileName != null}">
+                        <a th:href="'#disponibilités-bancaires-' + ${iterStat.index}" class="document-link" th:text="${disponibilite.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (disponibilite.fileType != null ? disponibilite.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${disponibilite.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
@@ -227,22 +296,28 @@
                 <th>Montant FCFA</th>
                 <th>Total FCFA</th>
                 <th>Date</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="espece : ${especes}">
+            <tr th:each="espece, iterStat : ${especes}">
                 <td th:text="${#numbers.formatDecimal(espece.monnaie, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${#numbers.formatDecimal(espece.devise, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${espece.tauxChange}">-</td>
                 <td th:text="${#numbers.formatDecimal(espece.montantFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${#numbers.formatDecimal(espece.montantTotalFCFA, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${espece.dateEspece}">-</td>
+                <td>
+                    <div th:if="${espece.fileName != null}">
+                        <a th:href="'#especes-' + ${iterStat.index}" class="document-link" th:text="${espece.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (espece.fileType != null ? espece.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${espece.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
 
-    <!-- Page break pour améliorer la lisibilité -->
     <div class="page-break"></div>
 
-    <!-- Section 9: Animaux -->
     <div class="section" id="section-animaux" th:if="${animaux != null and !animaux.empty}">
         <div class="section-title">9. Animaux</div>
         <table>
@@ -253,19 +328,26 @@
                 <th>Année</th>
                 <th>Valeur (FCFA)</th>
                 <th>Localité</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="animal : ${animaux}">
+            <tr th:each="animal, iterStat : ${animaux}">
                 <td th:text="${animal.especes}">-</td>
                 <td th:text="${animal.nombreTetes}">-</td>
                 <td th:text="${animal.modeAcquisition != null ? animal.modeAcquisition.intitule : 'N/A'}">-</td>
                 <td th:text="${animal.anneeAcquisition}">-</td>
                 <td th:text="${#numbers.formatDecimal(animal.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${animal.localite != null ? animal.localite.intitule : 'N/A'}">-</td>
+                <td>
+                    <div th:if="${animal.fileName != null}">
+                        <a th:href="'#animaux-' + ${iterStat.index}" class="document-link" th:text="${animal.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (animal.fileType != null ? animal.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${animal.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
 
-    <!-- Section 10: Meubles Meublants -->
     <div class="section" id="section-meubles" th:if="${meublesMeublants != null and !meublesMeublants.empty}">
         <div class="section-title">10. Meubles Meublants</div>
         <table>
@@ -274,17 +356,24 @@
                 <th>Année</th>
                 <th>Valeur (FCFA)</th>
                 <th>État</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="meuble : ${meublesMeublants}">
+            <tr th:each="meuble, iterStat : ${meublesMeublants}">
                 <td th:text="${meuble.designation != null ? meuble.designation.intitule : 'N/A'}">-</td>
                 <td th:text="${meuble.anneeAcquisition}">-</td>
                 <td th:text="${#numbers.formatDecimal(meuble.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${meuble.etatGeneral != null ? meuble.etatGeneral.intitule : 'N/A'}">-</td>
+                <td>
+                    <div th:if="${meuble.fileName != null}">
+                        <a th:href="'#meubles-' + ${iterStat.index}" class="document-link" th:text="${meuble.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (meuble.fileType != null ? meuble.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${meuble.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
 
-    <!-- Section 11: Titres -->
     <div class="section" id="section-titres" th:if="${titres != null and !titres.empty}">
         <div class="section-title">11. Titres</div>
         <table>
@@ -293,17 +382,24 @@
                 <th>Valeur (FCFA)</th>
                 <th>Emplacement</th>
                 <th>Précisions</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="titre : ${titres}">
+            <tr th:each="titre, iterStat : ${titres}">
                 <td th:text="${titre.designationNatureActions != null ? titre.designationNatureActions.intitule : 'N/A'}">-</td>
                 <td th:text="${#numbers.formatDecimal(titre.valeurEmplacement, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${titre.emplacement != null ? titre.emplacement.intitule : 'N/A'}">-</td>
                 <td th:text="${titre.autrePrecisions != null ? titre.autrePrecisions.intitule : 'N/A'}">-</td>
+                <td>
+                    <div th:if="${titre.fileName != null}">
+                        <a th:href="'#titres-' + ${iterStat.index}" class="document-link" th:text="${titre.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (titre.fileType != null ? titre.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${titre.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
 
-    <!-- Section 12: Créances -->
     <div class="section" id="section-creances" th:if="${creances != null and !creances.empty}">
         <div class="section-title">12. Créances</div>
         <table>
@@ -311,19 +407,25 @@
                 <th>Débiteur</th>
                 <th>Montant (FCFA)</th>
                 <th>Précisions</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="creance : ${creances}">
+            <tr th:each="creance, iterStat : ${creances}">
                 <td th:text="${creance.debiteurs != null ? creance.debiteurs.intitule : 'N/A'}">-</td>
                 <td th:text="${#numbers.formatDecimal(creance.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${creance.autresPrecisions != null ? creance.autresPrecisions.intitule : 'N/A'}">-</td>
+                <td>
+                    <div th:if="${creance.fileName != null}">
+                        <a th:href="'#creances-' + ${iterStat.index}" class="document-link" th:text="${creance.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (creance.fileType != null ? creance.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${creance.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
 
-    <!-- Page break pour améliorer la lisibilité -->
     <div class="page-break"></div>
 
-    <!-- Section 13: Autres Dettes -->
     <div class="section" id="section-autres-dettes" th:if="${autresDettes != null and !autresDettes.empty}">
         <div class="section-title">13. Autres Dettes</div>
         <table>
@@ -332,17 +434,24 @@
                 <th>Montant (FCFA)</th>
                 <th>Justificatifs</th>
                 <th>Précisions</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="dette : ${autresDettes}">
+            <tr th:each="dette, iterStat : ${autresDettes}">
                 <td th:text="${dette.creanciers != null ? dette.creanciers.intitule : 'N/A'}">-</td>
                 <td th:text="${#numbers.formatDecimal(dette.montant, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${dette.justificatifs != null ? dette.justificatifs.intitule : 'N/A'}">-</td>
                 <td th:text="${dette.autresPrecisions != null ? dette.autresPrecisions.intitule : 'N/A'}">-</td>
+                <td>
+                    <div th:if="${dette.fileName != null}">
+                        <a th:href="'#dettes-' + ${iterStat.index}" class="document-link" th:text="${dette.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (dette.fileType != null ? dette.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${dette.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
 
-    <!-- Section 14: Autres Biens de Valeur -->
     <div class="section" id="section-autres-biens" th:if="${autresBiensDeValeur != null and !autresBiensDeValeur.empty}">
         <div class="section-title">14. Autres Biens de Valeur</div>
         <table>
@@ -353,19 +462,26 @@
                 <th>Valeur (FCFA)</th>
                 <th>Précisions</th>
                 <th>Type</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="bien : ${autresBiensDeValeur}">
+            <tr th:each="bien, iterStat : ${autresBiensDeValeur}">
                 <td th:text="${bien.designation != null ? bien.designation.intitule : 'N/A'}">-</td>
                 <td th:text="${bien.localite != null ? bien.localite.intitule : 'N/A'}">-</td>
                 <td th:text="${bien.anneeAcquis}">-</td>
                 <td th:text="${#numbers.formatDecimal(bien.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${bien.autrePrecisions != null ? bien.autrePrecisions.intitule : 'N/A'}">-</td>
                 <td th:text="${bien.type != null ? bien.type.intitule : 'N/A'}">-</td>
+                <td>
+                    <div th:if="${bien.fileName != null}">
+                        <a th:href="'#biens-' + ${iterStat.index}" class="document-link" th:text="${bien.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (bien.fileType != null ? bien.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${bien.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
 
-    <!-- Section 15: Appareils Électroménagers -->
     <div class="section" id="section-appareils-electro" th:if="${appareilsElectromenagers != null and !appareilsElectromenagers.empty}">
         <div class="section-title">15. Appareils Électroménagers</div>
         <table>
@@ -374,12 +490,20 @@
                 <th>Année</th>
                 <th>Valeur (FCFA)</th>
                 <th>État</th>
+                <th class="document-column">Document</th>
             </tr>
-            <tr th:each="appareil : ${appareilsElectromenagers}">
+            <tr th:each="appareil, iterStat : ${appareilsElectromenagers}">
                 <td th:text="${appareil.designation != null ? appareil.designation.intitule : 'N/A'}">-</td>
                 <td th:text="${appareil.anneeAcquisition}">-</td>
                 <td th:text="${#numbers.formatDecimal(appareil.valeurAcquisition, 1, 'COMMA', 2, 'POINT')} + ' FCFA'">-</td>
                 <td th:text="${appareil.etatGeneral != null ? appareil.etatGeneral.intitule : 'N/A'}">-</td>
+                <td>
+                    <div th:if="${appareil.fileName != null}">
+                        <a th:href="'#appareils-' + ${iterStat.index}" class="document-link" th:text="${appareil.fileName}">Document</a>
+                        <div class="file-info" th:text="'(' + (appareil.fileType != null ? appareil.fileType : 'Fichier') + ')'"></div>
+                    </div>
+                    <span th:if="${appareil.fileName == null}" class="no-document">Aucun document</span>
+                </td>
             </tr>
         </table>
     </div>
