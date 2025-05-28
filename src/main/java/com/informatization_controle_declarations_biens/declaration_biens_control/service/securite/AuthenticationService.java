@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.AuthenticationRequest;
 import com.informatization_controle_declarations_biens.declaration_biens_control.controller.securite.AuthenticationResponse;
-
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.securite.IUtilisateurService;
 
@@ -22,51 +21,43 @@ public class AuthenticationService {
     private final JWTService jwtService;
     private final AuthenticationManager authenticationManager;
 
-    // public AuthenticationResponse register(RegisterRequest request) {
-    //     log.info("Tentative d'inscription avec rôle: {}", request.getRole());
-    //     // Validation basique du rôle
-    //     if(request.getRole() == null) {
-    //         throw new IllegalArgumentException("Le rôle est obligatoire");
-    //     }
-
-    //     // Création de l'utilisateur
-    //     Utilisateur user = Utilisateur.builder()
-    //         .firstname(request.getFirstname())
-    //         .lastname(request.getLastname())
-    //         .email(request.getEmail())
-    //         .password(passwordEncoder.encode(request.getPassword()))
-    //         .statutEmploi(true)
-    //         .tel(request.getTel())
-    //         .role(request.getRole())
-    //         .build();
-
-    //     repository.save(user);
-    //     log.debug("Utilisateur créé avec succès - ID: {}, Rôle: {}", user.getId(), user.getRole());
-
-    //     String jwtToken = jwtService.generateToken(user);
-    //     return AuthenticationResponse.builder().token(jwtToken).build();
-    // }
-
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
         log.info("Tentative d'authentification pour: {}", request.getEmail());
-    
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
         
-        Utilisateur user = repository.findByEmail(request.getEmail())
-            .orElseThrow(() -> new RuntimeException("Utilisateur non trouvé"));
-        
-        log.info("Authentification réussie - Utilisateur: {}, Rôle: {}", user.getEmail(), user.getRole().name());
+        try {
+            // Authenticate user credentials
+            authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
+            
+            // Find user by email
+            Utilisateur user = repository.findByEmail(request.getEmail())
+                .orElseThrow(() -> {
+                    log.error("Utilisateur non trouvé pour l'email: {}", request.getEmail());
+                    return new RuntimeException("Utilisateur non trouvé");
+                });
+            
+            // Validate user ID is not null or 0
+            if (user.getId() == null || user.getId() == 0) {
+                log.error("ID utilisateur invalide: {}", user.getId());
+                throw new RuntimeException("ID utilisateur invalide");
+            }
+            
+            log.info("Authentification réussie - Utilisateur: {}, ID: {}, Rôle: {}", 
+                    user.getEmail(), user.getId(), user.getRole().name());
     
-        String jwtToken = jwtService.generateToken(user);
+            String jwtToken = jwtService.generateToken(user);
     
-        return AuthenticationResponse.builder()
-            .token(jwtToken)
-            .id(user.getId())  
-            .firstname(user.getFirstname())
-            .lastname(user.getLastname())
-            .build();
+            return AuthenticationResponse.builder()
+                .token(jwtToken)
+                .id(user.getId())  
+                .firstname(user.getFirstname())
+                .lastname(user.getLastname())
+                .build();
+                
+        } catch (Exception e) {
+            log.error("Erreur lors de l'authentification pour {}: {}", request.getEmail(), e.getMessage());
+            throw new RuntimeException("Erreur d'authentification: " + e.getMessage());
+        }
     }
-    
 }
