@@ -21,9 +21,7 @@ public interface PGStatisticsService {
     
     // Statistiques sur les performances des conseillers
     List<AdvisorPerformance> getAdvisorsPerformance();
-    
-    // Statistiques temporelles
-    TemporalStats getTemporalStats(String period);
+
     
     // Statistiques sur le workflow
     WorkflowStats getWorkflowStats();

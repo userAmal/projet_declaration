@@ -47,11 +47,7 @@ public class PGStatisticsController {
         return ResponseEntity.ok(pgStatisticsService.getAdvisorsPerformance());
     }
 
-    @GetMapping("/temporal")
-    public ResponseEntity<TemporalStats> getTemporalStats(
-            @RequestParam(defaultValue = "monthly") String period) {
-        return ResponseEntity.ok(pgStatisticsService.getTemporalStats(period));
-    }
+
 
     @GetMapping("/workflow")
     public ResponseEntity<WorkflowStats> getWorkflowStats() {

@@ -12,5 +12,9 @@ import java.util.List;
 public interface ICommentaireGeneriqueData extends JpaRepository<CommentaireGenerique, Long> {
     List<CommentaireGenerique> findByDeclarationIdAndTypeEntite(Long declarationId, TypeEntiteEnum typeEntite);
     List<CommentaireGenerique> findByUtilisateurIdAndDeclarationIdAndTypeEntite(Long utilisateurId, Long declarationId, TypeEntiteEnum typeEntite);
+    List<CommentaireGenerique> findByUtilisateurIdAndDeclarationId(Long utilisateurId, Long declarationId);
+    
+    List<CommentaireGenerique> findByUtilisateurId(Long utilisateurId);
+
 
 }

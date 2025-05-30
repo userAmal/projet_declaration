@@ -6,5 +6,4 @@ public enum EtatAssujettiEnum {
         STOP,
         VALIDER,
         NON_VALIDER,
-        Archivier
 }

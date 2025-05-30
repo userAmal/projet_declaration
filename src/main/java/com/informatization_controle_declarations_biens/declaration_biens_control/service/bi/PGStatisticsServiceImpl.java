@@ -62,34 +62,31 @@ public class PGStatisticsServiceImpl implements PGStatisticsService {
         }
     }
 
-    @Override
-    public ReportStats getReportStats() {
-        try {
-            List<Rapport> rapports = rapportData.findAll();
-            
-            long provisoires = rapports.stream()
-                    .filter(r -> r.getType() == Rapport.Type.PROVISOIRE)
-                    .count();
-                    
-            long definitifs = rapports.stream()
-                    .filter(r -> r.getType() == Rapport.Type.DEFINITIF)
-                    .count();
-                    
-            long enRetard = historiqueData.findActiveAffectations().stream()
-                    .filter(h -> h.getDateAffectation() != null && 
-                               ChronoUnit.DAYS.between(h.getDateAffectation(), LocalDate.now()) > 30)
-                    .count();
-                    
-            log.debug("Statistiques rapports - Provisoires: {}, Définitifs: {}, En retard: {}", 
-                     provisoires, definitifs, enRetard);
-                    
-            return new ReportStats(provisoires, definitifs, enRetard);
-        } catch (Exception e) {
-            log.error("Erreur lors du calcul des statistiques de rapports: {}", e.getMessage());
-            return new ReportStats(0, 0, 0);
-        }
+   @Override
+public ReportStats getReportStats() {
+    try {
+        List<Rapport> rapports = rapportData.findAll();
+        
+        long provisoires = rapports.stream()
+                .filter(r -> r.getType() == Rapport.Type.PROVISOIRE)
+                .count();
+                
+        long definitifs = rapports.stream()
+                .filter(r -> r.getType() == Rapport.Type.DEFINITIF)
+                .count();
+                
+        // Suppression du calcul des dossiers en retard
+        long enRetard = 0; // Valeur par défaut
+        
+        log.debug("Statistiques rapports - Provisoires: {}, Définitifs: {}", 
+                 provisoires, definitifs);
+                
+        return new ReportStats(provisoires, definitifs, enRetard);
+    } catch (Exception e) {
+        log.error("Erreur lors du calcul des statistiques de rapports: {}", e.getMessage());
+        return new ReportStats(0, 0, 0);
     }
-
+}
     @Override
     public DecisionStats getDecisionStats() {
         try {
@@ -162,47 +159,7 @@ public class PGStatisticsServiceImpl implements PGStatisticsService {
         }
     }
 
-    @Override
-    public TemporalStats getTemporalStats(String period) {
-        try {
-            List<Declaration> declarations = declarationData.findAll();
-            List<Rapport> rapports = rapportData.findAll();
-            
-            if ("monthly".equals(period)) {
-                Map<String, TemporalData> monthlyData = new LinkedHashMap<>();
-                
-                for (int i = 1; i <= 12; i++) {
-                    Month month = Month.of(i);
-                    String monthName = month.getDisplayName(TextStyle.SHORT, Locale.FRENCH);
-                    
-                    final int monthNum = i;
-                    long decCount = declarations.stream()
-                            .filter(d -> d.getDateDeclaration() != null && 
-                                       d.getDateDeclaration().getMonthValue() == monthNum)
-                            .count();
-                            
-                    long rapCount = rapports.stream()
-                            .filter(r -> r.getDateCreation() != null && 
-                                       r.getDateCreation().getMonthValue() == monthNum)
-                            .count();
-                            
-                    monthlyData.put(monthName, new TemporalData(decCount, rapCount));
-                }
-                
-                return new TemporalStats("monthly", monthlyData);
-            }
-            
-            // Handle other periods (quarterly, yearly)
-            log.warn("Période non supportée: {}", period);
-            return new TemporalStats(period, new LinkedHashMap<>());
-            
-        } catch (Exception e) {
-            log.error("Erreur lors du calcul des statistiques temporelles pour la période {}: {}", 
-                     period, e.getMessage());
-            return new TemporalStats(period, new LinkedHashMap<>());
-        }
-    }
-
+   
     @Override
     public WorkflowStats getWorkflowStats() {
         try {

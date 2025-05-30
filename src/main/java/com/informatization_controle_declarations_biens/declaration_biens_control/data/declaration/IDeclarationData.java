@@ -54,5 +54,34 @@ public interface IDeclarationData extends JpaRepository<Declaration, Long> {
     
     @Query("SELECT COUNT(d) FROM Declaration d WHERE d.etatDeclaration = :etat")
     long countByEtatDeclaration(@Param("etat") EtatDeclarationEnum etat);
+
+
+
+    @Query(value = "SELECT COUNT(*) FROM declaration", nativeQuery = true)
+Long countAllDeclarations();
+
+@Query(value = "SELECT type_declaration, COUNT(*) FROM declaration GROUP BY type_declaration", nativeQuery = true)
+List<Object[]> countByType();
+
+@Query(value = "SELECT etat_declaration, COUNT(*) FROM declaration GROUP BY etat_declaration", nativeQuery = true)
+List<Object[]> countByEtat();
+
+@Query(value = "SELECT YEAR(date_declaration), COUNT(*) FROM declaration GROUP BY YEAR(date_declaration)", nativeQuery = true)
+List<Object[]> countByYear();
+
+
+@Query("SELECT d FROM Declaration d JOIN HistoriqueDeclarationUser h ON d.id = h.declaration.id " +
+       "WHERE h.utilisateur.id = :conseillerId AND h.dateFinAffectation IS NULL")
+List<Declaration> findActiveDeclarationsByConseillerId(@Param("conseillerId") Long conseillerId);
+
+@Query("SELECT COUNT(d) FROM Declaration d WHERE d.utilisateur.id = :conseillerId " +
+       "AND d.etatDeclaration = :etat")
+long countByConseillerIdAndEtat(@Param("conseillerId") Long conseillerId, 
+                               @Param("etat") EtatDeclarationEnum etat);
+
+@Query("SELECT DISTINCT d.typeDeclaration FROM Declaration d " +
+       "JOIN HistoriqueDeclarationUser h ON d.id = h.declaration.id " +
+       "WHERE h.utilisateur.id = :conseillerId")
+List<TypeDeclarationEnum> findDistinctTypeDeclarationsByConseiller(@Param("conseillerId") Long conseillerId);
        }
        
