@@ -30,6 +30,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -293,7 +294,7 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
         });
     } */
 
-    @Override
+/*     @Override
     public void archiverAssujetti(Long id) {
         boolean hasDeclarationsEnCours = declarationData.existsByAssujettiIdAndEtatDeclaration(id, EtatDeclarationEnum.en_cours);
         
@@ -305,8 +306,32 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
             assujetti.setEtat(EtatAssujettiEnum.STOP);
             assujettiData.save(assujetti);
         });
+    } */
+    
+    @Override
+public void archiverAssujetti(Long id) {
+    // Liste des états qui bloquent l'archivage
+    List<EtatDeclarationEnum> etatsBloquants = Arrays.asList(
+        EtatDeclarationEnum.nouveau,
+        EtatDeclarationEnum.en_cours,
+        EtatDeclarationEnum.traitement,
+        EtatDeclarationEnum.jugement,
+        EtatDeclarationEnum.No_declaré
+    );
+    
+    // Vérifier s'il existe des déclarations dans ces états
+    boolean hasDeclarationsBloquantes = declarationData.existsByAssujettiIdAndEtatDeclarationIn(id, etatsBloquants);
+    
+    if (hasDeclarationsBloquantes) {
+        throw new IllegalStateException("Impossible d'archiver un assujetti lié à une déclaration dans un état non final (nouveau, en cours, traitement, jugement ou non déclaré).");
     }
     
+    // Si aucune déclaration bloquante, procéder à l'archivage
+    assujettiData.findById(id).ifPresent(assujetti -> {
+        assujetti.setEtat(EtatAssujettiEnum.STOP);
+        assujettiData.save(assujetti);
+    });
+}
 
     
     @Override

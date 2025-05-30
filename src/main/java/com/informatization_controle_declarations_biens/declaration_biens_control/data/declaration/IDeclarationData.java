@@ -83,5 +83,9 @@ long countByConseillerIdAndEtat(@Param("conseillerId") Long conseillerId,
        "JOIN HistoriqueDeclarationUser h ON d.id = h.declaration.id " +
        "WHERE h.utilisateur.id = :conseillerId")
 List<TypeDeclarationEnum> findDistinctTypeDeclarationsByConseiller(@Param("conseillerId") Long conseillerId);
+
+boolean existsByAssujettiIdAndEtatDeclarationIn(Long assujettiId, List<EtatDeclarationEnum> etats);
        }
+
+       
        
