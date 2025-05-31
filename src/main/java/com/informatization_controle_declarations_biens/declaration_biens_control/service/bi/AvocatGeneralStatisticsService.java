@@ -11,9 +11,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.Month;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -152,18 +150,13 @@ long refus = conclusions.stream()
 
     // Déclarations en cours de traitement
     long enCours = declarations.stream()
-        .filter(d -> d.getEtatDeclaration() == EtatDeclarationEnum.en_cours ||
-                   d.getEtatDeclaration() == EtatDeclarationEnum.traitement)
+        .filter(d -> d.getEtatDeclaration() == EtatDeclarationEnum.en_cours )
         .filter(d -> conclusions.stream()
             .noneMatch(c -> c.getDeclaration().getId().equals(d.getId())))
         .count();
 
-    // Nouvelles affectations
-    long nouvelles = declarations.stream()
-        .filter(d -> d.getEtatDeclaration() == EtatDeclarationEnum.nouveau)
-        .count();
 
-    return new ChargeTravailtDTO(nouvelles, enCours);
+    return new ChargeTravailtDTO(enCours);
 }
     // ==================== DASHBOARD COMPLET ====================
 
@@ -181,16 +174,7 @@ long refus = conclusions.stream()
         return dashboard;
     }
 
-    // ==================== MÉTHODES UTILITAIRES ====================
-
-    private double calculateAverageProcessingTime(List<Declaration> declarations, List<Conclusion> conclusions) {
-        if (declarations.isEmpty() || conclusions.isEmpty()) return 0.0;
-
-        return conclusions.stream()
-            .mapToLong(c -> ChronoUnit.DAYS.between(c.getDeclaration().getDateDeclaration(), c.getDateCreation()))
-            .average()
-            .orElse(0.0);
-    }
+   
 
     // ==================== CLASSES DTO INTERNES ====================
 
@@ -321,18 +305,15 @@ long refus = conclusions.stream()
     }
 
     public static class ChargeTravailtDTO {
-        private long nouvelles;
         private long enCours;
 ;
 
-        public ChargeTravailtDTO(long nouvelles, long enCours) {
-            this.nouvelles = nouvelles;
+        public ChargeTravailtDTO( long enCours) {
             this.enCours = enCours;
 
         }
 
         // Getters
-        public long getNouvelles() { return nouvelles; }
         public long getEnCours() { return enCours; }
 
     }

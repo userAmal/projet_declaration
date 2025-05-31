@@ -5,30 +5,22 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.ICommentaireGeneriqueData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.IRapportData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.HistoriqueDeclarationUserData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.AffectationDTO;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.CommentaireDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.ConseillerGlobalStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.ConseillerStatisticsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.DeclarationConseillerDTO;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.DeclarationPrioritaireDTO;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.HistoriqueDeclarationDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.PerformanceVerificationDTO;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.RapportDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.RapportProvisoireStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.RepartitionEtatDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.RepartitionTypeDTO;
@@ -37,7 +29,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.VerificationFraudeStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.CommentaireGenerique;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Rapport;
-import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.TypeEntiteEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.HistoriqueDeclarationUser;
@@ -46,8 +37,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 
-import lombok.Builder;
-import lombok.Data;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -331,26 +321,6 @@ public PerformanceVerificationDTO getPerformanceVerification(Long conseillerId) 
             .build();
 }
 
-
-// Méthode pour obtenir les déclarations nécessitant une attention particulière
-public List<DeclarationPrioritaireDTO> getDeclarationsPrioritaires(Long conseillerId) {
-    List<Declaration> declarations = declarationData.findActiveDeclarationsByConseillerId(conseillerId);
-    
-    return declarations.stream()
-            .filter(d -> d.getDateDeclaration().isBefore(LocalDate.now().minusDays(30)))
-            .map(d -> DeclarationPrioritaireDTO.builder()
-                    .declarationId(d.getId())
-                    .assujettiNom(d.getAssujetti().getNom())
-                    .assujettiPrenom(d.getAssujetti().getPrenom())
-                    .dateDeclaration(d.getDateDeclaration())
-                    .joursDepuisDeclaration(ChronoUnit.DAYS.between(
-                            d.getDateDeclaration(), 
-                            LocalDate.now()))
-                    .etatDeclaration(d.getEtatDeclaration())
-                    .build())
-            .sorted(Comparator.comparingLong(DeclarationPrioritaireDTO::getJoursDepuisDeclaration).reversed())
-            .collect(Collectors.toList());
-}
 
 // Méthode pour obtenir la répartition par type de déclaration
 public List<RepartitionTypeDTO> getRepartitionParType(Long conseillerId) {

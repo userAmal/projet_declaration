@@ -81,11 +81,6 @@ public ResponseEntity<Map<String, Object>> getDashboardConseiller(@PathVariable 
 public ResponseEntity<List<ConseillerGlobalStatsDTO>> getStatistiquesTousConseillers() {
     return ResponseEntity.ok(statisticsService.getStatistiquesTousConseillers());
 }
-@GetMapping("/{conseillerId}/declarations-prioritaires")
-public ResponseEntity<List<DeclarationPrioritaireDTO>> getDeclarationsPrioritaires(
-        @PathVariable Long conseillerId) {
-    return ResponseEntity.ok(statisticsService.getDeclarationsPrioritaires(conseillerId));
-}
 
 @GetMapping("/{conseillerId}/repartition-type")
 public ResponseEntity<List<RepartitionTypeDTO>> getRepartitionParType(
