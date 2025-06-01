@@ -1,6 +1,7 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.DeclarationToken;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
@@ -10,6 +11,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,6 +47,7 @@ public interface IDeclarationData extends JpaRepository<Declaration, Long> {
 
        @Query("SELECT d FROM Declaration d WHERE d.utilisateur.id = :userId AND d.etatDeclaration IN :etats")
        List<Declaration> findByUtilisateurIdAndEtatDeclarationIn(@Param("userId") Long userId, @Param("etats") List<EtatDeclarationEnum> etats);
+
 
        @Query("SELECT COUNT(d) FROM Declaration d WHERE d.utilisateur.id = :userId AND d.etatDeclaration IN :etats")
        long countByUtilisateurIdAndEtatDeclarationIn(@Param("userId") Long userId, @Param("etats") List<EtatDeclarationEnum> etats);
@@ -85,7 +89,22 @@ long countByConseillerIdAndEtat(@Param("conseillerId") Long conseillerId,
 List<TypeDeclarationEnum> findDistinctTypeDeclarationsByConseiller(@Param("conseillerId") Long conseillerId);
 
 boolean existsByAssujettiIdAndEtatDeclarationIn(Long assujettiId, List<EtatDeclarationEnum> etats);
-       }
+
+    @Query("SELECT COUNT(d) FROM Declaration d WHERE d.utilisateur.id = :utilisateurId AND d.etatDeclaration = :etat")
+    long countByUtilisateurIdAndEtatDeclaration(@Param("utilisateurId") Long utilisateurId, 
+                                               @Param("etat") EtatDeclarationEnum etat);
+    
+    @Query("SELECT COUNT(d) FROM Declaration d WHERE d.utilisateur.id = :utilisateurId " +
+           "AND d.etatDeclaration IN :etats AND d.dateDeclaration BETWEEN :dateDebut AND :dateFin")
+    long countByUtilisateurIdAndEtatDeclarationInAndDateBetween(
+        @Param("utilisateurId") Long utilisateurId,
+        @Param("etats") List<EtatDeclarationEnum> etats,
+        @Param("dateDebut") LocalDate dateDebut,
+        @Param("dateFin") LocalDate dateFin
+    );
+    
+       
+}
 
        
        

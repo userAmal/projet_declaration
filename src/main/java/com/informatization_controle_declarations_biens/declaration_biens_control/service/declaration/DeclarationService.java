@@ -16,8 +16,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import org.springframework.stereotype.Service;
 
@@ -197,7 +196,7 @@ public Declaration assignUserToDeclaration(Long declarationId, Long utilisateurI
     // Gestion du changement d'état en fonction du rôle
     String messageNotification;
 if (utilisateur.getRole() == RoleEnum.procureur_general) {
-        if (declaration.getEtatDeclaration() == EtatDeclarationEnum.en_cours) {
+ if (declaration.getEtatDeclaration() == EtatDeclarationEnum.en_cours) {
             declaration.setEtatDeclaration(EtatDeclarationEnum.traitement);
             messageNotification = "Une nouvelle déclaration nécessite votre traitement (N°: " + declarationId + ")";
         } else if (declaration.getEtatDeclaration() == EtatDeclarationEnum.traitement) {

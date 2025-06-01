@@ -53,17 +53,7 @@ public class AssujettiController {
     public List<Assujetti> getAllStoppedAssujetti() {
         return assujettiService.findAllStopped();
     }
-    @GetMapping("/declaration/access")
-    public ResponseEntity<Long> getDeclarationIdFromToken(@RequestParam String token) {
-        // Utilisation du logger pour afficher le token
-        logger.info("Token reçu: " + token);
-        Long declarationId = assujettiService.verifyToken(token);
-        if (declarationId != null) {
-            return ResponseEntity.ok(declarationId);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-    }
+    
     
 
 
@@ -194,7 +184,23 @@ public class AssujettiController {
                 return ResponseEntity.status(500).body("Erreur interne du serveur");
             }
         }
-
-    
-
+ @GetMapping("/declaration/access")
+    public ResponseEntity<?> getDeclarationIdFromToken(@RequestParam String token) {
+        logger.info("Token reçu: " + token);
+        
+        Long declarationId = assujettiService.verifyToken(token);
+        
+        if (declarationId == null) {
+            logger.warn("Token invalide ou expiré: " + token);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(Map.of(
+                    "error", "L'accès n'est pas autorisé pour ce site",
+                    "message", "Votre lien d'accès a expiré ou est invalide",
+                    "expired", true
+                ));
+        }
+        
+        logger.info("Token valide, declarationId: " + declarationId);
+        return ResponseEntity.ok(declarationId);
+    }
 }

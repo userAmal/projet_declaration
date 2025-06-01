@@ -17,6 +17,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAssujettiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.bi.DeclarationAssignmentService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.AmendeService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
@@ -24,6 +25,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import lombok.extern.slf4j.Slf4j;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -35,12 +37,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import javax.crypto.SecretKey;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import javax.crypto.SecretKey;
+@Slf4j
 @Service
 @Transactional
 public class AssujettiService implements IAssujettiService {
-    @Autowired
+   @Autowired
     private IAssujettiData assujettiData;
     
     @Autowired
@@ -49,9 +54,24 @@ public class AssujettiService implements IAssujettiService {
     @Autowired
     private EmailService emailService;
 
-@Autowired
-private TaskScheduler taskScheduler;
-   @Autowired
+    @Autowired
+    private TaskScheduler taskScheduler;
+    
+    @Autowired
+    private AmendeService amendeService;
+    
+    @Autowired
+    private IDeclarationData declarationData;
+    
+
+    
+    private static final int RAPPEL_JOURS = 15;
+    private static final int EXPIRATION_JOURS = 30;
+    private static final BigDecimal MONTANT_AMENDE = new BigDecimal("500.00");
+    
+    @Autowired
+    private UtilisateurServiceImpl utilisateurService;
+
     public AssujettiService(IAssujettiData assujettiData, 
                           DeclarationService declarationService,
                           EmailService emailService,
@@ -64,26 +84,15 @@ private TaskScheduler taskScheduler;
         this.amendeService = amendeService;
     }
 
-@Autowired
-private AmendeService amendeService;
-    @Autowired
-    private IDeclarationData declarationData;
-private static final int RAPPEL_JOURS = 15;
-private static final int EXPIRATION_JOURS = 30;
-private static final BigDecimal MONTANT_AMENDE = new BigDecimal("500.00"); // Montant de l'amende
-    @Autowired
-private UtilisateurServiceImpl utilisateurService; // or UtilisateurData utilisateurData
-    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
-
-private Utilisateur getDefaultUser() {
-    // Option 1: Get a specific user by ID (most common approach)
-    return utilisateurService.findById(1L) // Use the ID of your admin/system user
-        .orElseThrow(() -> new RuntimeException("Default user not found"));
     
-    // Option 2: Get the first available user (less ideal but works for testing)
-    // return utilisateurService.findAll().stream().findFirst()
-    //    .orElseThrow(() -> new RuntimeException("No users found in the system"));
-}
+  // Set pour stocker les tokens expirés/invalidés
+    private final Set<String> invalidatedTokens = ConcurrentHashMap.newKeySet();
+
+    private Utilisateur getDefaultUser() {
+        return utilisateurService.findById(1L)
+            .orElseThrow(() -> new RuntimeException("Default user not found"));
+    }
+     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     private String generateJwtToken(Long declarationId) {
         LocalDateTime expiryDate = LocalDateTime.now().plusDays(30);
@@ -97,79 +106,10 @@ private Utilisateur getDefaultUser() {
                 .signWith(secretKey)
                 .compact();
     }
-@Override
-public Assujetti save(Assujetti assujetti) {
-    try {
-        // Enregistrer l'assujetti
-        Assujetti savedAssujetti = assujettiData.save(assujetti);
-        
-        // Créer une nouvelle déclaration liée à cet assujetti
-        Declaration declaration = new Declaration();
-        declaration.setAssujetti(savedAssujetti);
-        declaration.setDateDeclaration(LocalDate.now());
-        declaration.setEtatDeclaration(EtatDeclarationEnum.nouveau);
-        declaration.setTypeDeclaration(TypeDeclarationEnum.Initiale);
-        declaration.setUtilisateur(getDefaultUser());
-        
-        // Sauvegarder la déclaration
-        Declaration savedDeclaration = declarationService.save(declaration);
-        
-        // Générer le token avec expiration après 30 jours
-        String token = generateJwtToken(savedDeclaration.getId());
-        String magicLink = "http://localhost:4200/#/declaration?token=" + token;
-        
-        // Envoyer l'email initial
-        Map<String, Object> initialVariables = Map.of(
-            "header", "initiale",
-            "body", "des biens et avoirs",
-            "url", magicLink
-        );
-        
-        emailService.sendEmail(
-            savedAssujetti.getEmail(),
-            "Accès à votre déclaration initiale des biens",
-            "mail_Saisie_Declaration_ASJ",
-            initialVariables
-        );
-        
-        // Planifier le rappel après 15 jours
-scheduleRappel(savedDeclaration, savedAssujetti, magicLink, Duration.ofMinutes(1));
-        
-        // Planifier la vérification d'expiration après 30 jours
-scheduleExpirationVerification(savedDeclaration, savedAssujetti, Duration.ofMinutes(2));
-        
-        return savedAssujetti;
-    } catch (Exception e) {
-        throw new RuntimeException("Erreur lors de la sauvegarde: " + e.getMessage(), e);
-    }
-}
-private void scheduleRappel(Declaration declaration, Assujetti assujetti, String magicLink, Duration delay) {
-    LocalDateTime rappelDate = LocalDateTime.now().plus(delay);
-    
-    taskScheduler.schedule(() -> {
-        // Vérifier si la déclaration est toujours en état "nouveau"
-        Declaration currentDeclaration = declarationService.findById(declaration.getId())
-            .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
-            
-        if (currentDeclaration.getEtatDeclaration() == EtatDeclarationEnum.nouveau) {
-            // Envoyer email de rappel
-            Map<String, Object> rappelVariables = Map.of(
-                "header", "rappel",
-                "body", "des biens et avoirs",
-                "url", magicLink,
-                "joursRestants", EXPIRATION_JOURS - RAPPEL_JOURS
-            );
-            
-            emailService.sendEmail(
-                assujetti.getEmail(),
-                "Rappel : Déclaration initiale des biens à compléter",
-                "mail_Rappel_Declaration_ASJ",
-                rappelVariables
-            );
-        }
-    }, rappelDate.atZone(ZoneId.systemDefault()).toInstant());
-}
+@Autowired
+private DeclarationAssignmentService assignmentService;
 
+// Modifier la méthode scheduleExpirationVerification
 private void scheduleExpirationVerification(Declaration declaration, Assujetti assujetti, Duration delay) {
     LocalDateTime verificationDate = LocalDateTime.now().plus(delay);
     
@@ -178,59 +118,142 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
             .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
             
         if (currentDeclaration.getEtatDeclaration() == EtatDeclarationEnum.nouveau) {
+            // Token expiré - Changer l'état à non_declare
+            currentDeclaration.setEtatDeclaration(EtatDeclarationEnum.No_declaré);
+            declarationService.save(currentDeclaration);
+            
             // Créer une amende
             Amende amende = new Amende();
             amende.setDeclaration(currentDeclaration);
             amende.setDateAmende(LocalDate.now());
             amende.setMontant(MONTANT_AMENDE);
             amende.setStatut(StatutAmendeEnum.NonPayee);
-            amende.setMotif("Déclaration non soumise dans les délais");
+            amende.setMotif("Déclaration non soumise dans les délais - Token expiré");
             
             amendeService.save(amende);
             
-            // Envoyer email d'amende
+            // NOUVEAU: Assignment automatique au PG le moins chargé
+            try {
+                assignmentService.assignDeclarationToPG(
+                    currentDeclaration.getId(), 
+                    "Déclaration expirée - traitement de l'amende requis"
+                );
+            } catch (Exception e) {
+                log.error("Erreur lors de l'assignment automatique pour déclaration expirée {}: {}", 
+                         currentDeclaration.getId(), e.getMessage());
+            }
+            
+            // Envoyer email d'amende à l'assujetti
             Map<String, Object> amendeVariables = Map.of(
-                "header", "amende",
-                "body", "des biens et avoirs",
-                "montant", MONTANT_AMENDE,
-                "dateLimite", LocalDate.now().plusDays(30)
+                "header", "expiration",
+                "body", "Votre token d'accès a expiré. Une amende de " + MONTANT_AMENDE + " FCFA a été appliquée",
+                "url", "#"
             );
             
             emailService.sendEmail(
                 assujetti.getEmail(),
-                "Amende pour déclaration non soumise",
-                "mail_Amende_Declaration_ASJ",
+                "Token expiré - Amende appliquée",
+                "mail_pdf_Declaration",
                 amendeVariables
-            );
-        } else if (currentDeclaration.getEtatDeclaration() == EtatDeclarationEnum.en_cours) {
-            // Changer l'état à "valider" et envoyer email de succès
-            currentDeclaration.setEtatDeclaration(EtatDeclarationEnum.valider);
-            declarationService.save(currentDeclaration);
-            
-            Map<String, Object> successVariables = Map.of(
-                "header", "confirmation",
-                "body", "des biens et avoirs",
-                "dateSoumission", currentDeclaration.getDateDeclaration()
-            );
-            
-            emailService.sendEmail(
-                assujetti.getEmail(),
-                "Confirmation de soumission de votre déclaration",
-                "mail_Confirmation_Declaration_ASJ",
-                successVariables
             );
         }
     }, verificationDate.atZone(ZoneId.systemDefault()).toInstant());
 }
+
+    @Override
+    public Assujetti save(Assujetti assujetti) {
+        try {
+            // Enregistrer l'assujetti
+            Assujetti savedAssujetti = assujettiData.save(assujetti);
+            
+            // Créer une nouvelle déclaration liée à cet assujetti
+            Declaration declaration = new Declaration();
+            declaration.setAssujetti(savedAssujetti);
+            declaration.setDateDeclaration(LocalDate.now());
+            declaration.setEtatDeclaration(EtatDeclarationEnum.nouveau);
+            declaration.setTypeDeclaration(TypeDeclarationEnum.Initiale);
+            declaration.setUtilisateur(getDefaultUser());
+            
+            // Sauvegarder la déclaration
+            Declaration savedDeclaration = declarationService.save(declaration);
+            
+            // Générer le token avec expiration après 30 jours
+            String token = generateJwtToken(savedDeclaration.getId());
+            String magicLink = "http://localhost:4200/#/declaration?token=" + token;
+            
+            // Envoyer l'email initial avec le template mail_pdf_Declaration.html
+            Map<String, Object> initialVariables = Map.of(
+                "header", "initiale",
+                "body", "des biens et avoirs",
+                "url", magicLink
+            );
+            
+            emailService.sendEmail(
+                savedAssujetti.getEmail(),
+                "Accès à votre déclaration initiale des biens",
+                "mail_pdf_Declaration",
+                initialVariables
+            );
+            
+            // Planifier le rappel après 15 jours (pour test: 1 minute)
+            scheduleRappel(savedDeclaration, savedAssujetti, magicLink, Duration.ofMinutes(1));
+            
+            // Planifier la vérification d'expiration après 30 jours (pour test: 2 minutes)
+            scheduleExpirationVerification(savedDeclaration, savedAssujetti, Duration.ofMinutes(2));
+            
+            return savedAssujetti;
+        } catch (Exception e) {
+            throw new RuntimeException("Erreur lors de la sauvegarde: " + e.getMessage(), e);
+        }
+    }
+
+    private void scheduleRappel(Declaration declaration, Assujetti assujetti, String magicLink, Duration delay) {
+        LocalDateTime rappelDate = LocalDateTime.now().plus(delay);
+        
+        taskScheduler.schedule(() -> {
+            Declaration currentDeclaration = declarationService.findById(declaration.getId())
+                .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
+                
+            if (currentDeclaration.getEtatDeclaration() == EtatDeclarationEnum.nouveau) {
+                Map<String, Object> rappelVariables = Map.of(
+                    "header", "rappel",
+                    "body", "des biens et avoirs - Il vous reste " + (EXPIRATION_JOURS - RAPPEL_JOURS) + " jours",
+                    "url", magicLink
+                );
+                
+                emailService.sendEmail(
+                    assujetti.getEmail(),
+                    "Rappel : Déclaration initiale des biens à compléter",
+                    "mail_pdf_Declaration",
+                    rappelVariables
+                );
+            }
+        }, rappelDate.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    // Méthode pour invalider un token après enregistrement
+    public void invalidateToken(String token) {
+        invalidatedTokens.add(token);
+    }
+    
+    // Méthode pour vérifier si un token est invalide
+    private boolean isTokenInvalidated(String token) {
+        return invalidatedTokens.contains(token);
+    }
+
     public Map<String, Object> verifyAndExtractTokenDetails(String token) {
         try {
+            // Vérifier si le token a été invalidé
+            if (isTokenInvalidated(token)) {
+                return null;
+            }
+            
             var claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
                     .parseClaimsJws(token)
                     .getBody();
 
-            // Récupérer declarationId depuis la claim personnalisée
             Long declarationId = claims.get("declarationId", Long.class);
             
             return Map.of(
@@ -242,13 +265,13 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
         }
     }
     
-    /**
-     * Verify and extract declaration ID from a token
-     * @param token JWT token to verify
-     * @return Declaration ID if valid, or null if invalid/expired
-     */
     public Long verifyToken(String token) {
         try {
+            // Vérifier si le token a été invalidé
+            if (isTokenInvalidated(token)) {
+                return null;
+            }
+            
             var claims = Jwts.parserBuilder()
                     .setSigningKey(secretKey)
                     .build()
@@ -260,8 +283,6 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
             return null;
         }
     }
-
-
     @Override
     public List<Assujetti> findAll() {
         return assujettiData.findAssujettisExcludingEtat(EtatAssujettiEnum.STOP);
