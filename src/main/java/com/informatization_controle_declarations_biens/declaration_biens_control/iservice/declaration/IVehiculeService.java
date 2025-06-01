@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface IVehiculeService extends IGenericService<Vehicule, Long> {
     List<VehiculeProjection> getByDeclaration(Long declarationId);
+    List<Vehicule> getFullEntitiesByDeclaration(Long declarationId);
     List<Vehicule> findByDesignation(Long designationId);
     double getPrediction(Vehicule vehicule);
     byte[] generatePdfRapport(List<PredictionResult> results);

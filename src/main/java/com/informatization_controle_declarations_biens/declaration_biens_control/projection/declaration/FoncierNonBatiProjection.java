@@ -11,6 +11,7 @@ public interface FoncierNonBatiProjection {
     Vocabulaire getModeAcquisition();
     String getIlot();
     String getLotissement();
+    Vocabulaire getTypeTerrain();
     String getSuperficie();
     String getLocalite();
     String getTitrePropriete();

@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.declaration.VehiculeDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.PredictionResult;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.FoncierNonBati;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Vehicule;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IVehiculeService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.payload.FileUploadResponse;
@@ -239,6 +240,20 @@ private Vehicule convertToEntity(VehiculeDto dto) {
     entity.setFileType(dto.getFileType());
     entity.setFileData(dto.getFileData());
     return entity;
+}
+
+
+ @GetMapping("/predictions-vehicule/{declarationId}")
+public ResponseEntity<List<PredictionResult>> getPredictionsForDeclaration(@PathVariable Long declarationId) {
+    List<Vehicule> list = service.getFullEntitiesByDeclaration(declarationId);
+    List<PredictionResult> results = new ArrayList<>();
+    
+    for (Vehicule foncier : list) {
+        double prediction = service.getPrediction(foncier);
+        results.add(new PredictionResult(foncier, prediction));
+    }
+    
+    return ResponseEntity.ok(results);
 }
 
 }

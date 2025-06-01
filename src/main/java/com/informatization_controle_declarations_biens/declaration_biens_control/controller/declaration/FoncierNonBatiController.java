@@ -243,6 +243,7 @@ public ResponseEntity<List<FoncierNonBatiDto>> getByNature(@PathVariable Long na
         entity.setTitrePropriete(dto.getTitrePropriete());
         entity.setDateAcquis(dto.getDateAcquis());
         entity.setValeurAcquisFCFA(dto.getValeurAcquisFCFA());
+        entity.setTypeTerrain(dto.getTypeTerrain());
         entity.setCoutInvestissements(dto.getCoutInvestissements());
         entity.setDateCreation(dto.getDateCreation());
         entity.setSynthese(dto.isSynthese()); 
@@ -276,6 +277,20 @@ public ResponseEntity<List<FoncierNonBatiDto>> getByNature(@PathVariable Long na
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
+
+
+    @GetMapping("/predictions-foncier-non-bati/{declarationId}")
+public ResponseEntity<List<PredictionResult>> getPredictionsForDeclaration(@PathVariable Long declarationId) {
+    List<FoncierNonBati> list = foncierNonBatiService.getFullEntitiesByDeclaration(declarationId);
+    List<PredictionResult> results = new ArrayList<>();
+    
+    for (FoncierNonBati foncier : list) {
+        double prediction = foncierNonBatiService.getPrediction(foncier);
+        results.add(new PredictionResult(foncier, prediction));
+    }
+    
+    return ResponseEntity.ok(results);
+}
 }
     
 

@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import com.itextpdf.layout.element.Table;
 
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 import com.itextpdf.layout.properties.TextAlignment;
@@ -129,140 +130,232 @@ public class FoncierNonBatiService implements IFoncierNonBatiService {
         throw new RuntimeException("Erreur lors de la prédiction avec l'API Flask pour le foncier non bâti.");
     }
 
-    @Override
-    public byte[] generatePdfRapportNonBati(List<PredictionResult> results) {
-        ByteArrayOutputStream out = new ByteArrayOutputStream();
-        PdfWriter writer = new PdfWriter(out);
-        PdfDocument pdfDoc = new PdfDocument(writer);
-        Document document = new Document(pdfDoc, PageSize.A4.rotate());
-        
-        // Titre principal
-        Paragraph title = new Paragraph("RAPPORT DE CONTRÔLE - FONCIER NON BÂTI")
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(16)
+   @Override
+public byte[] generatePdfRapportNonBati(List<PredictionResult> results) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    PdfWriter writer = new PdfWriter(out);
+    PdfDocument pdfDoc = new PdfDocument(writer);
+    Document document = new Document(pdfDoc, PageSize.A4.rotate()); // Format paysage
+    
+    // Titre principal
+    Paragraph title = new Paragraph("RAPPORT DE CONTRÔLE - FONCIER NON BÂTI")
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontSize(16)
+            .setBold()
+            .setMarginBottom(15);
+    document.add(title);
+
+    // Sous-titre
+    Paragraph subtitle = new Paragraph("Analyse des écarts entre valeurs déclarées et prédictions du modèle")
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontSize(12)
+            .setMarginBottom(20);
+    document.add(subtitle);
+
+    // Configuration du tableau avec colonnes ajustées
+    float[] columnWidths = {1.8f, 1.2f, 1.3f, 1.4f, 1.3f, 1.5f, 1.5f, 1.8f}; // Répartition optimisée
+    Table table = new Table(UnitValue.createPercentArray(columnWidths));
+    table.setWidth(UnitValue.createPercentValue(100));
+    table.setKeepTogether(false);
+    table.setFixedLayout(); // Force le respect des largeurs définies
+    
+    // Style des en-têtes
+    Color headerColor = new DeviceRgb(31, 73, 125);
+    Color headerTextColor = DeviceRgb.WHITE;
+    float fontSize = 9; // Taille réduite pour plus d'espace
+
+    // En-têtes du tableau spécifiques au non bâti
+    String[] headers = {
+        "Lotissement", "Superficie (m²)", "Localité", 
+        "Type de terrain", "Investissements", "Réf. Cadastrales", 
+        "Valeur déclarée", "Prédiction modèle"
+    };
+    
+    for (String header : headers) {
+        table.addHeaderCell(createHeaderCell(header, headerColor, headerTextColor, fontSize));
+    }
+
+    // Formatage des nombres
+    DecimalFormat df = new DecimalFormat("#,##0.00");
+    
+    // Remplissage des données
+    for (PredictionResult result : results) {
+        FoncierNonBati f = result.getFoncierNonBati();
+        double prediction = result.getPrediction();
+        double declaredValue = f.getValeurAcquisFCFA();
+        double ecartPourcentage = calculateEcartPercentage(declaredValue, prediction);
+
+        // Ligne du tableau
+        table.addCell(createContentCell(f.getLotissement(), fontSize));
+        table.addCell(createContentCell(cleanSuperficie(f.getSuperficie()), fontSize));
+        table.addCell(createContentCell(f.getLocalite(), fontSize));
+        table.addCell(createContentCell(f.getTypeTerrain().getIntitule(), fontSize));
+        table.addCell(createFinancialCell(f.getCoutInvestissements(), df, fontSize));
+        table.addCell(createContentCell(f.getTitrePropriete(), fontSize));
+        table.addCell(createFinancialCell(declaredValue, df, fontSize));
+        table.addCell(createPredictionCell(prediction, ecartPourcentage, df, fontSize));
+    }
+
+    document.add(table);
+
+    // Légende des couleurs
+    addColorLegend(document);
+    
+    // Pied de page
+    Paragraph footer = new Paragraph("Généré le " + LocalDate.now() + " | Système de contrôle des déclarations - Foncier Non Bâti")
+            .setTextAlignment(TextAlignment.CENTER)
+            .setFontSize(10)
+            .setItalic()
+            .setMarginTop(20);
+    document.add(footer);
+
+    document.close();
+    return out.toByteArray();
+}
+
+// Méthodes utilitaires modifiées pour un affichage optimisé
+private Cell createHeaderCell(String text, Color bgColor, Color textColor, float fontSize) {
+    return new Cell()
+            .add(new Paragraph(text)
+                .setFontColor(textColor)
+                .setFontSize(fontSize)
                 .setBold()
-                .setMarginBottom(15);
-        document.add(title);
+                .setMultipliedLeading(1.0f))
+            .setBackgroundColor(bgColor)
+            .setPadding(5) // Padding réduit
+            .setTextAlignment(TextAlignment.CENTER)
+            .setHeight(25) // Hauteur fixe
+            .setVerticalAlignment(com.itextpdf.layout.properties.VerticalAlignment.MIDDLE);
+}
 
-        // Sous-titre
-        Paragraph subtitle = new Paragraph("Analyse des écarts entre valeurs déclarées et prédictions du modèle")
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(12)
-                .setMarginBottom(20);
-        document.add(subtitle);
+private Cell createContentCell(String content, float fontSize) {
+    return new Cell()
+            .add(new Paragraph(content)
+                .setFontSize(fontSize)
+                .setMultipliedLeading(1.0f))
+            .setPadding(3) // Padding réduit
+            .setTextAlignment(TextAlignment.CENTER)
+            .setHeight(20) // Hauteur fixe
+            .setVerticalAlignment(com.itextpdf.layout.properties.VerticalAlignment.MIDDLE);
+}
 
-        // Configuration du tableau (8 colonnes)
-        float[] columnWidths = {2f, 1.5f, 1.5f, 1.5f, 1.5f, 2f, 2f, 2f};
-        Table table = new Table(columnWidths);
-        table.setWidth(UnitValue.createPercentValue(100));
-        
-        // Style des en-têtes
-        Color headerColor = new DeviceRgb(31, 73, 125);
-        Color headerTextColor = DeviceRgb.WHITE;
-        float fontSize = 9;
+private Cell createFinancialCell(double value, DecimalFormat df, float fontSize) {
+    return new Cell()
+            .add(new Paragraph(formatCurrencyShort(value, df))
+                .setFontSize(fontSize)
+                .setMultipliedLeading(1.0f))
+            .setPadding(3)
+            .setTextAlignment(TextAlignment.RIGHT)
+            .setHeight(20)
+            .setVerticalAlignment(com.itextpdf.layout.properties.VerticalAlignment.MIDDLE);
+}
 
-        // En-têtes du tableau spécifiques au non bâti
-        String[] headers = {
-            "Lotissement", "Superficie (m²)", "Localité", 
-            "Type de terrain", "Investissements", "Réf. Cadastrales", 
-            "Valeur déclarée", "Prédiction modèle"
-        };
-        
-        for (String header : headers) {
-            table.addHeaderCell(createHeaderCell(header, headerColor, headerTextColor, fontSize));
-        }
+private Cell createPredictionCell(double prediction, double ecartPourcentage, 
+                                DecimalFormat df, float fontSize) {
+    Color bgColor = getEcartColor(ecartPourcentage);
+    
+    // Format compact sur une ligne
+    String text = String.format("%s (Écart: %.1f%%)", 
+                  formatCurrencyShort(prediction, df), 
+                  ecartPourcentage);
+    
+    return new Cell()
+            .add(new Paragraph(text)
+                .setFontSize(fontSize - 0.5f) // Police légèrement plus petite
+                .setMultipliedLeading(1.0f))
+            .setBackgroundColor(bgColor)
+            .setPadding(3)
+            .setTextAlignment(TextAlignment.RIGHT)
+            .setHeight(20)
+            .setVerticalAlignment(com.itextpdf.layout.properties.VerticalAlignment.MIDDLE);
+}
 
-        // Formatage des nombres
-        DecimalFormat df = new DecimalFormat("#,##0.00");
-        
-        // Remplissage des données
-        for (PredictionResult result : results) {
-            FoncierNonBati f = result.getFoncierNonBati();
-            double prediction = result.getPrediction();
-            double declaredValue = f.getValeurAcquisFCFA();
-            double ecartPourcentage = calculateEcartPercentage(declaredValue, prediction);
+// Méthode pour ajouter la légende des couleurs (version compacte)
+private void addColorLegend(Document document) {
+    // Titre de la légende plus petit
+    Paragraph legendTitle = new Paragraph("LÉGENDE DES COULEURS")
+            .setTextAlignment(TextAlignment.LEFT)
+            .setFontSize(9)
+            .setBold()
+            .setMarginTop(15)
+            .setMarginBottom(5);
+    document.add(legendTitle);
 
-            // Ligne du tableau
-            table.addCell(createContentCell(f.getLotissement(), fontSize));
-            table.addCell(createContentCell(cleanSuperficie(f.getSuperficie()), fontSize));
-            table.addCell(createContentCell(f.getLocalite(), fontSize));
-            table.addCell(createContentCell(f.getTypeTerrain().getIntitule(), fontSize));
-            table.addCell(createFinancialCell(f.getCoutInvestissements(), df, fontSize));
-            table.addCell(createContentCell(f.getTitrePropriete(), fontSize));
-            table.addCell(createFinancialCell(declaredValue, df, fontSize));
-            table.addCell(createPredictionCell(prediction, ecartPourcentage, df, fontSize));
-        }
+    // Tableau pour la légende plus compact
+    float[] legendWidths = {0.3f, 2f};
+    Table legendTable = new Table(UnitValue.createPercentArray(legendWidths));
+    legendTable.setWidth(UnitValue.createPercentValue(35));
+    legendTable.setMarginBottom(8);
 
-        document.add(table);
-        
-        // Pied de page
-        Paragraph footer = new Paragraph("Généré le " + LocalDate.now() + " | Système de contrôle des déclarations - Foncier Non Bâti")
-                .setTextAlignment(TextAlignment.CENTER)
-                .setFontSize(10)
-                .setItalic()
-                .setMarginTop(20);
-        document.add(footer);
+    // Couleur verte - Écart acceptable
+    Color greenColor = new DeviceRgb(204, 255, 204);
+    legendTable.addCell(createLegendColorCell(greenColor));
+    legendTable.addCell(createLegendTextCell("Écart ≤ 10% - Acceptable"));
 
-        document.close();
-        return out.toByteArray();
+    // Couleur orange - Écart modéré
+    Color orangeColor = new DeviceRgb(255, 204, 153);
+    legendTable.addCell(createLegendColorCell(orangeColor));
+    legendTable.addCell(createLegendTextCell("Écart 10-20% - Attention"));
+
+    // Couleur rouge - Écart élevé
+    Color redColor = new DeviceRgb(255, 153, 153);
+    legendTable.addCell(createLegendColorCell(redColor));
+    legendTable.addCell(createLegendTextCell("Écart > 20% - Contrôle"));
+
+    document.add(legendTable);
+
+    // Note explicative plus courte
+    Paragraph note = new Paragraph("Note: L'écart représente la différence absolue entre la valeur déclarée et la prédiction du modèle, exprimée en pourcentage de la valeur déclarée.")
+            .setFontSize(7)
+            .setItalic()
+            .setMarginTop(3)
+            .setTextAlignment(TextAlignment.LEFT);
+    document.add(note);
+}
+
+// Méthodes utilitaires pour la légende (version compacte)
+private Cell createLegendColorCell(Color color) {
+    return new Cell()
+            .setBackgroundColor(color)
+            .setHeight(12)
+            .setBorder(new SolidBorder(0.5f))
+            .setPadding(2);
+}
+
+private Cell createLegendTextCell(String text) {
+    return new Cell()
+            .add(new Paragraph(text).setFontSize(8))
+            .setPadding(2)
+            .setVerticalAlignment(com.itextpdf.layout.properties.VerticalAlignment.MIDDLE)
+            .setBorder(new SolidBorder(0.5f));
+}
+
+private String cleanSuperficie(String superficie) {
+    return superficie.replaceAll("[^0-9.]", "") + " m²";
+}
+
+private String formatCurrency(double amount, DecimalFormat df) {
+    return df.format(amount).replace(",", " ") + " FCFA";
+}
+
+// Version courte pour format monétaire
+private String formatCurrencyShort(double amount, DecimalFormat df) {
+    String formatted = df.format(amount).replace(",", " ");
+    // Abréviation pour économiser l'espace si le montant est très grand
+    if (amount >= 1000000) {
+        return new DecimalFormat("#,##0.0").format(amount / 1000000).replace(",", " ") + "M FCFA";
     }
+    return formatted + " FCFA";
+}
 
-    // Méthodes utilitaires (identique à FoncierBatiService mais adapté si nécessaire)
-    private Cell createHeaderCell(String text, Color bgColor, Color textColor, float fontSize) {
-        return new Cell()
-                .add(new Paragraph(text)
-                    .setFontColor(textColor)
-                    .setFontSize(fontSize)
-                    .setBold())
-                .setBackgroundColor(bgColor)
-                .setPadding(7)
-                .setTextAlignment(TextAlignment.CENTER);
-    }
+private double calculateEcartPercentage(double declared, double predicted) {
+    return (Math.abs(declared - predicted) / declared) * 100;
+}
 
-    private Cell createContentCell(String content, float fontSize) {
-        return new Cell()
-                .add(new Paragraph(content).setFontSize(fontSize))
-                .setPadding(5)
-                .setTextAlignment(TextAlignment.CENTER);
-    }
-
-    private Cell createFinancialCell(double value, DecimalFormat df, float fontSize) {
-        return new Cell()
-                .add(new Paragraph(formatCurrency(value, df)).setFontSize(fontSize))
-                .setPadding(5)
-                .setTextAlignment(TextAlignment.RIGHT);
-    }
-
-    private Cell createPredictionCell(double prediction, double ecartPourcentage, 
-                                    DecimalFormat df, float fontSize) {
-        Color bgColor = getEcartColor(ecartPourcentage);
-        String text = String.format("%s\n(Écart: %.1f%%)", 
-                      formatCurrency(prediction, df), 
-                      ecartPourcentage);
-        
-        return new Cell()
-                .add(new Paragraph(text).setFontSize(fontSize))
-                .setBackgroundColor(bgColor)
-                .setPadding(5)
-                .setTextAlignment(TextAlignment.RIGHT);
-    }
-
-    private String cleanSuperficie(String superficie) {
-        return superficie.replaceAll("[^0-9.]", "") + " m²";
-    }
-
-    private String formatCurrency(double amount, DecimalFormat df) {
-        return df.format(amount).replace(",", " ") + " FCFA";
-    }
-
-    private double calculateEcartPercentage(double declared, double predicted) {
-        return (Math.abs(declared - predicted) / declared) * 100;
-    }
-
-    private Color getEcartColor(double ecartPourcentage) {
-        if (ecartPourcentage > 20) return new DeviceRgb(255, 153, 153);
-        if (ecartPourcentage > 10) return new DeviceRgb(255, 204, 153);
-        return new DeviceRgb(204, 255, 204);
-    }
+private Color getEcartColor(double ecartPourcentage) {
+    if (ecartPourcentage > 20) return new DeviceRgb(255, 153, 153);
+    if (ecartPourcentage > 10) return new DeviceRgb(255, 204, 153);
+    return new DeviceRgb(204, 255, 204);
+}
 
 }

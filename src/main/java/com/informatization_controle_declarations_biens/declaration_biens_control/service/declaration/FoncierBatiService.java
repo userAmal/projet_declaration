@@ -12,6 +12,7 @@ import com.itextpdf.kernel.colors.DeviceRgb;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
+import com.itextpdf.layout.borders.SolidBorder;
 import com.itextpdf.layout.element.Cell;
 import com.itextpdf.layout.element.Paragraph;
 
@@ -197,6 +198,9 @@ public byte[] generatePdfRapport(List<PredictionResult> results) {
     }
 
     document.add(table);
+
+    // AJOUT DE LA LÉGENDE DES COULEURS
+    addColorLegend(document);
     
     // Pied de page
     Paragraph footer = new Paragraph("Généré le " + LocalDate.now() + " | Système de contrôle des déclarations")
@@ -210,7 +214,67 @@ public byte[] generatePdfRapport(List<PredictionResult> results) {
     return out.toByteArray();
 }
 
-// Méthodes utilitaires améliorées
+// AJOUT DES MÉTHODES POUR LA LÉGENDE DES COULEURS
+private void addColorLegend(Document document) {
+    // Titre de la légende
+    Paragraph legendTitle = new Paragraph("LÉGENDE DES COULEURS")
+            .setTextAlignment(TextAlignment.LEFT)
+            .setFontSize(9)
+            .setBold()
+            .setMarginTop(15)
+            .setMarginBottom(5);
+    document.add(legendTitle);
+
+    // Tableau pour la légende
+    float[] legendWidths = {0.3f, 2f};
+    Table legendTable = new Table(UnitValue.createPercentArray(legendWidths));
+    legendTable.setWidth(UnitValue.createPercentValue(35));
+    legendTable.setMarginBottom(8);
+
+    // Couleur verte - Écart acceptable
+    Color greenColor = new DeviceRgb(204, 255, 204);
+    legendTable.addCell(createLegendColorCell(greenColor));
+    legendTable.addCell(createLegendTextCell("Écart ≤ 10% - Acceptable"));
+
+    // Couleur orange - Écart modéré
+    Color orangeColor = new DeviceRgb(255, 204, 153);
+    legendTable.addCell(createLegendColorCell(orangeColor));
+    legendTable.addCell(createLegendTextCell("Écart 10-20% - Attention"));
+
+    // Couleur rouge - Écart élevé
+    Color redColor = new DeviceRgb(255, 153, 153);
+    legendTable.addCell(createLegendColorCell(redColor));
+    legendTable.addCell(createLegendTextCell("Écart > 20% - Contrôle"));
+
+    document.add(legendTable);
+
+    // Note explicative
+    Paragraph note = new Paragraph("Note: L'écart représente la différence absolue entre la valeur déclarée et la prédiction du modèle, exprimée en pourcentage de la valeur déclarée.")
+            .setFontSize(7)
+            .setItalic()
+            .setMarginTop(3)
+            .setTextAlignment(TextAlignment.LEFT);
+    document.add(note);
+}
+
+// Méthodes utilitaires pour la légende
+private Cell createLegendColorCell(Color color) {
+    return new Cell()
+            .setBackgroundColor(color)
+            .setHeight(12)
+            .setBorder(new SolidBorder(0.5f))
+            .setPadding(2);
+}
+
+private Cell createLegendTextCell(String text) {
+    return new Cell()
+            .add(new Paragraph(text).setFontSize(8))
+            .setPadding(2)
+            .setVerticalAlignment(com.itextpdf.layout.properties.VerticalAlignment.MIDDLE)
+            .setBorder(new SolidBorder(0.5f));
+}
+
+// Méthodes utilitaires existantes (inchangées)
 private Cell createHeaderCell(String text, Color bgColor, Color textColor, float fontSize) {
     return new Cell()
             .add(new Paragraph(text)

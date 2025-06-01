@@ -351,6 +351,19 @@ public ResponseEntity<List<FoncierBatiDto>> getByNature(@PathVariable Long natur
                 .contentType(MediaType.APPLICATION_PDF)
                 .body(pdf);
     }
+
+    @GetMapping("/predictions-foncier-bati/{declarationId}")
+public ResponseEntity<List<PredictionResult>> getPredictionsForDeclaration(@PathVariable Long declarationId) {
+    List<FoncierBati> list = service.getFullEntitiesByDeclaration(declarationId);
+    List<PredictionResult> results = new ArrayList<>();
+    
+    for (FoncierBati foncier : list) {
+        double prediction = service.getPrediction(foncier);
+        results.add(new PredictionResult(foncier, prediction));
+    }
+    
+    return ResponseEntity.ok(results);
+}
     
 
 }

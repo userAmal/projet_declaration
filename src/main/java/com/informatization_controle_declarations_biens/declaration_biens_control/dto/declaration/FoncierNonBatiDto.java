@@ -51,6 +51,8 @@ public class FoncierNonBatiDto {
         this.idDeclaration = foncierNonBati.getIdDeclaration();
         this.fileName = foncierNonBati.getFileName();
         this.fileType = foncierNonBati.getFileType();
+        this.typeTerrain = foncierNonBati.getTypeTerrain();
+
                 if (foncierNonBati.getFileName() != null) {
             this.fileDownloadUri = "/api/foncier-bati/download/" + foncierNonBati.getId();
         }
@@ -66,6 +68,8 @@ public class FoncierNonBatiDto {
     private LocalDate dateAcquis;
     private float valeurAcquisFCFA;
     private float coutInvestissements;
+    private Vocabulaire typeTerrain;
+
     private LocalDate dateCreation;
     private boolean isSynthese;
     private Declaration idDeclaration;
