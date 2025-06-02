@@ -78,8 +78,4 @@ public class FoncierBati {
     @JoinColumn(nullable = false)
     private Vocabulaire etatGeneral;
 
-
-
-
-
 }

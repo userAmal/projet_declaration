@@ -85,5 +85,8 @@ public class FoncierBatiDto {
         if (foncierBati.getFileName() != null) {
             this.fileDownloadUri = "/api/foncier-bati/download/" + foncierBati.getId();
         }
+this.nbrChambres = foncierBati.getNbrChambres();
+this.etatGeneral = foncierBati.getEtatGeneral();
+
     }
 }

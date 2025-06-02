@@ -319,7 +319,8 @@ public ResponseEntity<List<FoncierBatiDto>> getByNature(@PathVariable Long natur
         if (dto.getFileData() != null) {
             entity.setFileData(dto.getFileData());
         }
-
+        entity.setEtatGeneral(dto.getEtatGeneral());
+        entity.setNbrChambres(dto.getNbrChambres());
         return entity;
     }
 
