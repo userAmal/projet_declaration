@@ -14,8 +14,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
-import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.NotificationService;
-import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -26,17 +24,13 @@ public class PGWorkloadService {
     
     private final IDeclarationData declarationData;
     private final IUtilisateurData utilisateurData;
-    private final NotificationService notificationService;
-    private final EmailService emailService;
+
     
     public PGWorkloadService(IDeclarationData declarationData, 
-                           IUtilisateurData utilisateurData,
-                           NotificationService notificationService,
-                           EmailService emailService) {
+                           IUtilisateurData utilisateurData) {
         this.declarationData = declarationData;
         this.utilisateurData = utilisateurData;
-        this.notificationService = notificationService;
-        this.emailService = emailService;
+
     }
     
     /**

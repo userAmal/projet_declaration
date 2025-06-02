@@ -33,6 +33,8 @@ public class FoncierNonBatiDto {
         this.idDeclaration = projection.getIdDeclaration();
         this.fileName = projection.getFileName();
         this.fileType = projection.getFileType();
+        this.typeTerrain = projection.getTypeTerrain();
+
     }
     public FoncierNonBatiDto(FoncierNonBati foncierNonBati) {
         this.id = foncierNonBati.getId();

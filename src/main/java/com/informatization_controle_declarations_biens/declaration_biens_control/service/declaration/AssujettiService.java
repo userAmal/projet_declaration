@@ -41,11 +41,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.crypto.SecretKey;
+
 @Slf4j
 @Service
 @Transactional
 public class AssujettiService implements IAssujettiService {
-   @Autowired
+    @Autowired
     private IAssujettiData assujettiData;
     
     @Autowired
@@ -63,15 +64,27 @@ public class AssujettiService implements IAssujettiService {
     @Autowired
     private IDeclarationData declarationData;
     
-
-    
-    private static final int RAPPEL_JOURS = 15;
-    private static final int EXPIRATION_JOURS = 30;
-    private static final BigDecimal MONTANT_AMENDE = new BigDecimal("500.00");
+    @Autowired
+    private DeclarationAssignmentService assignmentService;
     
     @Autowired
     private UtilisateurServiceImpl utilisateurService;
 
+    private static final int RAPPEL_JOURS = 15;
+    private static final int EXPIRATION_JOURS = 30;
+    private static final int DECLARATION_ANNUELLE_JOURS = 365;
+    private static final BigDecimal MONTANT_AMENDE = new BigDecimal("500.00");
+    
+    // Délais de production
+    private static final Duration PRODUCTION_DELAY_ANNUAL = Duration.ofDays(DECLARATION_ANNUELLE_JOURS);
+    private static final Duration PRODUCTION_DELAY_RAPPEL = Duration.ofDays(RAPPEL_JOURS);
+    private static final Duration PRODUCTION_DELAY_EXPIRATION = Duration.ofDays(EXPIRATION_JOURS);
+
+    // Set pour stocker les tokens expirés/invalidés
+    private final Set<String> invalidatedTokens = ConcurrentHashMap.newKeySet();
+    private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+
+    // Constructeur
     public AssujettiService(IAssujettiData assujettiData, 
                           DeclarationService declarationService,
                           EmailService emailService,
@@ -84,15 +97,10 @@ public class AssujettiService implements IAssujettiService {
         this.amendeService = amendeService;
     }
 
-    
-  // Set pour stocker les tokens expirés/invalidés
-    private final Set<String> invalidatedTokens = ConcurrentHashMap.newKeySet();
-
     private Utilisateur getDefaultUser() {
         return utilisateurService.findById(1L)
             .orElseThrow(() -> new RuntimeException("Default user not found"));
     }
-     private final SecretKey secretKey = Keys.secretKeyFor(SignatureAlgorithm.HS256);
 
     private String generateJwtToken(Long declarationId) {
         LocalDateTime expiryDate = LocalDateTime.now().plusDays(30);
@@ -106,10 +114,82 @@ public class AssujettiService implements IAssujettiService {
                 .signWith(secretKey)
                 .compact();
     }
-@Autowired
-private DeclarationAssignmentService assignmentService;
 
-// Modifier la méthode scheduleExpirationVerification
+    /**
+     * Planifie l'envoi automatique d'une déclaration de mise à jour annuelle
+     */
+    private void scheduleAnnualDeclaration(Assujetti assujetti, Duration delay) {
+        LocalDateTime scheduledDate = LocalDateTime.now().plus(delay);
+        
+        log.info("Planification de la déclaration annuelle pour l'assujetti ID {} à {}", 
+                assujetti.getId(), scheduledDate);
+        
+        taskScheduler.schedule(() -> {
+            try {
+                // Vérifier si l'assujetti existe toujours et n'est pas archivé
+                Optional<Assujetti> currentAssujettiOpt = assujettiData.findById(assujetti.getId());
+                
+                if (currentAssujettiOpt.isEmpty()) {
+                    log.warn("Assujetti ID {} non trouvé pour la déclaration annuelle", assujetti.getId());
+                    return;
+                }
+                
+                Assujetti currentAssujetti = currentAssujettiOpt.get();
+                
+                // Vérifier si l'assujetti est archivé (STOP)
+                if (currentAssujetti.getEtat() == EtatAssujettiEnum.STOP) {
+                    log.info("Assujetti ID {} est archivé, aucune déclaration annuelle envoyée", 
+                            currentAssujetti.getId());
+                    return;
+                }
+                
+                // Créer une nouvelle déclaration de mise à jour
+                Declaration nouvelleDeclaration = new Declaration();
+                nouvelleDeclaration.setAssujetti(currentAssujetti);
+                nouvelleDeclaration.setDateDeclaration(LocalDate.now());
+                nouvelleDeclaration.setEtatDeclaration(EtatDeclarationEnum.nouveau);
+                nouvelleDeclaration.setTypeDeclaration(TypeDeclarationEnum.Mise_à_jour);
+                nouvelleDeclaration.setUtilisateur(getDefaultUser());
+                
+                // Sauvegarder la déclaration
+                Declaration savedDeclaration = declarationService.save(nouvelleDeclaration);
+                
+                // Générer le token avec expiration après 30 jours
+                String token = generateJwtToken(savedDeclaration.getId());
+                String magicLink = "http://localhost:4200/#/declaration?token=" + token;
+                
+                // Envoyer l'email de déclaration annuelle
+                Map<String, Object> annualVariables = Map.of(
+                    "header", "mise_a_jour",
+                    "body", "des biens et avoirs - Déclaration annuelle de mise à jour",
+                    "url", magicLink
+                );
+                
+                emailService.sendEmail(
+                    currentAssujetti.getEmail(),
+                    "Déclaration annuelle de mise à jour des biens",
+                    "mail_pdf_Declaration",
+                    annualVariables
+                );
+                
+                log.info("Déclaration annuelle envoyée pour l'assujetti ID {} (Déclaration ID {})", 
+                        currentAssujetti.getId(), savedDeclaration.getId());
+                
+                // Planifier le rappel après 15 jours
+                scheduleRappel(savedDeclaration, currentAssujetti, magicLink, PRODUCTION_DELAY_RAPPEL);
+                
+                // Planifier la vérification d'expiration après 30 jours
+                scheduleExpirationVerification(savedDeclaration, currentAssujetti, PRODUCTION_DELAY_EXPIRATION);
+                
+                // Planifier la prochaine déclaration annuelle (365 jours après celle-ci)
+                scheduleAnnualDeclaration(currentAssujetti, PRODUCTION_DELAY_ANNUAL);
+                
+            } catch (Exception e) {
+                log.error("Erreur lors de l'envoi de la déclaration annuelle pour l'assujetti ID {}: {}", 
+                         assujetti.getId(), e.getMessage(), e);
+            }
+        }, scheduledDate.atZone(ZoneId.systemDefault()).toInstant());
+    }
 private void scheduleExpirationVerification(Declaration declaration, Assujetti assujetti, Duration delay) {
     LocalDateTime verificationDate = LocalDateTime.now().plus(delay);
     
@@ -132,7 +212,7 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
             
             amendeService.save(amende);
             
-            // NOUVEAU: Assignment automatique au PG le moins chargé
+            // Assignment automatique au PG le moins chargé
             try {
                 assignmentService.assignDeclarationToPG(
                     currentDeclaration.getId(), 
@@ -143,19 +223,9 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
                          currentDeclaration.getId(), e.getMessage());
             }
             
-            // Envoyer email d'amende à l'assujetti
-            Map<String, Object> amendeVariables = Map.of(
-                "header", "expiration",
-                "body", "Votre token d'accès a expiré. Une amende de " + MONTANT_AMENDE + " FCFA a été appliquée",
-                "url", "#"
-            );
-            
-            emailService.sendEmail(
-                assujetti.getEmail(),
-                "Token expiré - Amende appliquée",
-                "mail_pdf_Declaration",
-                amendeVariables
-            );
+            // SUPPRIMER L'ENVOI D'EMAIL D'AMENDE
+            log.info("Amende générée pour déclaration ID {} (Assujetti ID {}), aucun email envoyé", 
+                    currentDeclaration.getId(), assujetti.getId());
         }
     }, verificationDate.atZone(ZoneId.systemDefault()).toInstant());
 }
@@ -166,7 +236,7 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
             // Enregistrer l'assujetti
             Assujetti savedAssujetti = assujettiData.save(assujetti);
             
-            // Créer une nouvelle déclaration liée à cet assujetti
+            // Créer une nouvelle déclaration initiale liée à cet assujetti
             Declaration declaration = new Declaration();
             declaration.setAssujetti(savedAssujetti);
             declaration.setDateDeclaration(LocalDate.now());
@@ -195,14 +265,21 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
                 initialVariables
             );
             
-            // Planifier le rappel après 15 jours (pour test: 1 minute)
-            scheduleRappel(savedDeclaration, savedAssujetti, magicLink, Duration.ofMinutes(1));
+            // Planifier le rappel après 15 jours
+            scheduleRappel(savedDeclaration, savedAssujetti, magicLink, PRODUCTION_DELAY_RAPPEL);
             
-            // Planifier la vérification d'expiration après 30 jours (pour test: 2 minutes)
-            scheduleExpirationVerification(savedDeclaration, savedAssujetti, Duration.ofMinutes(2));
+            // Planifier la vérification d'expiration après 30 jours
+            scheduleExpirationVerification(savedDeclaration, savedAssujetti, PRODUCTION_DELAY_EXPIRATION);
+            
+            // Planifier la première déclaration annuelle après 365 jours
+            scheduleAnnualDeclaration(savedAssujetti, PRODUCTION_DELAY_ANNUAL);
+            
+            log.info("Assujetti sauvegardé avec planification des déclarations annuelles: ID {}", 
+                    savedAssujetti.getId());
             
             return savedAssujetti;
         } catch (Exception e) {
+            log.error("Erreur lors de la sauvegarde de l'assujetti: {}", e.getMessage(), e);
             throw new RuntimeException("Erreur lors de la sauvegarde: " + e.getMessage(), e);
         }
     }
@@ -215,15 +292,23 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
                 .orElseThrow(() -> new RuntimeException("Déclaration non trouvée"));
                 
             if (currentDeclaration.getEtatDeclaration() == EtatDeclarationEnum.nouveau) {
+                String bodyMessage = currentDeclaration.getTypeDeclaration() == TypeDeclarationEnum.Initiale 
+                    ? "des biens et avoirs - Il vous reste " + (EXPIRATION_JOURS - RAPPEL_JOURS) + " jours"
+                    : "des biens et avoirs - Mise à jour annuelle - Il vous reste " + (EXPIRATION_JOURS - RAPPEL_JOURS) + " jours";
+                    
                 Map<String, Object> rappelVariables = Map.of(
                     "header", "rappel",
-                    "body", "des biens et avoirs - Il vous reste " + (EXPIRATION_JOURS - RAPPEL_JOURS) + " jours",
+                    "body", bodyMessage,
                     "url", magicLink
                 );
                 
+                String subject = currentDeclaration.getTypeDeclaration() == TypeDeclarationEnum.Initiale 
+                    ? "Rappel : Déclaration initiale des biens à compléter"
+                    : "Rappel : Déclaration annuelle de mise à jour à compléter";
+                
                 emailService.sendEmail(
                     assujetti.getEmail(),
-                    "Rappel : Déclaration initiale des biens à compléter",
+                    subject,
                     "mail_pdf_Declaration",
                     rappelVariables
                 );
@@ -283,6 +368,7 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
             return null;
         }
     }
+
     @Override
     public List<Assujetti> findAll() {
         return assujettiData.findAssujettisExcludingEtat(EtatAssujettiEnum.STOP);
@@ -302,65 +388,44 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
             // Changer l'état de STOP à NOUVEAU
             assujetti.setEtat(EtatAssujettiEnum.NOUVEAU);
             assujettiData.save(assujetti);
+            
+            // Reprendre les déclarations annuelles après restoration
+            scheduleAnnualDeclaration(assujetti, PRODUCTION_DELAY_ANNUAL);
         } else {
             throw new IllegalArgumentException("Assujetti non trouvé avec l'ID: " + id);
         }
     }
 
-/*     @Override
-    public void archiverAssujetti(Long id) {
-        assujettiData.findById(id).ifPresent(assujetti -> {
-            assujetti.setEtat(EtatAssujettiEnum.STOP);
-            assujettiData.save(assujetti);
-        });
-    } */
-
-/*     @Override
-    public void archiverAssujetti(Long id) {
-        boolean hasDeclarationsEnCours = declarationData.existsByAssujettiIdAndEtatDeclaration(id, EtatDeclarationEnum.en_cours);
-        
-        if (hasDeclarationsEnCours) {
-            throw new IllegalStateException("Impossible d'archiver un assujetti lié à une  déclaration en cours.");
-        }
-    
-        assujettiData.findById(id).ifPresent(assujetti -> {
-            assujetti.setEtat(EtatAssujettiEnum.STOP);
-            assujettiData.save(assujetti);
-        });
-    } */
-    
     @Override
-public void archiverAssujetti(Long id) {
-    // Liste des états qui bloquent l'archivage
-    List<EtatDeclarationEnum> etatsBloquants = Arrays.asList(
-        EtatDeclarationEnum.nouveau,
-        EtatDeclarationEnum.en_cours,
-        EtatDeclarationEnum.traitement,
-        EtatDeclarationEnum.jugement,
-        EtatDeclarationEnum.No_declaré
-    );
-    
-    // Vérifier s'il existe des déclarations dans ces états
-    boolean hasDeclarationsBloquantes = declarationData.existsByAssujettiIdAndEtatDeclarationIn(id, etatsBloquants);
-    
-    if (hasDeclarationsBloquantes) {
-        throw new IllegalStateException("Impossible d'archiver un assujetti lié à une déclaration dans un état non final (nouveau, en cours, traitement, jugement ou non déclaré).");
+    public void archiverAssujetti(Long id) {
+        // Liste des états qui bloquent l'archivage
+        List<EtatDeclarationEnum> etatsBloquants = Arrays.asList(
+            EtatDeclarationEnum.nouveau,
+            EtatDeclarationEnum.en_cours,
+            EtatDeclarationEnum.traitement,
+            EtatDeclarationEnum.jugement,
+            EtatDeclarationEnum.No_declaré
+        );
+        
+        // Vérifier s'il existe des déclarations dans ces états
+        boolean hasDeclarationsBloquantes = declarationData.existsByAssujettiIdAndEtatDeclarationIn(id, etatsBloquants);
+        
+        if (hasDeclarationsBloquantes) {
+            throw new IllegalStateException("Impossible d'archiver un assujetti lié à une déclaration dans un état non final (nouveau, en cours, traitement, jugement ou non déclaré).");
+        }
+        
+        // Si aucune déclaration bloquante, procéder à l'archivage
+        assujettiData.findById(id).ifPresent(assujetti -> {
+            assujetti.setEtat(EtatAssujettiEnum.STOP);
+            assujettiData.save(assujetti);
+            log.info("Assujetti ID {} archivé - Les déclarations annuelles futures seront annulées", id);
+        });
     }
-    
-    // Si aucune déclaration bloquante, procéder à l'archivage
-    assujettiData.findById(id).ifPresent(assujetti -> {
-        assujetti.setEtat(EtatAssujettiEnum.STOP);
-        assujettiData.save(assujetti);
-    });
-}
-
     
     @Override
     public Optional<Assujetti> findById(Long id) {
         return assujettiData.findById(id);
     }
-
-    
     
     @Override
     public void deleteById(Long id) {

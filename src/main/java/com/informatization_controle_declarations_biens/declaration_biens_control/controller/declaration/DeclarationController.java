@@ -14,7 +14,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.declaration.AssujettiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.parametrage.ParametrageService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
-import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.JWTService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 
 import jakarta.persistence.EntityNotFoundException;
@@ -30,9 +29,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -65,14 +62,12 @@ private final IDeclarationService declarationService;
     private final UtilisateurServiceImpl utilisateurService;
     private final EmailService emailService;
     
-    @Autowired
-    private JWTService jwtService;
+
 
 @Autowired
 private DeclarationAssignmentService assignmentService;
 
 
-    @Autowired
     public DeclarationController(
             IDeclarationService declarationService,
             PdfFileService pdfFileService,

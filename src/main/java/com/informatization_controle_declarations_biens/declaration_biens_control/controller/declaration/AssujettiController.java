@@ -1,7 +1,6 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.controller.declaration;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
-import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAssujettiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AssujettiProjection;
 
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
