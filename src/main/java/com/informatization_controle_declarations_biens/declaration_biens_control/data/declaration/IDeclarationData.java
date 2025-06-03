@@ -1,7 +1,6 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
-import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.DeclarationToken;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
@@ -12,7 +11,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -103,7 +101,11 @@ boolean existsByAssujettiIdAndEtatDeclarationIn(Long assujettiId, List<EtatDecla
         @Param("dateFin") LocalDate dateFin
     );
     
-       
+       @Query(value = "SELECT MONTH(date_declaration), COUNT(*) FROM declaration " +
+           "WHERE YEAR(date_declaration) = :year GROUP BY MONTH(date_declaration)", nativeQuery = true)
+    List<Object[]> countByMonth(@Param("year") int year);
+
+    
 }
 
        
