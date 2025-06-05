@@ -1,5 +1,6 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.config.securite;
 
+import java.nio.file.Paths;
 import java.util.List;
 
 import org.springframework.context.annotation.Bean;
@@ -11,18 +12,33 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.resource.PathResourceResolver;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.config.JWTAuthenticationFilter;
+
 
 import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-public class SecurityConfiguration {
+public class SecurityConfiguration implements WebMvcConfigurer {
 
     private final JWTAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
+
+  public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Get absolute path to the uploads directory
+       String uploadDir = Paths.get("").toAbsolutePath().toString() + "/uploads/";
+        
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:" + uploadDir)
+                .setCachePeriod(3600)
+                .resourceChain(true)
+                .addResolver(new PathResourceResolver());
+    }
  
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -38,6 +54,8 @@ public class SecurityConfiguration {
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/uploads/**").permitAll() // Autorisation accès fichiers
+
 
 .requestMatchers("/api/declarations/**").permitAll()
 .requestMatchers("/api/foncier-bati/**").permitAll()

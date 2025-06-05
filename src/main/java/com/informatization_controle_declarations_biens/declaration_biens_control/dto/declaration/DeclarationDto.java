@@ -8,6 +8,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.controle.AmendeProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AnimauxProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AppareilsElectroMenagersProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AutresBiensDeValeurProjection;
@@ -72,5 +73,7 @@ public class DeclarationDto {
     private List<RevenusProjection> revenus;
     private List<TitresProjection> titres;
     private List<AutresDettesProjection> autresDettes;
+    private List<AmendeProjection> amendes;
+
 
 }

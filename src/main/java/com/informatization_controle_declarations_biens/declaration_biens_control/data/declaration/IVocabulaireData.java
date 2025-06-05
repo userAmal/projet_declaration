@@ -15,7 +15,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 @Repository
 public interface IVocabulaireData extends JpaRepository<Vocabulaire, Long> {
     @Query("SELECT v FROM Vocabulaire v WHERE v.isActive = true")
-List<Vocabulaire> findAllActive();
+    List<Vocabulaire> findAllActive();
 
     Optional<Vocabulaire> findByIntitule(String intitule);
 
@@ -43,6 +43,7 @@ boolean existsByIntituleAndTypevocabulaireIdAndIdNot(String intitule, Long typeV
 @Query("SELECT v.typevocabulaire.intitule, COUNT(v) FROM Vocabulaire v GROUP BY v.typevocabulaire.intitule")
 List<Object[]> countByType();  // Retourne [String type, Long count]
 
-
+@Query("SELECT v FROM Vocabulaire v WHERE v.typevocabulaire.id = :typeId AND v.isActive = true")
+List<Vocabulaire> findActiveByTypevocabulaireId(@Param("typeId") Long typeId);
 
 }

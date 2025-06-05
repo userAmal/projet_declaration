@@ -296,6 +296,9 @@ public Utilisateur modifierUtilisateur(Long id, Utilisateur utilisateurDetails) 
     if (utilisateurDetails.getRole() != null) {
         existingUtilisateur.setRole(utilisateurDetails.getRole());
     }
+
+    existingUtilisateur.setImageProfil(utilisateurDetails.getImageProfil());
+
     
     // IMPORTANT: On ne modifie pas le mot de passe dans cette méthode
     // Le mot de passe reste inchangé, peu importe ce qui est envoyé dans utilisateurDetails

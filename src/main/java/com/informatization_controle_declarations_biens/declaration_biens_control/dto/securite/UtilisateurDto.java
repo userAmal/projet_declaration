@@ -45,6 +45,7 @@ public class UtilisateurDto {
         this.role = utilisateurProjection.getRole(); 
         this.statutEmploi = utilisateurProjection.getStatutEmploi();
         this.firstLogin = utilisateurProjection.getFirstLogin();
+        this.imageProfil = utilisateurProjection.getImageProfil();
 
         this.token = token;
     }
@@ -59,7 +60,7 @@ public class UtilisateurDto {
         this.role = utilisateur.getRole(); 
         this.statutEmploi = utilisateur.isStatutEmploi();
         this.firstLogin = utilisateur.getFirstLogin();
-
+        this.imageProfil = utilisateur.getImageProfil();
         this.token = token;
     }
 
@@ -74,6 +75,8 @@ public class UtilisateurDto {
     private String token;
     private Boolean statutEmploi;
     private Boolean firstLogin;
+    private String imageProfil;
+
 
 
 }

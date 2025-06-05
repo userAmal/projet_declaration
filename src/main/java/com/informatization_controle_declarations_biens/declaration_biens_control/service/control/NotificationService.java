@@ -8,7 +8,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.controle.INotificationService;
-import com.informatization_controle_declarations_biens.declaration_biens_control.service.declaration.AssujettiService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 
@@ -23,8 +22,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.springframework.security.core.Authentication; // L'import CRUCIAL
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.Authentication;
 
 @Service
 @RequiredArgsConstructor
@@ -143,7 +141,7 @@ private String prepareAssignmentEmailContent(Utilisateur utilisateur, Declaratio
            "      <div style='display: table-cell; width: 150px; color: #555;'>Assujetti :</div>" +
            "      <div style='display: table-cell; font-weight: bold;'>" +
            "        <span style='color: #333; background-color: #fff; padding: 4px 10px; border-radius: 3px; border: 1px solid #ddd;'>" + 
-                      nomCompletAssujetti + 
+                      declaration.getAssujetti().getMatricule() + 
                    "</span>" +
            "      </div>" +
            "    </div>" +

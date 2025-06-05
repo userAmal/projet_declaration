@@ -13,6 +13,7 @@ public interface UtilisateurProjection {
     RoleEnum getRole(); 
     Boolean getStatutEmploi(); 
     Boolean getFirstLogin(); 
+    String getImageProfil();
 
 }
 

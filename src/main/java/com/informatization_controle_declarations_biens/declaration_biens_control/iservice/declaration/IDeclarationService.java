@@ -25,6 +25,7 @@ public interface IDeclarationService extends IGenericService<Declaration, Long> 
   List<Declaration> searchByUserAndKeyword(Long userId, String keyword);
   List<Declaration> findValidatedOrRefusedDeclarations();
   void transfererDeclarationsUtilisateur(Long sourceUserId, Long targetUserId, List<Long> declarationIds);
+  Declaration getById(Long id);
 
 
 

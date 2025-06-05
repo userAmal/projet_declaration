@@ -11,12 +11,14 @@ public interface IVocabulaireService extends IGenericService<Vocabulaire, Long> 
     List<Vocabulaire> findByIntitule(String intitule);
     
     List<Vocabulaire> findByTypeVocabulaire(Long typeVocabulaireId);
-    
+        List<Vocabulaire> findByTypeVocabulaireall(Long typeVocabulaireId);
+
     List<Vocabulaire> findByVocabulaireParent(Long vocabulaireParentId);
     
     List<VocabulaireProjection> getVocabulaireDetails(Long id);
 
     List<Vocabulaire> findByTypeVocabulaireId(Long typeId);
+
     boolean existsByIntituleAndTypeVocabulaire(String intitule, Long typeVocabulaireId);
     boolean existsByIntituleAndTypeVocabulaireAndIdNot(String intitule, Long typeVocabulaireId, Long id);
 

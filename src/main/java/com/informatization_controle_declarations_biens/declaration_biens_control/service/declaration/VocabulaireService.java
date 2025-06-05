@@ -48,15 +48,20 @@ public class VocabulaireService implements IVocabulaireService {
         return vocabulaireData.existsByIntituleAndTypevocabulaireIdAndIdNot(intitule, typeVocabulaireId, id);
     }
     
+
+    @Override
+    public List<Vocabulaire> findByTypeVocabulaire(Long typeVocabulaireId) {
+        return vocabulaireData.findActiveByTypevocabulaireId(typeVocabulaireId);
+    }
     
 
     @Override
     public List<Vocabulaire> findByIntitule(String intitule) {
         return vocabulaireData.findByIntitule(intitule).map(List::of).orElse(Collections.emptyList());
     }
-
+ 
     @Override
-    public List<Vocabulaire> findByTypeVocabulaire(Long typeVocabulaireId) {
+    public List<Vocabulaire> findByTypeVocabulaireall(Long typeVocabulaireId) {
         return vocabulaireData.findByTypevocabulaireId(typeVocabulaireId);
     }
 

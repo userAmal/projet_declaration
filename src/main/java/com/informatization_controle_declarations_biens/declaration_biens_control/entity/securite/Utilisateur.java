@@ -69,6 +69,9 @@ public class Utilisateur implements UserDetails {
     public void setFirstLogin(Boolean firstLogin) {
         this.firstLogin = firstLogin;
     }
+
+    @Column(name = "image_profil", length = 255, nullable = true)
+    private String imageProfil; // Ceci stockera le chemin ou l'URL de l'image
     
 @Override
 @JsonIgnore
@@ -101,5 +104,13 @@ public Collection<? extends GrantedAuthority> getAuthorities() {
     @Override
     public boolean isEnabled() {
         return true; 
+    }
+
+    public String getImageProfil() {
+        return imageProfil;
+    }
+
+    public void setImageProfil(String imageProfil) {
+        this.imageProfil = imageProfil;
     }
 }

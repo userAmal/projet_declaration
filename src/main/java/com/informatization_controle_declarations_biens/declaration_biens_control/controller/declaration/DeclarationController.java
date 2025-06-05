@@ -446,6 +446,7 @@ public ResponseEntity<List<Declaration>> getDeclarationsByConnectedUser(@Request
     }
 }*/
 
+
 private String getCurrentUserEmail() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null && authentication.getPrincipal() instanceof UserDetails) {

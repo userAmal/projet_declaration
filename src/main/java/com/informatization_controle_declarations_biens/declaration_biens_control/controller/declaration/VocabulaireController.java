@@ -95,6 +95,11 @@ public class VocabulaireController {
         return ResponseEntity.ok(vocabulaireService.findByTypeVocabulaire(typeId));
     }
 
+     @GetMapping("/typeall/{typeId}")
+    public ResponseEntity<List<Vocabulaire>> getByTypeVocabulaireall(@PathVariable Long typeId) {
+        return ResponseEntity.ok(vocabulaireService.findByTypeVocabulaireall(typeId));
+    }
+
     @GetMapping("/parent/{parentId}")
     public ResponseEntity<List<Vocabulaire>> getByVocabulaireParent(@PathVariable Long parentId) {
         return ResponseEntity.ok(vocabulaireService.findByVocabulaireParent(parentId));

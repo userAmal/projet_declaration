@@ -373,6 +373,10 @@ public List<Declaration> searchByUserAndKeyword(Long userId, String keyword) {
     // return declarationData.searchByUserAndKeyword(userId, keyword);
 }
 
-
+@Override
+public Declaration getById(Long id) {
+    return declarationData.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée avec l'ID: " + id));
+}
 
 }

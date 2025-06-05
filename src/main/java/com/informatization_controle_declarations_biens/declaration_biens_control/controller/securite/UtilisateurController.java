@@ -3,15 +3,23 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.HashMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.CacheControl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +28,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
@@ -27,6 +36,10 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
+import org.springframework.util.StringUtils;
+
+import org.springframework.http.MediaType;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -271,7 +284,9 @@ public ResponseEntity<?> modifierUtilisateur(@PathVariable Long id, @Valid @Requ
             response.put("firstname", utilisateur.getFirstname());  // Ajoute le prénom
             response.put("lastname", utilisateur.getLastname());  // Ajoute le nom
             response.put("tel", utilisateur.getTel());  // Ajoute le téléphone
-    
+            response.put("firstLogin",utilisateur.getFirstLogin());
+            response.put("imageProfil",utilisateur.getImageProfil());
+
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             logger.error("Erreur lors de la récupération de l'utilisateur courant", e);
@@ -312,5 +327,120 @@ public ResponseEntity<?> modifierUtilisateur(@PathVariable Long id, @Valid @Requ
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+       @GetMapping(value = "/images/{filename:.+}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getImage(@PathVariable String filename) throws IOException {
+        Path imagePath = Paths.get("uploads/profiles/" + filename);
+        if (!Files.exists(imagePath)) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        byte[] imageBytes = Files.readAllBytes(imagePath);
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_JPEG)
+                .cacheControl(CacheControl.maxAge(30, TimeUnit.DAYS))
+                .body(imageBytes);
+    }
+
+   @PostMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+public ResponseEntity<?> uploadProfileImage(
+    @PathVariable Long id,
+    @RequestParam("file") MultipartFile file) {
     
+    try {
+        // Validate file
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("File is empty");
+        }
+
+        // Create upload directory if not exists
+        Path uploadPath = Paths.get("uploads/profiles");
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        // Generate unique filename
+        String extension = StringUtils.getFilenameExtension(file.getOriginalFilename());
+        String filename = "profile_" + id + "_" + System.currentTimeMillis() + "." + extension;
+
+        // Save file
+        Path filePath = uploadPath.resolve(filename);
+        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        // Store the path that matches your security configuration
+        String imageUrl = "/uploads/profiles/" + filename;
+        Utilisateur update = new Utilisateur();
+        update.setImageProfil(imageUrl);
+        
+        Utilisateur updatedUser = utilisateurService.modifierUtilisateur(id, update);
+        
+        return ResponseEntity.ok(Map.of(
+            "message", "Image uploaded successfully",
+            "imageUrl", imageUrl
+        ));
+        
+    } catch (Exception e) {
+        return ResponseEntity.internalServerError()
+            .body("Error uploading image: " + e.getMessage());
+    }
+}
+@DeleteMapping("/{id}/image")
+public ResponseEntity<?> removeProfileImage(@PathVariable Long id) {
+    try {
+        Utilisateur utilisateur = utilisateurService.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Utilisateur non trouvé"));
+        
+        // Supprimer le fichier physique si nécessaire
+        if (utilisateur.getImageProfil() != null && !utilisateur.getImageProfil().isEmpty()) {
+            // Handle both absolute and relative paths
+            String imagePath = utilisateur.getImageProfil();
+            Path fileToDelete;
+            
+            if (imagePath.startsWith("/uploads/")) {
+                // Direct file path
+                fileToDelete = Paths.get("." + imagePath);
+            } else if (imagePath.startsWith("/api/utilisateurs/images/")) {
+                // API path - extract filename and construct file path
+                String filename = imagePath.substring(imagePath.lastIndexOf("/") + 1);
+                fileToDelete = Paths.get("uploads/profiles/" + filename);
+            } else {
+                // Fallback - assume it's in uploads/profiles
+                fileToDelete = Paths.get("uploads/profiles/" + imagePath);
+            }
+            
+            try {
+                boolean deleted = Files.deleteIfExists(fileToDelete);
+                logger.info("File deletion result: {} for path: {}", deleted, fileToDelete);
+            } catch (IOException e) {
+                logger.warn("Could not delete file: {}", fileToDelete, e);
+                // Continue with database update even if file deletion fails
+            }
+        }
+        
+        // Mettre à jour l'utilisateur
+        Utilisateur update = new Utilisateur();
+        update.setImageProfil(null);
+        utilisateurService.modifierUtilisateur(id, update);
+        
+        // Return JSON response instead of plain text
+        return ResponseEntity.ok().body(Map.of(
+            "success", true,
+            "message", "Image de profil supprimée avec succès"
+        ));
+        
+    } catch (EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(Map.of(
+                "success", false,
+                "message", "Utilisateur non trouvé"
+            ));
+    } catch (Exception e) {
+        logger.error("Erreur lors de la suppression de l'image pour l'utilisateur {}", id, e);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of(
+                "success", false,
+                "message", "Erreur lors de la suppression de l'image: " + e.getMessage()
+            ));
+    }
+}
 }

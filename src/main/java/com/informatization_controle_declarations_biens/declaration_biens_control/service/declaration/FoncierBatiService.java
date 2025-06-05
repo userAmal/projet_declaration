@@ -147,7 +147,7 @@ public byte[] generatePdfRapport(List<PredictionResult> results) {
     document.add(title);
 
     // Sous-titre
-    Paragraph subtitle = new Paragraph("Analyse des écarts entre valeurs déclarées et prédictions du modèle")
+    Paragraph subtitle = new Paragraph("Analyse des écarts entre valeurs déclarées et prédictions du modèle 'FONCIER BÂTI'")
             .setTextAlignment(TextAlignment.CENTER)
             .setFontSize(12)
             .setMarginBottom(20);
