@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import org.springframework.stereotype.Service;
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.AmendeData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IAnimauxData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IAppareilsElectroMenagersData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IAutresBiensDeValeurData;
@@ -39,6 +40,7 @@ public class DeclarationDtoLoader {
     private final ILesCreancesData lesCreancesData;
     private final IMeublesMeublantsData meublesMeublantsData;
     private final ITitreData titreData;
+    private final AmendeData amendeData;
 
 
 
@@ -65,6 +67,7 @@ public class DeclarationDtoLoader {
         dto.setCreances(lesCreancesData.findByDeclarationId(declarationId));
         dto.setMeublesMeublants(meublesMeublantsData.findByDeclarationId(declarationId));
         dto.setTitres(titreData.findByDeclarationId(declarationId));
+        dto.setAmendes(amendeData.findByIdDeclaration_Id(declarationId));
 
         // ... chargez toutes les autres listes
         

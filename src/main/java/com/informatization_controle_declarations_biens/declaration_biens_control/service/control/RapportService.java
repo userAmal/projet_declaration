@@ -10,6 +10,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.controle.IRapportService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.controle.AmendeProjection;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Rapport.Type;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.TypeEntiteEnum;
@@ -31,6 +32,7 @@ import org.thymeleaf.context.Context;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -38,6 +40,7 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 
@@ -466,7 +469,7 @@ private Map<String, Object> createPassifEntry(String typeDette, float montantPre
             context.setVariable("etapesducontrole", ETAPESDUCONTROLE);
                 
             // Ajoutez l'introduction au contexte
-            String respectdudélai = respectdudélai(declaration);
+            String respectdudélai = respectdudélai(declarationDto);
             context.setVariable("respectdudélai", respectdudélai);
                 
             String nomComplet = declaration.getAssujetti() != null ? 
@@ -638,30 +641,60 @@ private String ETAPESDUCONTROLE(Declaration declaration) {
         """;
 }
 
-private String respectdudélai(Declaration declaration) {
-    
-    String civilite = declaration.getAssujetti() != null &&
-                      declaration.getAssujetti().getCivilite() != null ?
-                      declaration.getAssujetti().getCivilite().getIntitule() + " " : "";
+private String respectdudélai(DeclarationDto declarationDto) {
+    String civilite = declarationDto.getAssujetti() != null &&
+                      declarationDto.getAssujetti().getCivilite() != null ?
+                      declarationDto.getAssujetti().getCivilite().getIntitule() + " " : "";
 
-        String nomComplet = declaration.getAssujetti() != null ?
-                       (declaration.getAssujetti().getPrenom() != null ?
-                        declaration.getAssujetti().getPrenom() + " " : "") +
-                       (declaration.getAssujetti().getNom() != null ?
-                        declaration.getAssujetti().getNom().toUpperCase() : "NOM INCONNU") :
-                       "ASSUJETTI INCONNU";
+    String nomComplet = declarationDto.getAssujetti() != null ?
+               (declarationDto.getAssujetti().getPrenom() != null ?
+                declarationDto.getAssujetti().getPrenom() + " " : "") +
+               (declarationDto.getAssujetti().getNom() != null ?
+                declarationDto.getAssujetti().getNom().toUpperCase() : "NOM INCONNU") :
+               "ASSUJETTI INCONNU";
+
+    // Check if there are any fines
+    boolean hasAmendes = declarationDto.getAmendes() != null && !declarationDto.getAmendes().isEmpty();
+    
+    String respectText;
+    String amendeDetails = "";
+    
+    if (hasAmendes) {
+        // Get the first fine projection
+        AmendeProjection amendeProjection = declarationDto.getAmendes().get(0);
+        respectText = "ne respecte pas le délai, le modèle et/ou le contenu de la déclaration des biens";
+        
+        // Format the amount with French locale
+        NumberFormat formatter = NumberFormat.getInstance(Locale.FRENCH);
+        formatter.setMinimumFractionDigits(2);
+        formatter.setMaximumFractionDigits(2);
+        
+        String formattedAmount = formatter.format(amendeProjection.getMontant());
+        
+        // Style the amount in red and bold
+        String styledAmount = String.format("<span style=\"color: red; font-weight: bold;\">%s</span>", formattedAmount);
+        
+        amendeDetails = String.format("\nUne amende de %s FCFA a été appliquée pour le motif suivant : \"%s\".", 
+                                    styledAmount, 
+                                    amendeProjection.getMotif() != null ? 
+                                        amendeProjection.getMotif() : "Motif non spécifié");
+    } else {
+        respectText = "respecte le modèle et le contenu tels qu'institués par le décret précité";
+    }
 
     return """
         
-        En application des dispositions combinées des articles 78 et 139 de la loi organique régissant la Cour des comptes, le Premier Ministre et les Ministres doivent remettre dans les sept (7) jours de leur entrée en fonction au Premier Président de la Cour des comptes la déclaration écrite sur l’honneur de leurs biens. Cette déclaration fait l’objet d’une mise à jour annuelle et à la cessation de fonction. Ces dispositions s’étendent aux Président des Institutions de la République, aux responsables des autorités administratives indépendantes et à tout autre agent public soumis à la déclaration des biens.
-        En outre, la loi n° 2020-028 du 02 juillet 2020 déterminant les autres agents publics assujettis à l’obligation de déclaration des biens et son décret no 2021-856/PRN/MJ du 07 octobre 2021 fixant le modèle et le contenu n’ont pas précisé le délai de dépôt desdites déclarations ; mais, la note de service n° 353 du 30 novembre 2021 du Premier Président de la Cour des comptes rend opposable aux tiers cette déclaration à partir de cette date.
+        En application des dispositions combinées des articles 78 et 139 de la loi organique régissant la Cour des comptes, le Premier Ministre et les Ministres doivent remettre dans les sept (7) jours de leur entrée en fonction au Premier Président de la Cour des comptes la déclaration écrite sur l'honneur de leurs biens. Cette déclaration fait l'objet d'une mise à jour annuelle et à la cessation de fonction. Ces dispositions s'étendent aux Présidents des Institutions de la République, aux responsables des autorités administratives indépendantes et à tout autre agent public soumis à la déclaration des biens.
+        En outre, la loi n° 2020-028 du 02 juillet 2020 déterminant les autres agents publics assujettis à l'obligation de déclaration des biens et son décret no 2021-856/PRN/MJ du 07 octobre 2021 fixant le modèle et le contenu n'ont pas précisé le délai de dépôt desdites déclarations ; mais, la note de service n° 353 du 30 novembre 2021 du Premier Président de la Cour des comptes rend opposable aux tiers cette déclaration à partir de cette date.
         %s%s, Directeur des Systèmes d'Information à la Direction Générale des Douanes au Ministère des finances, ayant pris service le 13 juillet 2021 a transmis à la Cour la déclaration initiale de ses biens le 21 avril 2022. 
-        La déclaration transmise respecte le modèle et le contenu tels qu’institués par le décret précité. 
+        La déclaration transmise %s.%s
 
 
         """.formatted(
             civilite,
-            nomComplet
+            nomComplet,
+            respectText,
+            amendeDetails
         );
 }
 

@@ -9,12 +9,16 @@ import org.springframework.stereotype.Repository;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Amende;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.StatutAmendeEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.controle.AmendeProjection;
+import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AnimauxProjection;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface AmendeData extends JpaRepository<Amende, Long> {
+
+    @Query("SELECT a FROM Amende a WHERE a.declaration.id = :declarationId")
+    List<AmendeProjection> findByIdDeclaration_Id(@Param("declarationId") Long declarationId);
     
     // Trouver toutes les amendes pour une déclaration spécifique
     List<Amende> findByDeclarationId(Long declarationId);
