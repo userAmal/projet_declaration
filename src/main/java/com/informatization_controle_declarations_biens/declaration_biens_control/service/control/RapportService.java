@@ -7,10 +7,12 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.HistoriqueDeclarationUser;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.controle.IRapportService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.controle.AmendeProjection;
+import com.informatization_controle_declarations_biens.declaration_biens_control.service.declaration.HistoriqueDeclarationUserServiceImpl;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.EmailService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Rapport.Type;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.TypeEntiteEnum;
@@ -56,6 +58,8 @@ public class RapportService implements IRapportService {
     private final CommentaireGeneriqueService commentaireService;  // <<== J'ajoute ici
     private final DeclarationDtoLoader declarationDtoLoader;
     private final TemplateEngine templateEngine;
+    @Autowired
+    private  HistoriqueDeclarationUserServiceImpl historiqueDeclarationUserServiceImpl;
 
     public RapportService(CommentaireGeneriqueService commentaireService, DeclarationDtoLoader declarationDtoLoader) {
         ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
@@ -486,6 +490,17 @@ private Map<String, Object> createPassifEntry(String typeDette, float montantPre
             
             String htmlContent = templateEngine.process("definitif-template", context);
             byte[] pdfContent = genererPdf(htmlContent);
+
+            // Fermer l'affectation actuelle en mettant à jour la dateFinAffectation
+        List<HistoriqueDeclarationUser> historiquesActifs = historiqueDeclarationUserServiceImpl.getActiveAffectationsByDeclaration(declaration.getId());
+        
+        if (!historiquesActifs.isEmpty()) {
+            // Fermer toutes les affectations actives pour cette déclaration
+            for (HistoriqueDeclarationUser historiqueActif : historiquesActifs) {
+                historiqueActif.setDateFinAffectation(LocalDate.now());
+                historiqueDeclarationUserServiceImpl.save(historiqueActif); // Vous devrez ajouter cette méthode au service
+            }
+        }
             
             if (decision != null) {
                 if (decision) {

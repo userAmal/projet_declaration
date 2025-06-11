@@ -37,5 +37,6 @@ public interface IHistoriqueDeclarationUserService {
     List<HistoriqueDeclarationUser> getHistoriqueByPeriod(LocalDate startDate, LocalDate endDate);
     Optional<Utilisateur> getFirstUtilisateurByRoleAndDeclaration(RoleEnum role, Long declarationId);
     List<HistoriqueDeclarationUser> findAll();
+    HistoriqueDeclarationUser save(HistoriqueDeclarationUser historique);
 
 }

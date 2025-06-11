@@ -51,6 +51,12 @@ public class HistoriqueDeclarationUserServiceImpl implements IHistoriqueDeclarat
     }
 
     @Override
+    @Transactional
+    public HistoriqueDeclarationUser save(HistoriqueDeclarationUser historique) {
+        return historiqueRepository.save(historique);
+    }
+
+    @Override
     public List<HistoriqueDeclarationUser> getHistoriqueByDeclaration(Long declarationId) {
         return historiqueRepository.findByDeclarationId(declarationId);
     }
