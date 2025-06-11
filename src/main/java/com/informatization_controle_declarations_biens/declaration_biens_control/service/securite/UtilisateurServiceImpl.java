@@ -83,7 +83,7 @@ public Utilisateur save(Utilisateur utilisateur) {
                 "dès votre première connexion.<br><br>" +
                 
                 "Veuillez cliquer sur le bouton ci-dessous pour accéder à la plateforme :<br>",
-        "url", "http://localhost:4201/api/auth/authenticate"
+        "url", "http://localhost:4201/securite"
     );
 
     try {
