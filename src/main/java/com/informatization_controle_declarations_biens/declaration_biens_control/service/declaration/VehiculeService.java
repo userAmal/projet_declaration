@@ -93,49 +93,51 @@ public class VehiculeService implements IVehiculeService {
     return data.findByDesignationId(designationId);
 
     }
-    @Override
-    public double getPrediction(Vehicule vehicule) {
-        // Création locale du RestTemplate
-        RestTemplate restTemplate = new RestTemplate();
-        
-        try {
-            // Préparer les données selon ce que le modèle attend
-            Map<String, Object> requestData = new HashMap<>();
-            requestData.put("Year", vehicule.getAnneeAcquisition());
-            requestData.put("Present_Price", vehicule.getValeurAcquisition());
-            requestData.put("Kms_Driven", vehicule.getKilometrage());
-            requestData.put("Fuel_Type", vehicule.getCarburant().getIntitule());
-            requestData.put("Transmission", vehicule.getTransmission().getIntitule());
+@Override
+public double getPrediction(Vehicule vehicule) {
+    RestTemplate restTemplate = new RestTemplate();
+    
+    try {
+        // 1. Préparation des données avec conversion FCFA → millions
+        Map<String, Object> requestData = new HashMap<>();
+        requestData.put("Year", vehicule.getAnneeAcquisition());
+        requestData.put("Present_Price", vehicule.getValeurAcquisition() / 1_000_000); // Conversion cruciale
+        requestData.put("Kms_Driven", vehicule.getKilometrage());
+        requestData.put("Fuel_Type", vehicule.getCarburant().getIntitule());
+        requestData.put("Transmission", vehicule.getTransmission().getIntitule());
 
-            // Debug: Afficher la requête
-            System.out.println("Requête envoyée à Flask: " + requestData);
+        System.out.println("[DEBUG] Requête convertie: " + requestData);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestData, headers);
+        // 2. Envoi à l'API
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<Map<String, Object>> requestEntity = new HttpEntity<>(requestData, headers);
 
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                "http://localhost:5000/predict/car_price", 
-                requestEntity, 
-                Map.class
-            );
+        ResponseEntity<Map> response = restTemplate.postForEntity(
+            "http://localhost:5000/predict/vehicule", 
+            requestEntity, 
+            Map.class
+        );
 
-            System.out.println("Réponse reçue de Flask: " + response.getBody());
-
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Object prediction = response.getBody().get("prediction");
-                if (prediction instanceof Number) {
-                    return ((Number) prediction).doubleValue();
-                } else {
-                    return Double.parseDouble(prediction.toString());
-                }
+        // 3. Traitement de la réponse avec reconversion
+        if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
+            Object prediction = response.getBody().get("prediction");
+            double valeur;
+            
+            if (prediction instanceof Number) {
+                valeur = ((Number) prediction).doubleValue();
+            } else {
+                valeur = Double.parseDouble(prediction.toString());
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Erreur lors de la prédiction: " + e.getMessage());
+            
+            // Conversion millions → FCFA
+            return valeur * 1_000_000;
         }
-        throw new RuntimeException("Erreur lors de la prédiction avec l'API Flask.");
+    } catch (Exception e) {
+        throw new RuntimeException("Erreur de prédiction: " + e.getMessage());
     }
+    throw new RuntimeException("Erreur lors de l'appel à l'API Flask");
+}
 
   @Override
 public byte[] generatePdfRapport(List<PredictionResult> results) {
