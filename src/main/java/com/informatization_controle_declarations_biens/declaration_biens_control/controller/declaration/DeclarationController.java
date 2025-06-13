@@ -8,6 +8,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IDeclarationService;
+import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IHistoriqueDeclarationUserService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.bi.DeclarationAssignmentService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.PdfFileService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.control.PdfRapportService;
@@ -61,7 +62,7 @@ private final IDeclarationService declarationService;
     private final AssujettiService assujettiService;
     private final UtilisateurServiceImpl utilisateurService;
     private final EmailService emailService;
-    
+    private final IHistoriqueDeclarationUserService historiqueDeclarationUserService;
 
 
 @Autowired
@@ -75,7 +76,7 @@ private DeclarationAssignmentService assignmentService;
             ParametrageService parametrageService,
             AssujettiService assujettiService,
             UtilisateurServiceImpl utilisateurService,
-            EmailService emailService) {
+            EmailService emailService,IHistoriqueDeclarationUserService historiqueDeclarationUserService) {
         this.declarationService = declarationService;
         this.pdfFileService = pdfFileService;
         this.utilisateurService = utilisateurService;
@@ -83,110 +84,135 @@ private DeclarationAssignmentService assignmentService;
         this.assujettiService = assujettiService;
         this.pdfRapportService = pdfRapportService;
         this.emailService = emailService;
+        
+        this.historiqueDeclarationUserService = historiqueDeclarationUserService;
 
-    }
- // Nouvelle méthode pour enregistrer une déclaration avec email de confirmation et PDF
-    @PostMapping("/{id}/enregistrer")
-    public ResponseEntity<?> enregistrerDeclaration(@PathVariable Long id, HttpServletRequest request) {
-        try {
-            // 1. Récupérer le token depuis l'en-tête ou les paramètres
-            String token = extractTokenFromRequest(request);
-            
-            // 2. Récupérer la déclaration
-            Declaration declaration = declarationService.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
-            
-            // 3. Vérifier que la déclaration est encore en état "nouveau"
-            if (declaration.getEtatDeclaration() != EtatDeclarationEnum.nouveau) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of(
-                        "error", "Cette déclaration a déjà été soumise",
-                        "alreadySubmitted", true
-                    ));
-            }
-            
-            // 4. Changer l'état en "en_cours"
-
-            declaration.setEtatDeclaration(EtatDeclarationEnum.en_cours);
+    }// Nouvelle méthode pour enregistrer une déclaration avec email de confirmation et PDF
+@PostMapping("/{id}/enregistrer")
+public ResponseEntity<?> enregistrerDeclaration(@PathVariable Long id, HttpServletRequest request) {
+    try {
+        // 1. Récupérer le token depuis l'en-tête ou les paramètres
+        String token = extractTokenFromRequest(request);
+        
+        // 2. Récupérer la déclaration
+        Declaration declaration = declarationService.findById(id)
+            .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
+        
+        // 3. Vérifier que la déclaration est encore en état "nouveau"
+        if (declaration.getEtatDeclaration() != EtatDeclarationEnum.nouveau) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of(
+                    "error", "Cette déclaration a déjà été soumise",
+                    "alreadySubmitted", true
+                ));
+        }
+        
+        // 4. Changer l'état en "en_cours"
+        declaration.setEtatDeclaration(EtatDeclarationEnum.en_cours);
         declaration.setDateDeclaration(LocalDate.now());
         Declaration savedDeclaration = declarationService.save(declaration);
         
         // NOUVEAU: Assignment automatique au PG le moins chargé
+        Utilisateur pgAssigne = null;
         try {
             assignmentService.assignDeclarationToPG(
                 savedDeclaration.getId(), 
                 "Déclaration soumise par l'assujetti - traitement requis"
             );
+            
+            // Récupérer le PG assigné pour l'historique
+            Declaration declarationWithPG = declarationService.findById(savedDeclaration.getId())
+                .orElseThrow(() -> new EntityNotFoundException("Déclaration non trouvée"));
+            pgAssigne = declarationWithPG.getUtilisateur();
+            
         } catch (Exception e) {
             log.error("Erreur lors de l'assignment automatique pour déclaration {}: {}", 
                      savedDeclaration.getId(), e.getMessage());
             // L'erreur d'assignment n'empêche pas la soumission
         }
         
-            // 5. INVALIDER LE TOKEN après l'enregistrement
-            if (token != null) {
-                assujettiService.invalidateToken(token);
+        // NOUVEAU: Créer l'historique d'affectation si un PG a été assigné
+        if (pgAssigne != null) {
+            try {
+                historiqueDeclarationUserService.createHistorique(
+                    savedDeclaration.getId(), 
+                    pgAssigne.getId()
+                );
+                log.info("Historique d'affectation créé pour déclaration {} assignée au PG {}", 
+                        savedDeclaration.getId(), pgAssigne.getEmail());
+            } catch (Exception e) {
+                log.error("Erreur lors de la création de l'historique pour déclaration {}: {}", 
+                         savedDeclaration.getId(), e.getMessage());
+                // L'erreur d'historique n'empêche pas la soumission
             }
-            
-            // 6. Générer le PDF de la déclaration
-            DeclarationDto declarationDto = declarationService.getFullDeclarationDetails(id);
-            
-            // Créer le répertoire pour les documents si nécessaire
-            Parametrage documentsPath = parametrageService.getByCode("PATH_DOCUMENTS_ASSUJETTIS");
-            if (documentsPath == null) {
-                throw new RuntimeException("Paramètre PATH_DOCUMENTS_ASSUJETTIS non configuré");
-            }
-            
-            Path outputPath = Paths.get(documentsPath.getValeur());
-            Files.createDirectories(outputPath);
-            
-            // Générer le nom du fichier PDF
-            String fileName = "declaration_" + declarationDto.getId() + "_" +
-                           new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            Path fullPath = outputPath.resolve(fileName + ".pdf");
-            
-            // Générer le PDF
-            pdfFileService.generateFullDeclarationPdf(declarationDto, fullPath.toString());
-            
-            // 7. Lire le contenu du PDF pour l'email
-            byte[] pdfContent = Files.readAllBytes(fullPath);
-            
-            // 8. Préparer les variables pour l'email de confirmation
-            Map<String, Object> emailVariables = Map.of(
-                "header", "de confirmation",
-                "body", "Merci pour votre déclaration. Votre déclaration a été enregistrée avec succès. Veuillez trouver votre PDF en pièce jointe.",
-                "url", "#"
-            );
-            
-            // 9. Envoyer l'email avec le PDF en pièce jointe
-            emailService.sendEmailWithAttachment(
-                savedDeclaration.getAssujetti().getEmail(),
-                "Confirmation de votre déclaration de biens - PDF joint",
-                "mail_pdf_Declaration",
-                emailVariables,
-                pdfContent,
-                fileName + ".pdf"
-            );
-            
-            // 10. Retourner la réponse de succès
-            return ResponseEntity.ok(Map.of(
-                "message", "Merci pour votre déclaration. Un email de confirmation avec votre PDF a été envoyé.",
-                "etat", "en-cours",
-                "declarationId", savedDeclaration.getId(),
-                "pdfGenerated", true,
-                "tokenInvalidated", true
-            ));
-            
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Erreur lors de l'enregistrement: " + e.getMessage()));
         }
+        
+        // 5. INVALIDER LE TOKEN après l'enregistrement
+        if (token != null) {
+            assujettiService.invalidateToken(token);
+        }
+        
+        // 6. Générer le PDF de la déclaration
+        DeclarationDto declarationDto = declarationService.getFullDeclarationDetails(id);
+        
+        // Créer le répertoire pour les documents si nécessaire
+        Parametrage documentsPath = parametrageService.getByCode("PATH_DOCUMENTS_ASSUJETTIS");
+        if (documentsPath == null) {
+            throw new RuntimeException("Paramètre PATH_DOCUMENTS_ASSUJETTIS non configuré");
+        }
+        
+        Path outputPath = Paths.get(documentsPath.getValeur());
+        Files.createDirectories(outputPath);
+        
+        // Générer le nom du fichier PDF
+        String fileName = "declaration_" + declarationDto.getId() + "_" +
+                       new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        Path fullPath = outputPath.resolve(fileName + ".pdf");
+        
+        // Générer le PDF
+        pdfFileService.generateFullDeclarationPdf(declarationDto, fullPath.toString());
+        
+        // 7. Lire le contenu du PDF pour l'email
+        byte[] pdfContent = Files.readAllBytes(fullPath);
+        
+        // 8. Préparer les variables pour l'email de confirmation
+        Map<String, Object> emailVariables = Map.of(
+            "header", "de confirmation",
+            "body", "Merci pour votre déclaration. Votre déclaration a été enregistrée avec succès. Veuillez trouver votre PDF en pièce jointe.",
+            "url", "#"
+        );
+        
+        // 9. Envoyer l'email avec le PDF en pièce jointe
+        emailService.sendEmailWithAttachment(
+            savedDeclaration.getAssujetti().getEmail(),
+            "Merci pour  votre déclaration de biens - PDF joint",
+            "PDF_Declaration",
+            emailVariables,
+            pdfContent,
+            fileName + ".pdf"
+        );
+        
+        // 10. Retourner la réponse de succès
+        Map<String, Object> responseData = Map.of(
+            "message", "Merci pour votre déclaration. Un email de confirmation avec votre PDF a été envoyé.",
+            "etat", "en-cours",
+            "declarationId", savedDeclaration.getId(),
+            "pdfGenerated", true,
+            "tokenInvalidated", true,
+            "pgAssigned", pgAssigne != null,
+            "historiqueCreated", pgAssigne != null
+        );
+        
+        return ResponseEntity.ok(responseData);
+        
+    } catch (EntityNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+            .body(Map.of("error", e.getMessage()));
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+            .body(Map.of("error", "Erreur lors de l'enregistrement: " + e.getMessage()));
     }
-
-    // Vérification d'accès avec token
+}  // Vérification d'accès avec token
     @GetMapping("/access")
     public ResponseEntity<?> validateToken(@RequestParam String token) {
         Long declarationId = assujettiService.verifyToken(token);
