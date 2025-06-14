@@ -2,8 +2,11 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.IConclusionData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.ICommentaireGeneriqueData;
-import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.IRapportData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.DeclarationAncienneInfo;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.DeclarationsAnciennesDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.PerformanceAnnuelleDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.PerformanceMensuelleDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.CommentaireGenerique;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Conclusion;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
@@ -11,7 +14,9 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.Month;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -28,16 +33,14 @@ public class AvocatGeneralStatisticsService {
     private final IDeclarationData declarationData;
     private final IConclusionData conclusionData;
     private final ICommentaireGeneriqueData commentaireData;
-    private final IRapportData rapportData;
 
     public AvocatGeneralStatisticsService(IDeclarationData declarationData,
                                         IConclusionData conclusionData,
-                                        ICommentaireGeneriqueData commentaireData,
-                                        IRapportData rapportData) {
+                                        ICommentaireGeneriqueData commentaireData
+                                       ) {
         this.declarationData = declarationData;
         this.conclusionData = conclusionData;
         this.commentaireData = commentaireData;
-        this.rapportData = rapportData;
     }
 
     // ==================== STATISTIQUES PRINCIPALES ====================
@@ -345,4 +348,114 @@ long refus = conclusions.stream()
         public double getMonTauxRespectDelais() { return monTauxRespectDelais; }
         public double getTauxRespectDelaisMoyen() { return tauxRespectDelaisMoyen; }
     }
+    public PerformanceMensuelleDTO getPerformanceMensuelle(Long avocatGeneralId) {
+    int currentYear = LocalDate.now().getYear();
+    List<Declaration> declarations = declarationData.findByUtilisateurId(avocatGeneralId);
+    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
+    
+    // Filtrer les déclarations pour l'année courante
+    List<Declaration> declarationsAnnuelles = declarations.stream()
+        .filter(d -> d.getDateDeclaration() != null && 
+                    d.getDateDeclaration().getYear() == currentYear)
+        .collect(Collectors.toList());
+    
+    Map<Month, Long> declarationsParMois = declarationsAnnuelles.stream()
+        .collect(Collectors.groupingBy(
+            d -> d.getDateDeclaration().getMonth(),
+            Collectors.counting()
+        ));
+    
+    Map<Month, Long> conclusionsParMois = conclusions.stream()
+        .filter(c -> c.getDateCreation() != null && 
+                    c.getDateCreation().getYear() == currentYear)
+        .collect(Collectors.groupingBy(
+            c -> c.getDateCreation().getMonth(),
+            Collectors.counting()
+        ));
+    
+    Map<Month, Double> tauxTraitementParMois = new HashMap<>();
+    for (Month mois : Month.values()) {
+        long declMois = declarationsParMois.getOrDefault(mois, 0L);
+        long conclMois = conclusionsParMois.getOrDefault(mois, 0L);
+        double taux = declMois > 0 ? (conclMois * 100.0 / declMois) : 0.0;
+        tauxTraitementParMois.put(mois, taux);
+    }
+    
+    return new PerformanceMensuelleDTO(
+        currentYear,
+        declarationsParMois,
+        conclusionsParMois,
+        tauxTraitementParMois
+    );
+}
+
+/**
+ * Performance annuelle par utilisateur
+ */
+public PerformanceAnnuelleDTO getPerformanceAnnuelle(Long avocatGeneralId) {
+    List<Declaration> declarations = declarationData.findByUtilisateurId(avocatGeneralId);
+    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
+    
+    Map<Integer, Long> declarationsParAnnee = declarations.stream()
+        .filter(d -> d.getDateDeclaration() != null)
+        .collect(Collectors.groupingBy(
+            d -> d.getDateDeclaration().getYear(),
+            Collectors.counting()
+        ));
+    
+    Map<Integer, Long> conclusionsParAnnee = conclusions.stream()
+        .filter(c -> c.getDateCreation() != null)
+        .collect(Collectors.groupingBy(
+            c -> c.getDateCreation().getYear(),
+            Collectors.counting()
+        ));
+    
+    Map<Integer, Double> tauxTraitementParAnnee = new HashMap<>();
+    for (Integer annee : declarationsParAnnee.keySet()) {
+        long declAnnee = declarationsParAnnee.get(annee);
+        long conclAnnee = conclusionsParAnnee.getOrDefault(annee, 0L);
+        double taux = declAnnee > 0 ? (conclAnnee * 100.0 / declAnnee) : 0.0;
+        tauxTraitementParAnnee.put(annee, taux);
+    }
+    
+    return new PerformanceAnnuelleDTO(
+        declarationsParAnnee,
+        conclusionsParAnnee,
+        tauxTraitementParAnnee
+    );
+}
+
+/**
+ * Déclarations les plus anciennes nécessitant un contrôle
+ */
+public DeclarationsAnciennesDTO getDeclarationsAnciennesAControler(Long avocatGeneralId, int limite) {
+    List<Declaration> declarations = declarationData.findByUtilisateurId(avocatGeneralId);
+    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
+    
+    // IDs des déclarations qui ont déjà une conclusion
+    Set<Long> declarationsAvecConclusion = conclusions.stream()
+        .map(c -> c.getDeclaration().getId())
+        .collect(Collectors.toSet());
+    
+    // Déclarations en cours sans conclusion, triées par date (plus ancienne d'abord)
+    List<DeclarationAncienneInfo> declarationsAnciennes = declarations.stream()
+        .filter(d -> d.getEtatDeclaration() == EtatDeclarationEnum.en_cours)
+        .filter(d -> !declarationsAvecConclusion.contains(d.getId()))
+        .filter(d -> d.getDateDeclaration() != null)
+        .sorted(Comparator.comparing(Declaration::getDateDeclaration))
+        .limit(limite)
+        .map(d -> {
+            long joursEnAttente = ChronoUnit.DAYS.between(d.getDateDeclaration(), LocalDate.now());
+            return new DeclarationAncienneInfo(
+                d.getId(),
+                d.getTypeDeclaration().name(),
+                d.getDateDeclaration(),
+                joursEnAttente,
+                d.getAssujetti() != null ? d.getAssujetti().getNom() + " " + d.getAssujetti().getPrenom() : "N/A"
+            );
+        })
+        .collect(Collectors.toList());
+    
+    return new DeclarationsAnciennesDTO(declarationsAnciennes);
+}
 }

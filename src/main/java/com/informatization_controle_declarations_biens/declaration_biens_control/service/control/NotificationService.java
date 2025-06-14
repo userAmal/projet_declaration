@@ -53,7 +53,7 @@ public Notification createAndSendNotification(Long utilisateurId, String message
 
     Notification savedNotification = notificationData.save(notification);
 
-    if (utilisateur.isStatutEmploi()) {
+    if (utilisateur.getStatutEmploi()) {
         // Préparation du contenu email en fonction du type de notification
         String emailSubject;
         String emailBody;
@@ -173,7 +173,7 @@ public void notifyTransferDeclarations(Utilisateur source, Utilisateur cible, Li
     notificationData.save(notification);
 
     // 2. Email inchangé (identique à votre version actuelle)
-    if (cible.isStatutEmploi()) {
+    if (cible.getStatutEmploi()) {
         String emailSubject = "Nouvelles déclarations transférées - Cour des comptes";
         
         StringBuilder declarationsList = new StringBuilder();

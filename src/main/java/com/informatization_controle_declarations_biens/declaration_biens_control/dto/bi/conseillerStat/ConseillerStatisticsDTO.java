@@ -19,6 +19,5 @@ public class ConseillerStatisticsDTO {
     private long declarationsEnCours;
     private double tempsTraitementMoyen;
     private List<StatsMensuellesDTO> statistiquesParMois;
-    private List<RepartitionEtatDTO> repartitionParEtat;
     private PerformanceVerificationDTO performanceVerification;
 }

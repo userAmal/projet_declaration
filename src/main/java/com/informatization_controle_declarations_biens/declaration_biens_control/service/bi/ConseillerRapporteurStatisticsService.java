@@ -1,13 +1,14 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.service.bi;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -17,15 +18,15 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.IRapportData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.HistoriqueDeclarationUserData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.ConseillerGlobalStatsDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.ChargeUtilisateurDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.ConseillerStatisticsDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.DeclarationAncienneDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.DeclarationConseillerDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.PerformanceAnnuelleDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.PerformanceVerificationDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.RapportProvisoireStatsDTO;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.RepartitionEtatDTO;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.RepartitionTypeDTO;
+
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.StatsMensuellesDTO;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.ValidationStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.conseillerStat.VerificationFraudeStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.CommentaireGenerique;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Rapport;
@@ -33,7 +34,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.HistoriqueDeclarationUser;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
-import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.securite.UtilisateurServiceImpl;
 
@@ -63,7 +63,6 @@ public class ConseillerRapporteurStatisticsService {
                 .declarationsEnCours(getNombreDeclarationsEnCours(conseillerId))
                 .tempsTraitementMoyen(getTempsTraitementMoyen(conseillerId))
                 .statistiquesParMois(getStatistiquesParMois(conseillerId))
-                .repartitionParEtat(getRepartitionDeclarationsParEtat(conseillerId))
                 .performanceVerification(getPerformanceVerification(conseillerId))
                 .build();
     }
@@ -274,34 +273,6 @@ public List<StatsMensuellesDTO> getStatistiquesParMois(Long conseillerId) {
             .collect(Collectors.toList());
 }
 
-// Change this:
-// public List<RepartitionEtatDTO> getRepartitionDeclarationsParEtat(Long conseillerId) {
-// To this:
-public List<RepartitionEtatDTO> getRepartitionDeclarationsParEtat(Long conseillerId) {
-    List<Declaration> declarations = historiqueData.findByUtilisateurId(conseillerId)
-            .stream()
-            .map(HistoriqueDeclarationUser::getDeclaration)
-            .collect(Collectors.toList());
-    
-    Map<EtatDeclarationEnum, Long> repartition = declarations.stream()
-            .collect(Collectors.groupingBy(
-                    Declaration::getEtatDeclaration, 
-                    Collectors.counting()
-            ));
-    
-    return repartition.entrySet().stream()
-            .map(entry -> RepartitionEtatDTO.builder()
-                    .etat(entry.getKey())
-                    .nombre(entry.getValue())
-                    .pourcentage(declarations.isEmpty() ? 0.0 : 
-                               (entry.getValue() * 100.0 / declarations.size()))
-                    .build())
-            .collect(Collectors.toList());
-}
-
-// Change this:
-// public PerformanceVerificationDTO getPerformanceVerification(Long conseillerId) {
-// To this:
 public PerformanceVerificationDTO getPerformanceVerification(Long conseillerId) {
     long rapportsProvisoires = rapportData.findByUtilisateurId(conseillerId)
             .stream()
@@ -320,88 +291,278 @@ public PerformanceVerificationDTO getPerformanceVerification(Long conseillerId) 
             .efficaciteTraitement(calculateEfficiencyScore(conseillerId))
             .build();
 }
+// Ajouter ces méthodes dans votre ConseillerRapporteurStatisticsService existant
 
+/**
+ * Vérifie si une LocalDateTime est dans la période donnée (mois courant)
+ */
+private boolean estDansLeMoisCourant(LocalDateTime dateTime) {
+    if (dateTime == null) return false;
+    LocalDate date = dateTime.toLocalDate();
+    LocalDate debutMois = LocalDate.now().withDayOfMonth(1);
+    LocalDate finMois = debutMois.plusMonths(1).minusDays(1);
+    return !date.isBefore(debutMois) && !date.isAfter(finMois);
+}
 
-// Méthode pour obtenir la répartition par type de déclaration
-public List<RepartitionTypeDTO> getRepartitionParType(Long conseillerId) {
-    List<Declaration> declarations = historiqueData.findByUtilisateurId(conseillerId)
+/**
+ * Vérifie si une LocalDateTime est dans l'année courante
+ */
+private boolean estDansLAnneeCourante(LocalDateTime dateTime) {
+    if (dateTime == null) return false;
+    LocalDate date = dateTime.toLocalDate();
+    int anneeActuelle = LocalDate.now().getYear();
+    return date.getYear() == anneeActuelle;
+}
+
+/**
+ * Vérifie si une LocalDate est dans une période donnée
+ */
+private boolean estDansLaPeriode(LocalDate date, LocalDate debut, LocalDate fin) {
+    if (date == null) return false;
+    return !date.isBefore(debut) && !date.isAfter(fin);
+}
+
+/**
+ * Méthode utilitaire pour obtenir tous les utilisateurs actifs
+ */
+private List<Utilisateur> getAllUtilisateursActifs() {
+    return utilisateurServiceImpl.findAll()
             .stream()
-            .map(HistoriqueDeclarationUser::getDeclaration)
-            .collect(Collectors.toList());
-    
-    Map<TypeDeclarationEnum, Long> repartition = declarations.stream()
-            .collect(Collectors.groupingBy(
-                    Declaration::getTypeDeclaration, 
-                    Collectors.counting()
-            ));
-    
-    return repartition.entrySet().stream()
-            .map(entry -> RepartitionTypeDTO.builder()
-                    .type(entry.getKey())
-                    .nombre(entry.getValue())
-                    .pourcentage(declarations.isEmpty() ? 0.0 : 
-                               (entry.getValue() * 100.0 / declarations.size()))
-                    .build())
+            .filter(u -> u.getStatutEmploi() != null && u.getStatutEmploi())
             .collect(Collectors.toList());
 }
 
-// Méthode pour obtenir les statistiques de validation
-public ValidationStatsDTO  getStatistiquesValidation(Long conseillerId) {
-    long totalDeclarations = historiqueData.findByUtilisateurId(conseillerId).size();
-    long declarationsValidees = declarationData.countByConseillerIdAndEtat(
-            conseillerId, EtatDeclarationEnum.valider);
-    long declarationsRejetees = declarationData.countByConseillerIdAndEtat(
-            conseillerId, EtatDeclarationEnum.refuser);
+/**
+ * Obtenir la charge de travail d'un utilisateur spécifique
+ */
+public ChargeUtilisateurDTO getChargeUtilisateur(Long utilisateurId) {
+    log.info("Calcul de la charge de travail pour l'utilisateur ID: {}", utilisateurId);
     
-    return ValidationStatsDTO.builder()
-            .totalDeclarations(totalDeclarations)
-            .declarationsValidees(declarationsValidees)
-            .declarationsRejetees(declarationsRejetees)
-            .tauxValidation(totalDeclarations > 0 ? 
-                    (double) declarationsValidees * 100 / totalDeclarations : 0.0)
-            .tauxRejet(totalDeclarations > 0 ? 
-                    (double) declarationsRejetees * 100 / totalDeclarations : 0.0)
+    // Déclarations en cours
+    long declarationsEnCours = historiqueData.findByUtilisateurId(utilisateurId)
+            .stream()
+            .filter(h -> h.getDateFinAffectation() == null)
+            .count();
+    
+    // Déclarations traitées ce mois
+    LocalDate debutMois = LocalDate.now().withDayOfMonth(1);
+    long declarationsTraiteesMois = historiqueData.findByUtilisateurId(utilisateurId)
+            .stream()
+            .filter(h -> h.getDateFinAffectation() != null)
+            .filter(h -> h.getDateFinAffectation().isAfter(debutMois))
+            .count();
+    
+    // Temps moyen de traitement
+    double tempsMoyenTraitement = getTempsTraitementMoyen(utilisateurId);
+    
+    // Rapports provisoires générés ce mois
+    long rapportsProvMois = rapportData.findByUtilisateurId(utilisateurId)
+            .stream()
+            .filter(r -> r.getType() == Rapport.Type.PROVISOIRE)
+            .filter(r -> estDansLeMoisCourant(r.getDateCreation()))
+            .count();
+    
+    
+    // Score de charge (plus élevé = plus chargé)
+    double scoreCharge = calculerScoreCharge(declarationsEnCours, tempsMoyenTraitement, 
+                                            declarationsTraiteesMois);
+    
+    // Récupérer les infos utilisateur
+    Optional<Utilisateur> utilisateurOpt = utilisateurServiceImpl.findById(utilisateurId);
+    if (utilisateurOpt.isEmpty()) {
+        throw new RuntimeException("Utilisateur non trouvé avec l'ID: " + utilisateurId);
+    }
+    Utilisateur utilisateur = utilisateurOpt.get();
+    
+    return ChargeUtilisateurDTO.builder()
+            .utilisateurId(utilisateurId)
+            .nom(utilisateur.getLastname())
+            .prenom(utilisateur.getFirstname())
+            .role(utilisateur.getRole())
+            .declarationsEnCours(declarationsEnCours)
+            .declarationsTraiteesMois(declarationsTraiteesMois)
+            .tempsMoyenTraitement(tempsMoyenTraitement)
+            .rapportsProvMois(rapportsProvMois)
+            .scoreCharge(scoreCharge)
+            .statut(determinerStatutCharge(scoreCharge))
             .build();
 }
-// Dans ConseillerRapporteurStatisticsService
-public List<ConseillerGlobalStatsDTO> getStatistiquesTousConseillers() {
-    List<Utilisateur> conseillers = utilisateurServiceImpl.findByRole(RoleEnum.conseiller_rapporteur);
+
+/**
+ * Performance d'un utilisateur pour l'année courante
+ */
+public PerformanceAnnuelleDTO getPerformanceAnnuelleCourante(Long utilisateurId) {
+    log.info("Calcul de la performance annuelle pour l'utilisateur ID: {}", utilisateurId);
     
-    return conseillers.stream()
-            .map(c -> {
-                long declarationsAssignees = getNombreDeclarationsAssignees(c.getId());
-                long declarationsTraitees = getNombreDeclarationsTraitees(c.getId());
-                double tempsMoyen = getTempsTraitementMoyen(c.getId());
+    int anneeActuelle = LocalDate.now().getYear();
+    LocalDate debutAnnee = LocalDate.of(anneeActuelle, 1, 1);
+    LocalDate finAnnee = LocalDate.of(anneeActuelle, 12, 31);
+    
+    // Déclarations traitées cette année
+    long declarationsTraiteesAnnee = historiqueData.findByUtilisateurId(utilisateurId)
+            .stream()
+            .filter(h -> h.getDateFinAffectation() != null)
+            .filter(h -> h.getDateFinAffectation().isAfter(debutAnnee.minusDays(1)) && 
+                        h.getDateFinAffectation().isBefore(finAnnee.plusDays(1)))
+            .count();
+    
+    // Rapports générés cette année
+    long rapportsGeneres = rapportData.findByUtilisateurId(utilisateurId)
+            .stream()
+            .filter(r -> estDansLAnneeCourante(r.getDateCreation()))
+            .count();
+    
+  
+    // Score d'efficacité pour l'année
+    double scoreEfficacite = calculateEfficiencyScore(utilisateurId);
+    
+    // Moyennes mensuelles
+    double moyenneDeclarationsParMois = declarationsTraiteesAnnee / 12.0;
+    double moyenneRapportsParMois = rapportsGeneres / 12.0;
+    
+    // Récupérer les infos utilisateur
+    Optional<Utilisateur> utilisateurOpt = utilisateurServiceImpl.findById(utilisateurId);
+    if (utilisateurOpt.isEmpty()) {
+        throw new RuntimeException("Utilisateur non trouvé avec l'ID: " + utilisateurId);
+    }
+    Utilisateur utilisateur = utilisateurOpt.get();
+    
+    return PerformanceAnnuelleDTO.builder()
+            .utilisateurId(utilisateurId)
+            .nom(utilisateur.getLastname())
+            .prenom(utilisateur.getFirstname())
+            .role(utilisateur.getRole())
+            .annee(anneeActuelle)
+            .declarationsTraiteesAnnee(declarationsTraiteesAnnee)
+            .rapportsGeneresAnnee(rapportsGeneres)
+            .tempsMoyenTraitement(getTempsTraitementMoyen(utilisateurId))
+            .moyenneDeclarationsParMois(moyenneDeclarationsParMois)
+            .moyenneRapportsParMois(moyenneRapportsParMois)
+            .scoreEfficacite(scoreEfficacite)
+            .niveauPerformance(determinerNiveauPerformance(scoreEfficacite))
+            .build();
+}
+
+/**
+ * Déclarations les plus anciennes nécessitant un contrôle pour un utilisateur
+ */
+public List<DeclarationAncienneDTO> getDeclarationsAnciennesAControler(Long utilisateurId) {
+    log.info("Recherche des déclarations anciennes à contrôler pour l'utilisateur ID: {}", utilisateurId);
+    
+    LocalDate limiteDate = LocalDate.now().minusDays(30); // Plus de 30 jours
+    
+    List<HistoriqueDeclarationUser> affectationsActives = historiqueData
+            .findByUtilisateurId(utilisateurId)
+            .stream()
+            .filter(h -> h.getDateFinAffectation() == null) // Encore en cours
+            .filter(h -> h.getDateAffectation().isBefore(limiteDate)) // Ancienne
+            .collect(Collectors.toList());
+
+    return affectationsActives.stream()
+            .map(historique -> {
+                Declaration declaration = historique.getDeclaration();
                 
-                return ConseillerGlobalStatsDTO.builder()
-                        .conseillerId(c.getId())
-                        .conseillerNom(c.getLastname())
-                        .conseillerPrenom(c.getFirstname())
-                        .declarationsAssignees(declarationsAssignees)
-                        .declarationsTraitees(declarationsTraitees)
-                        .tempsTraitementMoyen(tempsMoyen)
-                        .rapportsGeneres(getNombreRapportsProvisoires(c.getId()))
-                        .observationsRealisees(getNombreObservations(c.getId()))
+                // Calculer l'ancienneté en jours
+                long joursAnciennete = ChronoUnit.DAYS.between(
+                        historique.getDateAffectation(), 
+                        LocalDate.now()
+                );
+                
+                // Vérifier si un rapport provisoire existe
+                boolean rapportProvisoireExiste = rapportData
+                        .findByDeclarationId(declaration.getId())
+                        .stream()
+                        .anyMatch(r -> r.getType() == Rapport.Type.PROVISOIRE);
+                
+                // Nombre d'observations
+                long nombreObservations = commentaireData
+                        .findByUtilisateurIdAndDeclarationId(
+                                utilisateurId, 
+                                declaration.getId()
+                        ).size();
+                
+                // Niveau de priorité basé sur l'ancienneté
+                String niveauPriorite = determinerNiveauPriorite(joursAnciennete);
+                
+                return DeclarationAncienneDTO.builder()
+                        .declarationId(declaration.getId())
+                        .assujettiNom(declaration.getAssujetti().getNom())
+                        .assujettiPrenom(declaration.getAssujetti().getPrenom())
+                        .typeDeclaration(declaration.getTypeDeclaration())
+                        .etatDeclaration(declaration.getEtatDeclaration())
+                        .dateDeclaration(declaration.getDateDeclaration())
+                        .dateAffectation(historique.getDateAffectation())
+                        .joursAnciennete(joursAnciennete)
+                        .rapportProvisoireExiste(rapportProvisoireExiste)
+                        .nombreObservations(nombreObservations)
+                        .niveauPriorite(niveauPriorite)
+                        .recommandationAction(genererRecommandation(joursAnciennete, rapportProvisoireExiste, nombreObservations))
                         .build();
             })
+            .sorted((a, b) -> Long.compare(b.getJoursAnciennete(), a.getJoursAnciennete())) // Plus ancien en premier
             .collect(Collectors.toList());
 }
 
-
-
-
-
+/**
+ * Calculer le score de charge d'un utilisateur
+ */
+private double calculerScoreCharge(long declarationsEnCours, double tempsMoyenTraitement, 
+                                  long declarationsTraiteesMois) {
+    // Pondération : 40% déclarations en cours, 30% temps moyen, 30% productivité
+    double scoreEnCours = Math.min(100, declarationsEnCours * 10); // Max 100
+    double scoreTemps = tempsMoyenTraitement > 0 ? Math.min(100, tempsMoyenTraitement * 3) : 0;
+    double scoreProductivite = Math.max(0, 100 - (declarationsTraiteesMois * 5)); // Moins de traités = plus chargé
+    
+    return (scoreEnCours * 0.4) + (scoreTemps * 0.3) + (scoreProductivite * 0.3);
 }
 
+/**
+ * Déterminer le statut de charge
+ */
+private String determinerStatutCharge(double scoreCharge) {
+    if (scoreCharge >= 70) return "SURCHARGE";
+    if (scoreCharge >= 50) return "CHARGE_ELEVEE";
+    if (scoreCharge >= 30) return "CHARGE_NORMALE";
+    return "SOUS_CHARGE";
+}
 
+/**
+ * Déterminer le niveau de performance
+ */
+private String determinerNiveauPerformance(double scoreEfficacite) {
+    if (scoreEfficacite >= 80) return "EXCELLENT";
+    if (scoreEfficacite >= 60) return "BON";
+    if (scoreEfficacite >= 40) return "MOYEN";
+    return "FAIBLE";
+}
 
+/**
+ * Déterminer le niveau de priorité basé sur l'ancienneté
+ */
+private String determinerNiveauPriorite(long joursAnciennete) {
+    if (joursAnciennete >= 90) return "CRITIQUE";
+    if (joursAnciennete >= 60) return "URGENT";
+    if (joursAnciennete >= 30) return "IMPORTANT";
+    return "NORMAL";
+}
 
-
-
-
-
-
-
-
-
-
+/**
+ * Générer une recommandation d'action
+ */
+private String genererRecommandation(long joursAnciennete, boolean rapportProvisoireExiste, 
+                                   long nombreObservations) {
+    if (joursAnciennete >= 90) {
+        return "Action immédiate requise - Escalader au superviseur";
+    }
+    if (joursAnciennete >= 60 && !rapportProvisoireExiste) {
+        return "Générer le rapport provisoire en urgence";
+    }
+    if (joursAnciennete >= 45 && nombreObservations == 0) {
+        return "Commencer l'analyse et ajouter des observations";
+    }
+    if (joursAnciennete >= 30) {
+        return "Accélérer le traitement de cette déclaration";
+    }
+    return "Continuer le traitement normal";
+}
+}

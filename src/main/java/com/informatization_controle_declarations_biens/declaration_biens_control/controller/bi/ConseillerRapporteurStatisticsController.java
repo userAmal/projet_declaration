@@ -51,11 +51,6 @@ public class ConseillerRapporteurStatisticsController {
         return ResponseEntity.ok(statisticsService.getStatistiquesParMois(conseillerId));
     }
 
-    @GetMapping("/{conseillerId}/repartition-etat")
-    public ResponseEntity<List<RepartitionEtatDTO>> getRepartitionParEtat(
-            @PathVariable Long conseillerId) {
-        return ResponseEntity.ok(statisticsService.getRepartitionDeclarationsParEtat(conseillerId));
-    }
 
     @GetMapping("/{conseillerId}/performance")
     public ResponseEntity<PerformanceVerificationDTO> getPerformanceVerification(
@@ -71,27 +66,58 @@ public ResponseEntity<Map<String, Object>> getDashboardConseiller(@PathVariable 
     dashboard.put("nombreDeclarationsAssignees", statisticsService.getNombreDeclarationsAssignees(conseillerId));
     dashboard.put("tempsTraitementMoyen", statisticsService.getTempsTraitementMoyen(conseillerId));
     dashboard.put("statistiquesParMois", statisticsService.getStatistiquesParMois(conseillerId));
-    dashboard.put("repartitionParEtat", statisticsService.getRepartitionDeclarationsParEtat(conseillerId));
     dashboard.put("performance", statisticsService.getPerformanceVerification(conseillerId));
 
     return ResponseEntity.ok(dashboard);
 }
-// Dans le Controller
-@GetMapping("/all")
-public ResponseEntity<List<ConseillerGlobalStatsDTO>> getStatistiquesTousConseillers() {
-    return ResponseEntity.ok(statisticsService.getStatistiquesTousConseillers());
+// Ajouter ces méthodes dans votre ConseillerRapporteurStatisticsController
+
+/**
+ * Obtenir la charge de travail d'un utilisateur
+ */
+@GetMapping("/{utilisateurId}/charge-travail")
+public ResponseEntity<ChargeUtilisateurDTO> getChargeUtilisateur(
+        @PathVariable Long utilisateurId) {
+    return ResponseEntity.ok(statisticsService.getChargeUtilisateur(utilisateurId));
 }
 
-@GetMapping("/{conseillerId}/repartition-type")
-public ResponseEntity<List<RepartitionTypeDTO>> getRepartitionParType(
-        @PathVariable Long conseillerId) {
-    return ResponseEntity.ok(statisticsService.getRepartitionParType(conseillerId));
+/**
+ * Obtenir la performance annuelle d'un utilisateur pour l'année courante
+ */
+@GetMapping("/{utilisateurId}/performance-annuelle")
+public ResponseEntity<PerformanceAnnuelleDTO> getPerformanceAnnuelleCourante(
+        @PathVariable Long utilisateurId) {
+    return ResponseEntity.ok(statisticsService.getPerformanceAnnuelleCourante(utilisateurId));
 }
 
-
-@GetMapping("/{conseillerId}/stats-validation")
-public ResponseEntity<ValidationStatsDTO> getStatistiquesValidation(
-        @PathVariable Long conseillerId) {
-    return ResponseEntity.ok(statisticsService.getStatistiquesValidation(conseillerId));
+/**
+ * Obtenir les déclarations les plus anciennes nécessitant un contrôle
+ */
+@GetMapping("/{utilisateurId}/declarations-anciennes")
+public ResponseEntity<List<DeclarationAncienneDTO>> getDeclarationsAnciennesAControler(
+        @PathVariable Long utilisateurId) {
+    return ResponseEntity.ok(statisticsService.getDeclarationsAnciennesAControler(utilisateurId));
 }
+
+/**
+ * Dashboard complet avec toutes les nouvelles statistiques
+ */
+@GetMapping("/{utilisateurId}/dashboard-complet")
+public ResponseEntity<Map<String, Object>> getDashboardComplet(@PathVariable Long utilisateurId) {
+    Map<String, Object> dashboard = new HashMap<>();
+    
+    // Statistiques existantes
+    dashboard.put("statistiquesGenerales", statisticsService.getStatistiquesConseiller(utilisateurId));
+    dashboard.put("declarationsAssignees", statisticsService.consulterDeclarationsAssignees(utilisateurId));
+    dashboard.put("statistiquesParMois", statisticsService.getStatistiquesParMois(utilisateurId));
+    dashboard.put("performanceVerification", statisticsService.getPerformanceVerification(utilisateurId));
+    
+    // Nouvelles statistiques
+    dashboard.put("chargeTravail", statisticsService.getChargeUtilisateur(utilisateurId));
+    dashboard.put("performanceAnnuelle", statisticsService.getPerformanceAnnuelleCourante(utilisateurId));
+    dashboard.put("declarationsAnciennes", statisticsService.getDeclarationsAnciennesAControler(utilisateurId));
+    
+    return ResponseEntity.ok(dashboard);
+}
+
 }

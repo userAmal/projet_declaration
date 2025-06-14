@@ -19,9 +19,12 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.AdminDashboardStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.AssujettiStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.DeclarationStatsDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.MonthlyPerformanceDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.PerformanceStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.UserActivityDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.UserStatsDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.VocabularyStatsDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.adminstat.YearlyPerformanceDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Assujetti;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatAssujettiEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
@@ -274,6 +277,97 @@ public DeclarationStatsDTO getDeclarationStatistics() {
         }
     }
   
+ public List<MonthlyPerformanceDTO> getMonthlyPerformance(int year) {
+        try {
+            List<Object[]> results = declarationData.getDeclarationPerformanceByMonth(year);
+            
+            return results.stream()
+                .map(result -> new MonthlyPerformanceDTO(
+                    ((Number) result[0]).intValue(),  // year
+                    ((Number) result[1]).intValue(),  // month
+                    ((Number) result[2]).longValue(), // total_declarations
+                    ((Number) result[3]).longValue()  // final_declarations
+                ))
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error in getMonthlyPerformance: " + e.getMessage());
+            return List.of();
+        }
+    }
+    
+    /**
+     * Obtenir les performances annuelles
+     */
+    public List<YearlyPerformanceDTO> getYearlyPerformance() {
+        try {
+            List<Object[]> results = declarationData.getDeclarationPerformanceByYear();
+            
+            return results.stream()
+                .map(result -> new YearlyPerformanceDTO(
+                    ((Number) result[0]).intValue(),  // year
+                    ((Number) result[1]).longValue(), // total_declarations
+                    ((Number) result[2]).longValue()  // final_declarations
+                ))
+                .collect(Collectors.toList());
+        } catch (Exception e) {
+            System.err.println("Error in getYearlyPerformance: " + e.getMessage());
+            return List.of();
+        }
+    }
+    
+    public PerformanceStatsDTO getPerformanceStatistics(int year, LocalDate startDate, LocalDate endDate) {
+        try {
+            // Performances mensuelles pour l'année donnée
+            List<MonthlyPerformanceDTO> monthlyPerformance = getMonthlyPerformance(year);
+            
+            // Performances annuelles
+            List<YearlyPerformanceDTO> yearlyPerformance = getYearlyPerformance();
+            
+            
+            // Calcul du taux de performance global
+            double globalPerformanceRate = calculateGlobalPerformanceRate(yearlyPerformance);
+            
+            return new PerformanceStatsDTO(
+                monthlyPerformance,
+                yearlyPerformance,
+                globalPerformanceRate
+            );
+        } catch (Exception e) {
+            System.err.println("Error in getPerformanceStatistics: " + e.getMessage());
+           return new PerformanceStatsDTO(
+    List.of(), List.of(), 0.0
+);
+        }
+    }
+    
+    /**
+     * Calculer le taux de performance global
+     */
+    private double calculateGlobalPerformanceRate(List<YearlyPerformanceDTO> yearlyPerformance) {
+        if (yearlyPerformance.isEmpty()) {
+            return 0.0;
+        }
+        
+        long totalDeclarations = yearlyPerformance.stream()
+            .mapToLong(YearlyPerformanceDTO::getTotalDeclarations)
+            .sum();
+            
+        long totalFinalDeclarations = yearlyPerformance.stream()
+            .mapToLong(YearlyPerformanceDTO::getFinalDeclarations)
+            .sum();
+            
+        return totalDeclarations > 0 ? (double) totalFinalDeclarations / totalDeclarations * 100 : 0.0;
+    }
+    
+    /**
+     * Obtenir les performances pour l'année courante uniquement
+     */
+    public List<MonthlyPerformanceDTO> getCurrentYearPerformance() {
+        int currentYear = LocalDate.now().getYear();
+        return getMonthlyPerformance(currentYear);
+    }
+    
+
 
 
 }

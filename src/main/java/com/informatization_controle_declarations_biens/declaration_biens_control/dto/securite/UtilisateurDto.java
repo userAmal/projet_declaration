@@ -58,7 +58,7 @@ public class UtilisateurDto {
         this.password = utilisateur.getPassword();
         this.tel = utilisateur.getTel();
         this.role = utilisateur.getRole(); 
-        this.statutEmploi = utilisateur.isStatutEmploi();
+        this.statutEmploi = utilisateur.getStatutEmploi();
         this.firstLogin = utilisateur.getFirstLogin();
         this.imageProfil = utilisateur.getImageProfil();
         this.token = token;

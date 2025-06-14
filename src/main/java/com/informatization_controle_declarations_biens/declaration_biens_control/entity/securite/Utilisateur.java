@@ -55,7 +55,7 @@ public class Utilisateur implements UserDetails {
 
     @Column(length = 50, nullable = false)
     @Builder.Default
-    private boolean statutEmploi=true;
+    private Boolean statutEmploi=true;
 
     @Column(name = "first_login")
     @Builder.Default
@@ -113,4 +113,7 @@ public Collection<? extends GrantedAuthority> getAuthorities() {
     public void setImageProfil(String imageProfil) {
         this.imageProfil = imageProfil;
     }
+    public Boolean getStatutEmploi() {
+    return statutEmploi;
+}
 }

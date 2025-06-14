@@ -1,6 +1,7 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.HistoriqueDeclarationUser;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.RoleEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.securite.Utilisateur;
@@ -50,4 +51,27 @@ public interface HistoriqueDeclarationUserData extends JpaRepository<HistoriqueD
 
     Optional<HistoriqueDeclarationUser> findByDeclarationAndDateFinAffectationIsNull(Declaration declaration);
     void deleteByDeclaration(Declaration declaration);
+
+     @Query("SELECT h.utilisateur.id, h.utilisateur.firstname, h.utilisateur.lastname, " +
+           "h.utilisateur.role, COUNT(DISTINCT h.declaration.id) as declaration_count " +
+           "FROM HistoriqueDeclarationUser h " +
+           "WHERE h.utilisateur.role = :role " +
+           "AND h.dateAffectation BETWEEN :startDate AND :endDate " +
+           "GROUP BY h.utilisateur.id, h.utilisateur.firstname, h.utilisateur.lastname, h.utilisateur.role " +
+           "ORDER BY declaration_count DESC")
+    List<Object[]> findTopUsersByRole(@Param("role") RoleEnum role, 
+                                      @Param("startDate") LocalDate startDate, 
+                                      @Param("endDate") LocalDate endDate);
+    
+    // Statistiques d'activité par utilisateur et rôle
+    @Query("SELECT h.utilisateur.role, h.utilisateur.id, h.utilisateur.firstname, h.utilisateur.lastname, " +
+           "COUNT(DISTINCT h.declaration.id) as total_declarations, " +
+           "COUNT(DISTINCT CASE WHEN h.declaration.etatDeclaration IN (:finalStates) THEN h.declaration.id END) as completed_declarations " +
+           "FROM HistoriqueDeclarationUser h " +
+           "WHERE h.dateAffectation BETWEEN :startDate AND :endDate " +
+           "GROUP BY h.utilisateur.role, h.utilisateur.id, h.utilisateur.firstname, h.utilisateur.lastname " +
+           "ORDER BY h.utilisateur.role, completed_declarations DESC")
+    List<Object[]> getUserPerformanceByRole(@Param("startDate") LocalDate startDate, 
+                                           @Param("endDate") LocalDate endDate,
+                                           @Param("finalStates") List<EtatDeclarationEnum> finalStates);
 }

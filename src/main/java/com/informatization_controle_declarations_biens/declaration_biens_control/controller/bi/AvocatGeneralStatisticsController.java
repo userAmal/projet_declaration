@@ -73,4 +73,5 @@ public class AvocatGeneralStatisticsController {
             @PathVariable Long avocatGeneralId) {
         return statisticsService.getDashboardComplet(avocatGeneralId);
     }
+    
 }

@@ -104,6 +104,31 @@ boolean existsByAssujettiIdAndEtatDeclarationIn(Long assujettiId, List<EtatDecla
        @Query(value = "SELECT MONTH(date_declaration), COUNT(*) FROM declaration " +
            "WHERE YEAR(date_declaration) = :year GROUP BY MONTH(date_declaration)", nativeQuery = true)
     List<Object[]> countByMonth(@Param("year") int year);
+@Query(value = "SELECT YEAR(date_declaration) as year, MONTH(date_declaration) as month, " +
+           "COUNT(*) as total_declarations, " +
+           "SUM(CASE WHEN etat_declaration IN (4, 6) THEN 1 ELSE 0 END) as final_declarations " +
+           "FROM declaration " +
+           "WHERE YEAR(date_declaration) = :year " +
+           "GROUP BY YEAR(date_declaration), MONTH(date_declaration) " +
+           "ORDER BY MONTH(date_declaration)", nativeQuery = true)
+    List<Object[]> getDeclarationPerformanceByMonth(@Param("year") int year);
+    
+    // Compter les déclarations en état final par année
+    @Query(value = "SELECT YEAR(date_declaration) as year, " +
+           "COUNT(*) as total_declarations, " +
+           "SUM(CASE WHEN etat_declaration IN (4, 6) THEN 1 ELSE 0 END) as final_declarations " +
+           "FROM declaration " +
+           "GROUP BY YEAR(date_declaration) " +
+           "ORDER BY YEAR(date_declaration)", nativeQuery = true)
+    List<Object[]> getDeclarationPerformanceByYear();
+    
+    // Compter les déclarations traitées par utilisateur (pour performance)
+    @Query("SELECT d.utilisateur.id, COUNT(d) as total, " +
+           "SUM(CASE WHEN d.etatDeclaration IN (:finalStates) THEN 1 ELSE 0 END) as completed " +
+           "FROM Declaration d " +
+           "WHERE d.utilisateur.id IS NOT NULL " +
+           "GROUP BY d.utilisateur.id")
+    List<Object[]> getUserDeclarationStats(@Param("finalStates") List<EtatDeclarationEnum> finalStates);
 
     
 }
