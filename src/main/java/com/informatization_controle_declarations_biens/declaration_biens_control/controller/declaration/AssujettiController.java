@@ -85,30 +85,22 @@ public class AssujettiController {
         return ResponseEntity.ok(saved);
     }  */
 
-
-    @PostMapping
-    public ResponseEntity<Assujetti> saveAssujetti(@RequestBody @Valid Assujetti assujetti, BindingResult result) {
-        if (result.hasErrors()) {
-            // Collecter toutes les erreurs et les envoyer dans la réponse
-            String errorMessage = result.getAllErrors().stream()
-                .map(error -> error.getDefaultMessage())
-                .collect(Collectors.joining(", "));
-            // Retourner une réponse 400 Bad Request avec un message détaillé
-            return ResponseEntity.badRequest().body(null);  // Tu pourrais aussi inclure errorMessage dans la réponse
-        }
-    
-        try {
-            System.out.println("Erreurs: " + result.getAllErrors());
-            Assujetti savedAssuj = assujettiService.save(assujetti);
-            return ResponseEntity.ok(savedAssuj);
-        } catch (Exception e) {
-            // Si une exception se produit lors de la sauvegarde, retourner 500
-            return ResponseEntity.status(500).body(null);  
-        }
+@PostMapping
+public ResponseEntity<Assujetti> saveAssujetti(@RequestBody @Valid Assujetti assujetti, BindingResult result) {
+    if (result.hasErrors()) {
+        String errorMessage = result.getAllErrors().stream()
+            .map(error -> error.getDefaultMessage())
+            .collect(Collectors.joining(", "));
+        return ResponseEntity.badRequest().body(null);
     }
-    
-    
 
+    try {
+        Assujetti savedAssuj = assujettiService.createInitialAssujetti(assujetti);
+        return ResponseEntity.ok(savedAssuj);
+    } catch (Exception e) {
+        return ResponseEntity.status(500).body(null);  
+    }
+}
 
     @PutMapping("/{id}")
     public ResponseEntity<Assujetti> updateAssujetti(@PathVariable Long id, @RequestBody Assujetti assujetti) {

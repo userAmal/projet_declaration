@@ -28,7 +28,7 @@ public interface IAssujettiService extends IGenericService<Assujetti, Long> {
     List<Assujetti> findAllStopped();
     void restoreAssujetti(Long id);
 
-
+Assujetti createInitialAssujetti(Assujetti assujetti);
     
 }
 

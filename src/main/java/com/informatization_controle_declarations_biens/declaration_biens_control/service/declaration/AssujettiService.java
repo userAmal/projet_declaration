@@ -229,9 +229,20 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
         }
     }, verificationDate.atZone(ZoneId.systemDefault()).toInstant());
 }
-
-    @Override
+ @Override
     public Assujetti save(Assujetti assujetti) {
+        try {
+            // Simple sauvegarde sans logique d'email
+            return assujettiData.save(assujetti);
+        } catch (Exception e) {
+            log.error("Erreur lors de la sauvegarde de l'assujetti: {}", e.getMessage(), e);
+            throw new RuntimeException("Erreur lors de la sauvegarde: " + e.getMessage(), e);
+        }
+    }
+
+    // Nouvelle méthode spécifique pour la création initiale
+    @Override
+    public Assujetti createInitialAssujetti(Assujetti assujetti) {
         try {
             // Enregistrer l'assujetti
             Assujetti savedAssujetti = assujettiData.save(assujetti);
@@ -274,16 +285,15 @@ private void scheduleExpirationVerification(Declaration declaration, Assujetti a
             // Planifier la première déclaration annuelle après 365 jours
             scheduleAnnualDeclaration(savedAssujetti, PRODUCTION_DELAY_ANNUAL);
             
-            log.info("Assujetti sauvegardé avec planification des déclarations annuelles: ID {}", 
+            log.info("Nouvel assujetti créé avec planification des déclarations annuelles: ID {}", 
                     savedAssujetti.getId());
             
             return savedAssujetti;
         } catch (Exception e) {
-            log.error("Erreur lors de la sauvegarde de l'assujetti: {}", e.getMessage(), e);
-            throw new RuntimeException("Erreur lors de la sauvegarde: " + e.getMessage(), e);
+            log.error("Erreur lors de la création de l'assujetti: {}", e.getMessage(), e);
+            throw new RuntimeException("Erreur lors de la création: " + e.getMessage(), e);
         }
     }
-
     private void scheduleRappel(Declaration declaration, Assujetti assujetti, String magicLink, Duration delay) {
         LocalDateTime rappelDate = LocalDateTime.now().plus(delay);
         
