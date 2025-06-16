@@ -314,23 +314,6 @@ private boolean estDansLAnneeCourante(LocalDateTime dateTime) {
     return date.getYear() == anneeActuelle;
 }
 
-/**
- * Vérifie si une LocalDate est dans une période donnée
- */
-private boolean estDansLaPeriode(LocalDate date, LocalDate debut, LocalDate fin) {
-    if (date == null) return false;
-    return !date.isBefore(debut) && !date.isAfter(fin);
-}
-
-/**
- * Méthode utilitaire pour obtenir tous les utilisateurs actifs
- */
-private List<Utilisateur> getAllUtilisateursActifs() {
-    return utilisateurServiceImpl.findAll()
-            .stream()
-            .filter(u -> u.getStatutEmploi() != null && u.getStatutEmploi())
-            .collect(Collectors.toList());
-}
 
 /**
  * Obtenir la charge de travail d'un utilisateur spécifique

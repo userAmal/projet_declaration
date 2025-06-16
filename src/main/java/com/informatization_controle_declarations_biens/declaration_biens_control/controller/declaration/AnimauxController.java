@@ -5,7 +5,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.iservice.declaration.IAnimauxService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.payload.FileUploadResponse;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AnimauxProjection;
-import com.informatization_controle_declarations_biens.declaration_biens_control.service.parametrage.ParametrageService;
 
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;
@@ -22,8 +21,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import java.io.IOException;
-import java.util.Optional;
-import java.util.logging.Logger;
+
 import java.util.stream.Collectors;
 
 
@@ -36,11 +34,9 @@ import java.util.stream.Collectors;
 public class AnimauxController {
 
     private final IAnimauxService animauxService;
-    private final ParametrageService parametrageService;
 
-    public AnimauxController(IAnimauxService animauxService, ParametrageService parametrageService) {
+    public AnimauxController(IAnimauxService animauxService) {
         this.animauxService = animauxService;
-        this.parametrageService = parametrageService;
 
     }
 

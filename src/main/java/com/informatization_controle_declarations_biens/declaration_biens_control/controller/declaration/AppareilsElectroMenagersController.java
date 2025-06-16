@@ -10,7 +10,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 
 import jakarta.persistence.EntityNotFoundException;
 
-import org.hibernate.validator.internal.util.logging.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.http.HttpStatus;

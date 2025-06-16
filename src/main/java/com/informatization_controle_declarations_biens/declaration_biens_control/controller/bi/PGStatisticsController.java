@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.AdvancedStatisticsService;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.AdvisorPerformance;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.ComparativeStatsDto;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.DecisionStats;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.DeclarationStats;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.ReportStats;
@@ -73,16 +72,7 @@ public class PGStatisticsController {
     }
     
 
-    /**
-     * Charge de travail de tous les utilisateurs
-    
-    @GetMapping("/workload/users")
-    public ResponseEntity<List<UserWorkloadStatsDto>> getAllUsersWorkload() {
-        log.info("Récupération de la charge de travail de tous les utilisateurs");
-        List<UserWorkloadStatsDto> workloadStats = advancedStatisticsService.getUserWorkloadStats();
-        return ResponseEntity.ok(workloadStats);
-    } */
-    
+   
     /**
      * Charge de travail d'un utilisateur spécifique
      */

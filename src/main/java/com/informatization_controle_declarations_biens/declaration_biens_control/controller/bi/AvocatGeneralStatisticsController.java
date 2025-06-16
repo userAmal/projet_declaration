@@ -1,6 +1,9 @@
 package com.informatization_controle_declarations_biens.declaration_biens_control.controller.bi;
 
 
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.DeclarationsAnciennesDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.PerformanceAnnuelleDTO;
+import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.PerformanceMensuelleDTO;
 import com.informatization_controle_declarations_biens.declaration_biens_control.service.bi.AvocatGeneralStatisticsService;
 import org.springframework.web.bind.annotation.*;
 
@@ -73,5 +76,38 @@ public class AvocatGeneralStatisticsController {
             @PathVariable Long avocatGeneralId) {
         return statisticsService.getDashboardComplet(avocatGeneralId);
     }
-    
+    /**
+ * Get monthly performance statistics
+ * @param avocatGeneralId ID of the Avocat General
+ * @return Monthly performance DTO
+ */
+@GetMapping("/performance/monthly/{avocatGeneralId}")
+public PerformanceMensuelleDTO getPerformanceMensuelle(
+        @PathVariable Long avocatGeneralId) {
+    return statisticsService.getPerformanceMensuelle(avocatGeneralId);
+}
+
+/**
+ * Get annual performance statistics
+ * @param avocatGeneralId ID of the Avocat General
+ * @return Annual performance DTO
+ */
+@GetMapping("/performance/annual/{avocatGeneralId}")
+public PerformanceAnnuelleDTO getPerformanceAnnuelle(
+        @PathVariable Long avocatGeneralId) {
+    return statisticsService.getPerformanceAnnuelle(avocatGeneralId);
+}
+
+/**
+ * Get oldest declarations requiring control
+ * @param avocatGeneralId ID of the Avocat General
+ * @param limite Maximum number of declarations to return (default: 10)
+ * @return DTO containing oldest declarations
+ */
+@GetMapping("/declarations/anciennes/{avocatGeneralId}")
+public DeclarationsAnciennesDTO getDeclarationsAnciennesAControler(
+        @PathVariable Long avocatGeneralId,
+        @RequestParam(defaultValue = "10") int limite) {
+    return statisticsService.getDeclarationsAnciennesAControler(avocatGeneralId, limite);
+}
 }

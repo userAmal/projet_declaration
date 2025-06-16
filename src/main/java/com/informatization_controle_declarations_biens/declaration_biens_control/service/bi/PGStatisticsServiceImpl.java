@@ -10,7 +10,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.IRapportData;
-import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.HistoriqueDeclarationUserData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.securite.IUtilisateurData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.*;
@@ -30,16 +29,13 @@ public class PGStatisticsServiceImpl implements PGStatisticsService {
     private final IDeclarationData declarationData;
     private final IRapportData rapportData;
     private final IUtilisateurData utilisateurData;
-    private final HistoriqueDeclarationUserData historiqueData;
 
     public PGStatisticsServiceImpl(IDeclarationData declarationData, 
                                  IRapportData rapportData,
-                                 IUtilisateurData utilisateurData,
-                                 HistoriqueDeclarationUserData historiqueData) {
+                                 IUtilisateurData utilisateurData) {
         this.declarationData = declarationData;
         this.rapportData = rapportData;
         this.utilisateurData = utilisateurData;
-        this.historiqueData = historiqueData;
     }
 
     @Override

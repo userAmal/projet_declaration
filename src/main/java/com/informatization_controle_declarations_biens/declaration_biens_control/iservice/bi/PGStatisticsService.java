@@ -6,7 +6,6 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.DecisionStats;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.DeclarationStats;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.ReportStats;
-import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.TemporalStats;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.pgStat.WorkflowStats;
 
 public interface PGStatisticsService {
