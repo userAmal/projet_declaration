@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface HistoriqueDeclarationUserData extends JpaRepository<HistoriqueDeclarationUser, Long> {
@@ -74,4 +75,11 @@ public interface HistoriqueDeclarationUserData extends JpaRepository<HistoriqueD
     List<Object[]> getUserPerformanceByRole(@Param("startDate") LocalDate startDate, 
                                            @Param("endDate") LocalDate endDate,
                                            @Param("finalStates") List<EtatDeclarationEnum> finalStates);
+
+ @Query("SELECT h FROM HistoriqueDeclarationUser h WHERE h.utilisateur.id = :userId AND h.dateFinAffectation IS NULL")
+    List<HistoriqueDeclarationUser> findByUtilisateurIdAndDateFinAffectationIsNull(@Param("userId") Long userId);
+    
+    
+    @Query("SELECT DISTINCT h.declaration.id FROM HistoriqueDeclarationUser h WHERE h.utilisateur.id = :userId")
+    Set<Long> findDeclarationIdsByUtilisateurId(@Param("userId") Long userId);
 }

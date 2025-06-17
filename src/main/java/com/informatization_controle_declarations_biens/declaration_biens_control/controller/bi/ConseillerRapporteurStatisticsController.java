@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 @RestController
 @RequestMapping("/api/conseiller-statistics")
 @RequiredArgsConstructor
@@ -19,105 +18,77 @@ public class ConseillerRapporteurStatisticsController {
 
     private final ConseillerRapporteurStatisticsService statisticsService;
 
-    @GetMapping("/{conseillerId}")
-    public ResponseEntity<ConseillerStatisticsDTO> getStatistiquesConseiller(
+    // Endpoints principaux
+    @GetMapping("/{conseillerId}/dashboard")
+    public ResponseEntity<Map<String, Object>> getDashboardConseiller(
             @PathVariable Long conseillerId) {
-        return ResponseEntity.ok(statisticsService.getStatistiquesConseiller(conseillerId));
+        Map<String, Object> dashboard = new HashMap<>();
+        
+        dashboard.put("statistiquesGenerales", statisticsService.getStatistiquesConseiller(conseillerId));
+        dashboard.put("declarationsAssignees", statisticsService.consulterDeclarationsAssignees(conseillerId));
+        dashboard.put("statistiquesMensuelles", statisticsService.getStatistiquesParMois(conseillerId));
+        dashboard.put("performanceVerification", statisticsService.getPerformanceVerification(conseillerId));
+        dashboard.put("chargeTravail", statisticsService.getChargeUtilisateur(conseillerId));
+        
+        return ResponseEntity.ok(dashboard);
     }
 
-    @GetMapping("/{conseillerId}/declarations")
-    public ResponseEntity<List<DeclarationConseillerDTO>> consulterDeclarationsAssignees(
+    // Endpoints spécifiques
+    @GetMapping("/{conseillerId}/declarations-assignees")
+    public ResponseEntity<List<DeclarationConseillerDTO>> getDeclarationsAssignees(
             @PathVariable Long conseillerId) {
         return ResponseEntity.ok(statisticsService.consulterDeclarationsAssignees(conseillerId));
     }
 
-    @PostMapping("/{conseillerId}/rapport-provisoire/{declarationId}")
+    @GetMapping("/{conseillerId}/declarations-anciennes")
+    public ResponseEntity<List<DeclarationAncienneDTO>> getDeclarationsAnciennes(
+            @PathVariable Long conseillerId) {
+        return ResponseEntity.ok(statisticsService.getDeclarationsAnciennesAControler(conseillerId));
+    }
+
+    // Endpoints pour les rapports
+    @PostMapping("/{conseillerId}/rapports/provisoire/{declarationId}")
     public ResponseEntity<RapportProvisoireStatsDTO> genererRapportProvisoire(
             @PathVariable Long conseillerId,
             @PathVariable Long declarationId) {
-        return ResponseEntity.ok(statisticsService.genererRapportProvisoire(conseillerId, declarationId));
+        return ResponseEntity.ok(
+            statisticsService.genererRapportProvisoire(conseillerId, declarationId)
+        );
     }
 
-    @PostMapping("/{conseillerId}/verifier-fraude/{declarationId}")
+    // Endpoints pour les vérifications
+    @PostMapping("/{conseillerId}/verifications/fraude/{declarationId}")
     public ResponseEntity<VerificationFraudeStatsDTO> verifierDeclaration(
             @PathVariable Long conseillerId,
             @PathVariable Long declarationId) {
-        return ResponseEntity.ok(statisticsService.verifierDeclaration(conseillerId, declarationId));
+        return ResponseEntity.ok(
+            statisticsService.verifierDeclaration(conseillerId, declarationId)
+        );
     }
 
-    @GetMapping("/{conseillerId}/stats-mensuelles")
-    public ResponseEntity<List<StatsMensuellesDTO>> getStatistiquesMensuelles(
+    // Endpoints pour les statistiques
+    @GetMapping("/{conseillerId}/stats/mensuelles")
+    public ResponseEntity<List<StatsMensuellesDTO>> getStatsMensuelles(
             @PathVariable Long conseillerId) {
         return ResponseEntity.ok(statisticsService.getStatistiquesParMois(conseillerId));
     }
 
-
-    @GetMapping("/{conseillerId}/performance")
-    public ResponseEntity<PerformanceVerificationDTO> getPerformanceVerification(
+    @GetMapping("/{conseillerId}/stats/performance")
+    public ResponseEntity<PerformanceVerificationDTO> getPerformance(
             @PathVariable Long conseillerId) {
         return ResponseEntity.ok(statisticsService.getPerformanceVerification(conseillerId));
     }
-    @GetMapping("/{conseillerId}/dashboard")
-public ResponseEntity<Map<String, Object>> getDashboardConseiller(@PathVariable Long conseillerId) {
-    Map<String, Object> dashboard = new HashMap<>();
 
-    dashboard.put("nombreDeclarationsTraitees", statisticsService.getNombreDeclarationsTraitees(conseillerId));
-    dashboard.put("nombreDeclarationsEnCours", statisticsService.getNombreDeclarationsEnCours(conseillerId));
-    dashboard.put("nombreDeclarationsAssignees", statisticsService.getNombreDeclarationsAssignees(conseillerId));
-    dashboard.put("tempsTraitementMoyen", statisticsService.getTempsTraitementMoyen(conseillerId));
-    dashboard.put("statistiquesParMois", statisticsService.getStatistiquesParMois(conseillerId));
-    dashboard.put("performance", statisticsService.getPerformanceVerification(conseillerId));
+    @GetMapping("/{conseillerId}/stats/annuelle")
+    public ResponseEntity<PerformanceAnnuelleDTO> getPerformanceAnnuelle(
+            @PathVariable Long conseillerId) {
+        return ResponseEntity.ok(statisticsService.getPerformanceAnnuelleCourante(conseillerId));
+    }
 
-    return ResponseEntity.ok(dashboard);
-}
-// Ajouter ces méthodes dans votre ConseillerRapporteurStatisticsController
-
-/**
- * Obtenir la charge de travail d'un utilisateur
- */
-@GetMapping("/{utilisateurId}/charge-travail")
-public ResponseEntity<ChargeUtilisateurDTO> getChargeUtilisateur(
-        @PathVariable Long utilisateurId) {
-    return ResponseEntity.ok(statisticsService.getChargeUtilisateur(utilisateurId));
-}
-
-/**
- * Obtenir la performance annuelle d'un utilisateur pour l'année courante
- */
-@GetMapping("/{utilisateurId}/performance-annuelle")
-public ResponseEntity<PerformanceAnnuelleDTO> getPerformanceAnnuelleCourante(
-        @PathVariable Long utilisateurId) {
-    return ResponseEntity.ok(statisticsService.getPerformanceAnnuelleCourante(utilisateurId));
-}
-
-/**
- * Obtenir les déclarations les plus anciennes nécessitant un contrôle
- */
-@GetMapping("/{utilisateurId}/declarations-anciennes")
-public ResponseEntity<List<DeclarationAncienneDTO>> getDeclarationsAnciennesAControler(
-        @PathVariable Long utilisateurId) {
-    return ResponseEntity.ok(statisticsService.getDeclarationsAnciennesAControler(utilisateurId));
-}
-
-/**
- * Dashboard complet avec toutes les nouvelles statistiques
- */
-@GetMapping("/{utilisateurId}/dashboard-complet")
-public ResponseEntity<Map<String, Object>> getDashboardComplet(@PathVariable Long utilisateurId) {
-    Map<String, Object> dashboard = new HashMap<>();
-    
-    // Statistiques existantes
-    dashboard.put("statistiquesGenerales", statisticsService.getStatistiquesConseiller(utilisateurId));
-    dashboard.put("declarationsAssignees", statisticsService.consulterDeclarationsAssignees(utilisateurId));
-    dashboard.put("statistiquesParMois", statisticsService.getStatistiquesParMois(utilisateurId));
-    dashboard.put("performanceVerification", statisticsService.getPerformanceVerification(utilisateurId));
-    
-    // Nouvelles statistiques
-    dashboard.put("chargeTravail", statisticsService.getChargeUtilisateur(utilisateurId));
-    dashboard.put("performanceAnnuelle", statisticsService.getPerformanceAnnuelleCourante(utilisateurId));
-    dashboard.put("declarationsAnciennes", statisticsService.getDeclarationsAnciennesAControler(utilisateurId));
-    
-    return ResponseEntity.ok(dashboard);
-}
-
+    // Endpoints pour la charge de travail
+    @GetMapping("/{conseillerId}/charge-travail")
+    public ResponseEntity<ChargeUtilisateurDTO> getChargeTravail(
+            @PathVariable Long conseillerId) {
+        return ResponseEntity.ok(statisticsService.getChargeUtilisateur(conseillerId));
+    }
 }

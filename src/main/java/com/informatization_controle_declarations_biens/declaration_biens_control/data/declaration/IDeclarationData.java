@@ -130,7 +130,8 @@ boolean existsByAssujettiIdAndEtatDeclarationIn(Long assujettiId, List<EtatDecla
            "GROUP BY d.utilisateur.id")
     List<Object[]> getUserDeclarationStats(@Param("finalStates") List<EtatDeclarationEnum> finalStates);
 
-    
+        List<Declaration> findByIdIn(List<Long> ids);
+
 }
 
        

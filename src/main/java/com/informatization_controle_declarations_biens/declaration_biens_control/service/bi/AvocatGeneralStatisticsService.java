@@ -2,6 +2,7 @@ package com.informatization_controle_declarations_biens.declaration_biens_contro
 
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.IConclusionData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.controle.ICommentaireGeneriqueData;
+import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.HistoriqueDeclarationUserData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.data.declaration.IDeclarationData;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.DeclarationAncienneInfo;
 import com.informatization_controle_declarations_biens.declaration_biens_control.dto.bi.avocatStat.DeclarationsAnciennesDTO;
@@ -11,6 +12,7 @@ import com.informatization_controle_declarations_biens.declaration_biens_control
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Conclusion;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.Declaration;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.EtatDeclarationEnum;
+import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.HistoriqueDeclarationUser;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.declaration.TypeDeclarationEnum;
 import org.springframework.stereotype.Service;
 
@@ -20,144 +22,166 @@ import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
-/**
- * Service de statistiques spécialement conçu pour l'Avocat Général
- * Fournit des métriques pertinentes pour ses responsabilités :
- * - Vérification des déclarations
- * - Génération des conclusions (acceptation/refus)
- * - Suivi des commentaires
- */
+
 @Service
 public class AvocatGeneralStatisticsService {
 
-    private final IDeclarationData declarationData;
+  private final IDeclarationData declarationData;
     private final IConclusionData conclusionData;
     private final ICommentaireGeneriqueData commentaireData;
+    private final HistoriqueDeclarationUserData historiqueData;
 
     public AvocatGeneralStatisticsService(IDeclarationData declarationData,
                                         IConclusionData conclusionData,
-                                        ICommentaireGeneriqueData commentaireData
-                                       ) {
+                                        ICommentaireGeneriqueData commentaireData,
+                                        HistoriqueDeclarationUserData historiqueData) {
         this.declarationData = declarationData;
         this.conclusionData = conclusionData;
         this.commentaireData = commentaireData;
+        this.historiqueData = historiqueData;
     }
+
+
 
     // ==================== STATISTIQUES PRINCIPALES ====================
 
     /**
      * Statistiques globales pour l'avocat général
      */
-    public AvocatGeneralGlobalStatsDTO getGlobalStats(Long avocatGeneralId) {
-        List<Declaration> declarationsAssignees = declarationData.findByUtilisateurId(avocatGeneralId);
-        List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
-        List<CommentaireGenerique> commentaires = commentaireData.findByUtilisateurId(avocatGeneralId);
-
-        long totalDeclarations = declarationsAssignees.size();
-        long conclusionsGenerees = conclusions.size();
-        long commentairesAjoutes = commentaires.size();
-        
-        // Calcul du taux de traitement
-        double tauxTraitement = totalDeclarations > 0 ? 
-            (conclusionsGenerees * 100.0 / totalDeclarations) : 0.0;
-
-        // Déclarations en attente de conclusion
-        long enAttenteConclusion = declarationsAssignees.stream()
-            .filter(d -> conclusions.stream()
-                .noneMatch(c -> c.getDeclaration().getId().equals(d.getId())))
-            .count();
-
-        return new AvocatGeneralGlobalStatsDTO(
-            totalDeclarations,
-            conclusionsGenerees,
-            enAttenteConclusion,
-            commentairesAjoutes,
-            tauxTraitement
-        );
-    }
-
-    /**
-     * Statistiques des conclusions (acceptation/refus)
-     */
-    public ConclusionStatsDTO getConclusionStats(Long avocatGeneralId) {
-        List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
-
-        long totalConclusions = conclusions.size();
-long acceptations = conclusions.stream()
-    .filter(Conclusion::isEstAcceptation)  // Utilisez le getter existant (lombok génère isEstAcceptation)
-    .count();
-long refus = conclusions.stream()
-    .filter(c -> !c.isEstAcceptation())   // Utilisez la négation du getter existant
-    .count();
-
-        double tauxAcceptation = totalConclusions > 0 ? 
-            (acceptations * 100.0 / totalConclusions) : 0.0;
-        double tauxRefus = totalConclusions > 0 ? 
-            (refus * 100.0 / totalConclusions) : 0.0;
-
-        return new ConclusionStatsDTO(
-            totalConclusions,
-            acceptations,
-            refus,
-            tauxAcceptation,
-            tauxRefus
-        );
-    }
-
+   public AvocatGeneralGlobalStatsDTO getGlobalStats(Long avocatGeneralId) {
+    // Récupérer les déclarations assignées via l'historique
+    List<HistoriqueDeclarationUser> historiques = historiqueData.findByUtilisateurId(avocatGeneralId);
+    Set<Long> declarationIds = historiques.stream()
+        .map(h -> h.getDeclaration().getId())
+        .collect(Collectors.toSet());
     
-    /**
-     * Analyse des déclarations par type pour l'avocat général
-     */
-    public List<DeclarationTypeAnalysisDTO> getAnalyseParType(Long avocatGeneralId) {
-        List<Declaration> declarations = declarationData.findByUtilisateurId(avocatGeneralId);
-        List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
-
-        Map<TypeDeclarationEnum, List<Declaration>> declarationsByType = 
-            declarations.stream().collect(Collectors.groupingBy(Declaration::getTypeDeclaration));
-
-        return declarationsByType.entrySet().stream()
-            .map(entry -> {
-                TypeDeclarationEnum type = entry.getKey();
-                List<Declaration> typeDeclarations = entry.getValue();
-                
-long acceptations = conclusions.stream()
-    .filter(Conclusion::isEstAcceptation)  // Utilisez le getter existant
-    .filter(c -> typeDeclarations.stream()
-        .anyMatch(d -> d.getId().equals(c.getDeclaration().getId())))
-    .count();
-
-long refus = conclusions.stream()
-    .filter(c -> !c.isEstAcceptation())   // Utilisez la négation du getter existant
-    .filter(c -> typeDeclarations.stream()
-        .anyMatch(d -> d.getId().equals(c.getDeclaration().getId())))
-    .count();
-
-                double tauxAcceptation = typeDeclarations.size() > 0 ? 
-                    (acceptations * 100.0 / typeDeclarations.size()) : 0.0;
-
-                return new DeclarationTypeAnalysisDTO(
-                    type.name(),
-                    typeDeclarations.size(),
-                    acceptations,
-                    refus,
-                    tauxAcceptation
-                );
-            })
-            .collect(Collectors.toList());
-    }
-
-    
-   public ChargeTravailtDTO getChargeTravail(Long avocatGeneralId) {
-    List<Declaration> declarations = declarationData.findByUtilisateurId(avocatGeneralId);
+    List<Declaration> declarationsAssignees = declarationData.findByIdIn(new ArrayList<>(declarationIds));
     List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
+    List<CommentaireGenerique> commentaires = commentaireData.findByUtilisateurId(avocatGeneralId);
 
-    // Déclarations en cours de traitement
-    long enCours = declarations.stream()
-        .filter(d -> d.getEtatDeclaration() == EtatDeclarationEnum.en_cours )
+    long totalDeclarations = declarationsAssignees.size();
+    long conclusionsGenerees = conclusions.size();
+    long commentairesAjoutes = commentaires.size();
+    
+    // Calcul du taux de traitement
+    double tauxTraitement = totalDeclarations > 0 ? 
+        (conclusionsGenerees * 100.0 / totalDeclarations) : 0.0;
+
+    // Déclarations en attente de conclusion
+    long enAttenteConclusion = declarationsAssignees.stream()
         .filter(d -> conclusions.stream()
             .noneMatch(c -> c.getDeclaration().getId().equals(d.getId())))
         .count();
 
+    return new AvocatGeneralGlobalStatsDTO(
+        totalDeclarations,
+        conclusionsGenerees,
+        enAttenteConclusion,
+        commentairesAjoutes,
+        tauxTraitement
+    );
+}
+    /**
+     * Statistiques des conclusions (acceptation/refus)
+     */
+   public ConclusionStatsDTO getConclusionStats(Long avocatGeneralId) {
+    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
+
+    // Récupérer les déclarations assignées via l'historique
+    List<HistoriqueDeclarationUser> historiques = historiqueData.findByUtilisateurId(avocatGeneralId);
+    Set<Long> declarationIds = historiques.stream()
+        .map(h -> h.getDeclaration().getId())
+        .collect(Collectors.toSet());
+    
+    long totalDeclarations = declarationIds.size();
+    long totalConclusions = conclusions.size();
+    
+    long acceptations = conclusions.stream()
+        .filter(Conclusion::isEstAcceptation)
+        .count();
+    long refus = conclusions.stream()
+        .filter(c -> !c.isEstAcceptation())
+        .count();
+
+    double tauxAcceptation = totalDeclarations > 0 ? 
+        (acceptations * 100.0 / totalDeclarations) : 0.0;
+    double tauxRefus = totalDeclarations > 0 ? 
+        (refus * 100.0 / totalDeclarations) : 0.0;
+
+    return new ConclusionStatsDTO(
+        totalConclusions,
+        acceptations,
+        refus,
+        tauxAcceptation,
+        tauxRefus
+    );
+}    
+    /**
+     * Analyse des déclarations par type pour l'avocat général
+     */
+   public List<DeclarationTypeAnalysisDTO> getAnalyseParType(Long avocatGeneralId) {
+    // Récupérer les déclarations assignées via l'historique
+    List<HistoriqueDeclarationUser> historiques = historiqueData.findByUtilisateurId(avocatGeneralId);
+    Set<Long> declarationIds = historiques.stream()
+        .map(h -> h.getDeclaration().getId())
+        .collect(Collectors.toSet());
+    
+    List<Declaration> declarations = declarationData.findByIdIn(new ArrayList<>(declarationIds));
+    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
+
+    Map<TypeDeclarationEnum, List<Declaration>> declarationsByType = 
+        declarations.stream().collect(Collectors.groupingBy(Declaration::getTypeDeclaration));
+
+    return declarationsByType.entrySet().stream()
+        .map(entry -> {
+            TypeDeclarationEnum type = entry.getKey();
+            List<Declaration> typeDeclarations = entry.getValue();
+            
+            long acceptations = conclusions.stream()
+                .filter(Conclusion::isEstAcceptation)
+                .filter(c -> typeDeclarations.stream()
+                    .anyMatch(d -> d.getId().equals(c.getDeclaration().getId())))
+                .count();
+
+            long refus = conclusions.stream()
+                .filter(c -> !c.isEstAcceptation())
+                .filter(c -> typeDeclarations.stream()
+                    .anyMatch(d -> d.getId().equals(c.getDeclaration().getId())))
+                .count();
+
+            double tauxAcceptation = typeDeclarations.size() > 0 ? 
+                (acceptations * 100.0 / typeDeclarations.size()) : 0.0;
+
+            return new DeclarationTypeAnalysisDTO(
+                type.name(),
+                typeDeclarations.size(),
+                acceptations,
+                refus,
+                tauxAcceptation
+            );
+        })
+        .collect(Collectors.toList());
+}
+    
+  public ChargeTravailtDTO getChargeTravail(Long avocatGeneralId) {
+    // Récupérer les affectations actives via l'historique
+    List<HistoriqueDeclarationUser> affectationsActives = historiqueData
+        .findByUtilisateurIdAndDateFinAffectationIsNull(avocatGeneralId);
+    
+    // Récupérer les déclarations correspondantes
+    Set<Long> declarationIds = affectationsActives.stream()
+        .map(h -> h.getDeclaration().getId())
+        .collect(Collectors.toSet());
+    
+    List<Declaration> declarations = declarationData.findByIdIn(new ArrayList<>(declarationIds));
+    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
+
+    // Déclarations en cours de traitement
+    long enCours = declarations.stream()
+        .filter(d -> d.getEtatDeclaration() == EtatDeclarationEnum.en_cours)
+        .filter(d -> conclusions.stream()
+            .noneMatch(c -> c.getDeclaration().getId().equals(d.getId())))
+        .count();
 
     return new ChargeTravailtDTO(enCours);
 }
@@ -348,31 +372,30 @@ long refus = conclusions.stream()
         public double getMonTauxRespectDelais() { return monTauxRespectDelais; }
         public double getTauxRespectDelaisMoyen() { return tauxRespectDelaisMoyen; }
     }
-    public PerformanceMensuelleDTO getPerformanceMensuelle(Long avocatGeneralId) {
+   public PerformanceMensuelleDTO getPerformanceMensuelle(Long avocatGeneralId) {
     int currentYear = LocalDate.now().getYear();
-    List<Declaration> declarations = declarationData.findByUtilisateurId(avocatGeneralId);
-    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
     
-    // Filtrer les déclarations pour l'année courante
-    List<Declaration> declarationsAnnuelles = declarations.stream()
-        .filter(d -> d.getDateDeclaration() != null && 
-                    d.getDateDeclaration().getYear() == currentYear)
-        .collect(Collectors.toList());
+    // Récupérer les affectations via l'historique
+    List<HistoriqueDeclarationUser> historiques = historiqueData.findByUtilisateurId(avocatGeneralId);
     
-    Map<Month, Long> declarationsParMois = declarationsAnnuelles.stream()
+    // Filtrer pour l'année courante et regrouper par mois
+    Map<Month, Long> declarationsParMois = historiques.stream()
+        .filter(h -> h.getDateAffectation() != null && h.getDateAffectation().getYear() == currentYear)
         .collect(Collectors.groupingBy(
-            d -> d.getDateDeclaration().getMonth(),
+            h -> h.getDateAffectation().getMonth(),
             Collectors.counting()
         ));
     
+    // Récupérer les conclusions
+    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
     Map<Month, Long> conclusionsParMois = conclusions.stream()
-        .filter(c -> c.getDateCreation() != null && 
-                    c.getDateCreation().getYear() == currentYear)
+        .filter(c -> c.getDateCreation() != null && c.getDateCreation().getYear() == currentYear)
         .collect(Collectors.groupingBy(
             c -> c.getDateCreation().getMonth(),
             Collectors.counting()
         ));
     
+    // Calculer les taux
     Map<Month, Double> tauxTraitementParMois = new HashMap<>();
     for (Month mois : Month.values()) {
         long declMois = declarationsParMois.getOrDefault(mois, 0L);
@@ -393,16 +416,19 @@ long refus = conclusions.stream()
  * Performance annuelle par utilisateur
  */
 public PerformanceAnnuelleDTO getPerformanceAnnuelle(Long avocatGeneralId) {
-    List<Declaration> declarations = declarationData.findByUtilisateurId(avocatGeneralId);
-    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
+    // Récupérer les affectations via l'historique
+    List<HistoriqueDeclarationUser> historiques = historiqueData.findByUtilisateurId(avocatGeneralId);
     
-    Map<Integer, Long> declarationsParAnnee = declarations.stream()
-        .filter(d -> d.getDateDeclaration() != null)
+    // Regrouper par année
+    Map<Integer, Long> declarationsParAnnee = historiques.stream()
+        .filter(h -> h.getDateAffectation() != null)
         .collect(Collectors.groupingBy(
-            d -> d.getDateDeclaration().getYear(),
+            h -> h.getDateAffectation().getYear(),
             Collectors.counting()
         ));
     
+    // Récupérer les conclusions
+    List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
     Map<Integer, Long> conclusionsParAnnee = conclusions.stream()
         .filter(c -> c.getDateCreation() != null)
         .collect(Collectors.groupingBy(
@@ -410,6 +436,7 @@ public PerformanceAnnuelleDTO getPerformanceAnnuelle(Long avocatGeneralId) {
             Collectors.counting()
         ));
     
+    // Calculer les taux
     Map<Integer, Double> tauxTraitementParAnnee = new HashMap<>();
     for (Integer annee : declarationsParAnnee.keySet()) {
         long declAnnee = declarationsParAnnee.get(annee);
@@ -424,12 +451,20 @@ public PerformanceAnnuelleDTO getPerformanceAnnuelle(Long avocatGeneralId) {
         tauxTraitementParAnnee
     );
 }
-
 /**
  * Déclarations les plus anciennes nécessitant un contrôle
  */
 public DeclarationsAnciennesDTO getDeclarationsAnciennesAControler(Long avocatGeneralId, int limite) {
-    List<Declaration> declarations = declarationData.findByUtilisateurId(avocatGeneralId);
+    // Récupérer les affectations actives via l'historique
+    List<HistoriqueDeclarationUser> affectationsActives = historiqueData
+        .findByUtilisateurIdAndDateFinAffectationIsNull(avocatGeneralId);
+    
+    // Récupérer les déclarations correspondantes
+    Set<Long> declarationIds = affectationsActives.stream()
+        .map(h -> h.getDeclaration().getId())
+        .collect(Collectors.toSet());
+    
+    List<Declaration> declarations = declarationData.findByIdIn(new ArrayList<>(declarationIds));
     List<Conclusion> conclusions = conclusionData.findByUtilisateurId(avocatGeneralId);
     
     // IDs des déclarations qui ont déjà une conclusion

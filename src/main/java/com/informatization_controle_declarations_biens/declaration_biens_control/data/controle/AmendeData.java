@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.Amende;
 import com.informatization_controle_declarations_biens.declaration_biens_control.entity.control.StatutAmendeEnum;
 import com.informatization_controle_declarations_biens.declaration_biens_control.projection.controle.AmendeProjection;
-import com.informatization_controle_declarations_biens.declaration_biens_control.projection.declaration.AnimauxProjection;
 
 import java.time.LocalDate;
 import java.util.List;

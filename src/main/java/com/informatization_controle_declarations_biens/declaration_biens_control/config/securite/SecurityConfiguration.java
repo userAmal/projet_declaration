@@ -81,6 +81,7 @@ public class SecurityConfiguration implements WebMvcConfigurer {
 .requestMatchers("/api/parametrages**").permitAll()
 .requestMatchers("/api/commentaires/**").permitAll()
 .requestMatchers("/api/conclusions/**").permitAll()
+            .requestMatchers("/api/avocat-general/statistics/**").permitAll()
 
 
 //.requestMatchers("/api/declarations/mes-declarations").authenticated()

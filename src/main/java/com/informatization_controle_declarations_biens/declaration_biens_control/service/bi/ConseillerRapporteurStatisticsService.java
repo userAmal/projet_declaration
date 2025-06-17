@@ -6,6 +6,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -51,64 +52,198 @@ public class ConseillerRapporteurStatisticsService {
     private final ICommentaireGeneriqueData commentaireData;
     private final HistoriqueDeclarationUserData historiqueData;
     private final UtilisateurServiceImpl utilisateurServiceImpl;
-
-    public ConseillerStatisticsDTO getStatistiquesConseiller(Long conseillerId) {
-        log.info("Génération des statistiques pour le conseiller ID: {}", conseillerId);
+ public ConseillerStatisticsDTO getStatistiquesConseiller(Long conseillerId) {
+        log.info("Début getStatistiquesConseiller pour conseiller ID: {}", conseillerId);
         
-        return ConseillerStatisticsDTO.builder()
-                .declarationsAssignees(getNombreDeclarationsAssignees(conseillerId))
-                .rapportsProvisoiresGeneres(getNombreRapportsProvisoires(conseillerId))
-                .observationsRealisees(getNombreObservations(conseillerId))
-                .declarationsTraitees(getNombreDeclarationsTraitees(conseillerId))
-                .declarationsEnCours(getNombreDeclarationsEnCours(conseillerId))
-                .tempsTraitementMoyen(getTempsTraitementMoyen(conseillerId))
-                .statistiquesParMois(getStatistiquesParMois(conseillerId))
-                .performanceVerification(getPerformanceVerification(conseillerId))
+        try {
+            List<HistoriqueDeclarationUser> historiques = historiqueData.findByUtilisateurId(conseillerId);
+            log.debug("Nombre d'historiques trouvés: {}", historiques.size());
+            
+            // Calcul des statistiques avec logs
+            long declarationsAssignees = getNombreDeclarationsAssignees(historiques);
+            log.debug("Declarations assignées: {}", declarationsAssignees);
+            
+            long rapportsProvisoires = getNombreRapportsProvisoires(conseillerId);
+            log.debug("Rapports provisoires: {}", rapportsProvisoires);
+            
+            long observations = getNombreObservations(conseillerId);
+            log.debug("Observations: {}", observations);
+            
+            long declarationsTraitees = getNombreDeclarationsTraitees(historiques);
+            log.debug("Declarations traitées: {}", declarationsTraitees);
+            
+            long declarationsEnCours = getNombreDeclarationsEnCours(historiques);
+            log.debug("Declarations en cours: {}", declarationsEnCours);
+            
+            double tempsTraitementMoyen = getTempsTraitementMoyen(historiques);
+            log.debug("Temps traitement moyen: {} jours", tempsTraitementMoyen);
+            
+            List<StatsMensuellesDTO> statsMensuelles = getStatistiquesParMois(historiques);
+            log.debug("Stats mensuelles: {} mois", statsMensuelles.size());
+            
+            PerformanceVerificationDTO perfVerif = getPerformanceVerification(conseillerId, historiques);
+            log.debug("Performance verification: {}", perfVerif);
+            
+            ConseillerStatisticsDTO result = ConseillerStatisticsDTO.builder()
+                    .declarationsAssignees(declarationsAssignees)
+                    .rapportsProvisoiresGeneres(rapportsProvisoires)
+                    .observationsRealisees(observations)
+                    .declarationsTraitees(declarationsTraitees)
+                    .declarationsEnCours(declarationsEnCours)
+                    .tempsTraitementMoyen(tempsTraitementMoyen)
+                    .statistiquesParMois(statsMensuelles)
+                    .performanceVerification(perfVerif)
+                    .build();
+            
+            log.info("Statistiques générées avec succès pour conseiller ID: {}", conseillerId);
+            log.debug("Résultat complet: {}", result);
+            
+            return result;
+        } catch (Exception e) {
+            log.error("Erreur lors de la génération des statistiques pour conseiller ID: {}", conseillerId, e);
+            throw e;
+        }
+    }
+
+    // Ajoutez des logs similaires dans les autres méthodes importantes
+    public List<DeclarationConseillerDTO> consulterDeclarationsAssignees(Long conseillerId) {
+        log.info("Consultation des déclarations assignées pour conseiller ID: {}", conseillerId);
+        
+        try {
+            List<HistoriqueDeclarationUser> affectationsActives = historiqueData.findByUtilisateurId(conseillerId)
+                    .stream()
+                    .filter(h -> h.getDateFinAffectation() == null)
+                    .collect(Collectors.toList());
+            
+            log.debug("Nombre d'affectations actives trouvées: {}", affectationsActives.size());
+            
+            List<DeclarationConseillerDTO> result = affectationsActives.stream()
+                    .map(this::mapToDeclarationConseillerDTO)
+                    .collect(Collectors.toList());
+            
+            log.info("{} déclarations assignées trouvées pour conseiller ID: {}", result.size(), conseillerId);
+            return result;
+        } catch (Exception e) {
+            log.error("Erreur lors de la consultation des déclarations assignées", e);
+            throw e;
+        }
+    }
+ private DeclarationConseillerDTO mapToDeclarationConseillerDTO(HistoriqueDeclarationUser historique) {
+        Declaration declaration = historique.getDeclaration();
+        log.trace("Mapping déclaration ID: {}", declaration.getId());
+        
+        boolean rapportProvisoireGenere = rapportData.findByDeclarationId(declaration.getId())
+                .stream()
+                .anyMatch(r -> r.getType() == Rapport.Type.PROVISOIRE);
+        
+        long nombreObservations = commentaireData
+                .findByUtilisateurIdAndDeclarationId(historique.getUtilisateur().getId(), declaration.getId())
+                .size();
+        
+        return DeclarationConseillerDTO.builder()
+                .declarationId(declaration.getId())
+                .assujettiNom(declaration.getAssujetti().getNom())
+                .assujettiPrenom(declaration.getAssujetti().getPrenom())
+                .dateDeclaration(declaration.getDateDeclaration())
+                .typeDeclaration(declaration.getTypeDeclaration())
+                .etatDeclaration(declaration.getEtatDeclaration())
+                .dateAffectation(historique.getDateAffectation())
+                .rapportProvisoireGenere(rapportProvisoireGenere)
+                .nombreObservations(nombreObservations)
+                .joursTraitement(ChronoUnit.DAYS.between(historique.getDateAffectation(), LocalDate.now()))
                 .build();
     }
 
-    public List<DeclarationConseillerDTO> consulterDeclarationsAssignees(Long conseillerId) {
-        log.info("Consultation des déclarations assignées au conseiller ID: {}", conseillerId);
-        
-        List<HistoriqueDeclarationUser> affectationsActives = historiqueData
-                .findByUtilisateurId(conseillerId)
-                .stream()
+    // Méthodes optimisées utilisant l'historique
+
+    private long getNombreDeclarationsAssignees(List<HistoriqueDeclarationUser> historiques) {
+        return historiques.stream()
                 .filter(h -> h.getDateFinAffectation() == null)
-                .collect(Collectors.toList());
+                .count();
+    }
 
-        return affectationsActives.stream()
-                .map(historique -> {
-                    Declaration declaration = historique.getDeclaration();
-                    boolean rapportProvisoireGenere = rapportData
-                            .findByDeclarationId(declaration.getId())
-                            .stream()
-                            .anyMatch(r -> r.getType() == Rapport.Type.PROVISOIRE);
+    private long getNombreDeclarationsTraitees(List<HistoriqueDeclarationUser> historiques) {
+        return historiques.stream()
+                .filter(h -> h.getDateFinAffectation() != null)
+                .count();
+    }
+
+    private long getNombreDeclarationsEnCours(List<HistoriqueDeclarationUser> historiques) {
+        return historiques.stream()
+                .filter(h -> h.getDateFinAffectation() == null)
+                .filter(h -> h.getDeclaration().getEtatDeclaration() == EtatDeclarationEnum.en_cours)
+                .count();
+    }
+
+    private double getTempsTraitementMoyen(List<HistoriqueDeclarationUser> historiques) {
+        return historiques.stream()
+                .filter(h -> h.getDateFinAffectation() != null)
+                .mapToLong(h -> ChronoUnit.DAYS.between(
+                        h.getDateAffectation(), 
+                        h.getDateFinAffectation()
+                ))
+                .average()
+                .orElse(0.0);
+    }
+
+    public List<StatsMensuellesDTO> getStatistiquesParMois(List<HistoriqueDeclarationUser> historiques) {
+        LocalDate maintenant = LocalDate.now();
+        
+        return IntStream.range(0, 12)
+                .mapToObj(i -> {
+                    LocalDate mois = maintenant.minusMonths(i);
+                    String nomMois = mois.getMonth().getDisplayName(TextStyle.FULL, Locale.FRENCH);
                     
-                    long nombreObservations = commentaireData
-                            .findByUtilisateurIdAndDeclarationId(
-                                    conseillerId, 
-                                    declaration.getId()
-                            ).size();
-
-                    return DeclarationConseillerDTO.builder()
-                            .declarationId(declaration.getId())
-                            .assujettiNom(declaration.getAssujetti().getNom())
-                            .assujettiPrenom(declaration.getAssujetti().getPrenom())
-                            .dateDeclaration(declaration.getDateDeclaration())
-                            .typeDeclaration(declaration.getTypeDeclaration())
-                            .etatDeclaration(declaration.getEtatDeclaration())
-                            .dateAffectation(historique.getDateAffectation())
-                            .rapportProvisoireGenere(rapportProvisoireGenere)
-                            .nombreObservations(nombreObservations)
-                            .joursTraitement(ChronoUnit.DAYS.between(
-                                    historique.getDateAffectation(), 
-                                    LocalDate.now()
-                            ))
+                    long affectations = historiques.stream()
+                            .filter(h -> h.getDateAffectation().getMonth() == mois.getMonth() &&
+                                       h.getDateAffectation().getYear() == mois.getYear())
+                            .count();
+                    
+                    long traitements = historiques.stream()
+                            .filter(h -> h.getDateFinAffectation() != null &&
+                                       h.getDateFinAffectation().getMonth() == mois.getMonth() &&
+                                       h.getDateFinAffectation().getYear() == mois.getYear())
+                            .count();
+                    
+                    return StatsMensuellesDTO.builder()
+                            .mois(nomMois)
+                            .annee(mois.getYear())
+                            .declarationsRecues(affectations)
+                            .declarationsTraitees(traitements)
                             .build();
                 })
+                .sorted(Comparator.comparing(StatsMensuellesDTO::getAnnee))
                 .collect(Collectors.toList());
     }
 
+    public PerformanceVerificationDTO getPerformanceVerification(Long conseillerId, List<HistoriqueDeclarationUser> historiques) {
+        long rapportsProvisoires = rapportData.findByUtilisateurId(conseillerId)
+                .stream()
+                .filter(r -> r.getType() == Rapport.Type.PROVISOIRE)
+                .count();
+        
+        long totalObservations = commentaireData.findByUtilisateurId(conseillerId).size();
+        double efficaciteTraitement = calculateEfficiencyScore(historiques);
+        
+        return PerformanceVerificationDTO.builder()
+                .totalRapportsGeneres(rapportsProvisoires)
+                .totalObservations(totalObservations)
+                .moyenneObservationsParRapport(rapportsProvisoires > 0 ? 
+                        (double) totalObservations / rapportsProvisoires : 0.0)
+                .efficaciteTraitement(efficaciteTraitement)
+                .build();
+    }
+
+    private double calculateEfficiencyScore(List<HistoriqueDeclarationUser> historiques) {
+        double tempsTraitement = getTempsTraitementMoyen(historiques);
+        long declarationsTraitees = getNombreDeclarationsTraitees(historiques);
+        
+        double scoreTemps = tempsTraitement > 0 ? Math.max(0, 100 - tempsTraitement * 2) : 0;
+        double scoreVolume = Math.min(100, declarationsTraitees * 5);
+        
+        return (scoreTemps * 0.4 + scoreVolume * 0.6);
+    }
+  
     public RapportProvisoireStatsDTO genererRapportProvisoire(Long conseillerId, Long declarationId) {
         log.info("Génération du rapport provisoire - Conseiller: {}, Déclaration: {}", 
                 conseillerId, declarationId);
